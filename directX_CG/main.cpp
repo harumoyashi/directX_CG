@@ -21,7 +21,7 @@ using namespace DirectX;
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
 
-//ウィンドプロシージャ
+#pragma region ウィンドプロシージャ
 //面倒だけど書かなきゃいけない関数
 LRESULT WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
@@ -34,6 +34,7 @@ LRESULT WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	}
 	return DefWindowProc(hwnd, msg, wparam, lparam);	//既定の処理を行う
 }
+#pragma endregion
 
 //Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
@@ -478,7 +479,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		if (key[DIK_SPACE])
 		{
-			FLOAT clearColor[] = { 0.5f,0.25f, 0.5f,0.0f }; // 青っぽい色
+			FLOAT clearColor[] = { 0.9f,0.1f, 0.5f,0.0f }; // 青っぽい色
 			commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
 		}
 
