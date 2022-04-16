@@ -21,7 +21,7 @@ using namespace DirectX;
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
 
-//ウィンドプロシージャ
+#pragma region ウィンドプロシージャ
 //面倒だけど書かなきゃいけない関数
 LRESULT WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
@@ -34,6 +34,7 @@ LRESULT WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	}
 	return DefWindowProc(hwnd, msg, wparam, lparam);	//既定の処理を行う
 }
+#pragma endregion
 
 //Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
@@ -384,8 +385,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	pipelineDesc.RasterizerState.DepthClipEnable = true; // 深度クリッピングを有効に
 
 	// ブレンドステート
-	pipelineDesc.BlendState.RenderTarget[0].RenderTargetWriteMask
-		= D3D12_COLOR_WRITE_ENABLE_ALL; // RBGA全てのチャンネルを描画
+	//pipelineDesc.BlendState.RenderTarget[0].RenderTargetWriteMask
+	//	= D3D12_COLOR_WRITE_ENABLE_ALL; // RBGA全てのチャンネルを描画
+
+	//レンダーターゲットのブレンド設定
+	D3D12_RENDER_TARGET_BLEND_DESC& blenddesc = pipelineDesc.BlendState.RenderTarget[0];
+	blenddesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;	//RBGA全てのチャンネルを描画
+
+	blenddesc.BlendEnable = true;					//ブレンドを有効にする
+	blenddesc.BlendOpAlpha = D3D12_BLEND_OP_ADD;	//加算
+	blenddesc.SrcBlendAlpha = D3D12_BLEND_ONE;		//ソースの値を100%使う
+	blenddesc.DestBlendAlpha = D3D12_BLEND_ZERO;	//デストの値を0%使う
+
+	//加算合成
+	blenddesc.BlendOp = D3D12_BLEND_OP_ADD;				//加算
+	blenddesc.SrcBlend = D3D12_BLEND_SRC_ALPHA;			//ソースのアルファ値
+	blenddesc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;	//1.0f-ソースのアルファ値
 
 	// 頂点レイアウトの設定
 	pipelineDesc.InputLayout.pInputElementDescs = inputLayout;
@@ -473,14 +488,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		commandList->OMSetRenderTargets(1, &rtvHandle, false, nullptr);
 
 		// 3.画面クリア R G B A
-		FLOAT clearColor[] = { 0.1f,0.25f, 0.5f,0.0f }; // 青っぽい色
+		FLOAT clearColor[] = { 0.1f,0.25f,0.5f,0.0f }; // 白っぽい色
 		commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
 
-		if (key[DIK_SPACE])
-		{
-			FLOAT clearColor[] = { 0.5f,0.25f, 0.5f,0.0f }; // 青っぽい色
-			commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
-		}
+		//if (key[DIK_SPACE])
+		//{
+		//	FLOAT clearColor[] = { 0.0f,1.0f, 0.0f,0.0f }; // 赤っぽい色
+		//	commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+		//}
 
 		// 4.描画コマンドここから
 		// ビューポート設定コマンド
@@ -493,7 +508,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		viewport.MaxDepth = 1.0f;	//最大深度
 		// ビューポート設定コマンドを、コマンドリストに積む
 		commandList->RSSetViewports(1, &viewport);
-		
+
 		// シザー矩形
 		D3D12_RECT scissorRect{};
 		scissorRect.left = 0; // 切り抜き座標左
