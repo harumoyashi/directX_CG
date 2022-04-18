@@ -520,6 +520,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			OutputDebugStringA("Hit 0\n");	//出力ウィンドウに「Hit 0」と表示
 		}
 
+		//値を書き込むと自動的に転送される
+		constMapMaterial->color = XMFLOAT4(1, 0, 0, 0.5f);	//RGBAで半透明の赤
+
 #pragma region グラフィックスコマンド
 		// バックバッファの番号を取得(2つなので0番か1番)
 		UINT bbIndex = swapChain->GetCurrentBackBufferIndex();
