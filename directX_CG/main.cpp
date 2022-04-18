@@ -302,6 +302,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		1,2,3,	//三角形２つ目
 	};
 
+	////インデックスデータ(線のやつ)
+	//uint16_t indices[] =
+	//{
+	//	0,1,
+	//	2,1,
+	//	2,3,
+	//	0,3,
+	//	2,5,
+	//	3,4,
+	//	4,5
+	//};
+
 	// 頂点データ
 	XMFLOAT3 vertices[] = {
 	{ -0.5f, -0.5f, 0.0f }, // 左下
