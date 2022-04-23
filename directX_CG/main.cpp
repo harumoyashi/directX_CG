@@ -314,11 +314,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//ルートパラメータの設定
 	D3D12_ROOT_PARAMETER rootParams[2] = {};
+	//定数バッファ0番
 	rootParams[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;	//定数バッファビュー
 	rootParams[0].Descriptor.ShaderRegister = 0;					//定数バッファ番号
 	rootParams[0].Descriptor.RegisterSpace = 0;						//デフォルト値
 	rootParams[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;	//全てのシェーダーから見える
-
+	//テクスチャレジスタ0番
 	rootParams[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;	//種類
 	rootParams[1].DescriptorTable.pDescriptorRanges = &descriptorRange;			//デスクリプタレンジ
 	rootParams[1].DescriptorTable.NumDescriptorRanges = 1;						//デスクリプタレンジ数
@@ -763,7 +764,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		//定数バッファビュー(CBV)の設定コマンド
 		commandList->SetGraphicsRootConstantBufferView(0, constBuffMaterial->GetGPUVirtualAddress());
-
+		//SRVヒープの設定コマンド
+		commandList->SetDescriptorHeaps(1, &srvHeap);
+		//SRVヒープの先頭ハンドルを取得(SRVを指してるはず)
+		D3D12_GPU_DESCRIPTOR_HANDLE srvGpuHandle = srvHeap->GetCPUDescriptorHandleForHeapStart();
+		//SRVヒープの先頭にあるSRVをルートパラメータ1番に設定
+		commandList->SetGraphicsRootDescriptorTable(1, srvGpuHandle);
 
 		// 描画コマンド
 		commandList->DrawIndexedInstanced(_countof(indices), 1, 0, 0, 0); // インデックスバッファを使って描画
