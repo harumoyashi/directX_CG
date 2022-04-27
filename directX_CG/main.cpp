@@ -190,7 +190,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		(IDXGISwapChain1**)&swapChain);
 	assert(SUCCEEDED(result));
 
-	//SRVの最大個数
+	//シェーダリソースビュー(SRV)の最大個数
 	const size_t kMaxSRVCount = 2056;
 
 	// デスクリプタヒープの設定
@@ -445,7 +445,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//インデックス1個分のサイズ
 	ibView.Format = DXGI_FORMAT_R16_UINT;
 	// インデックスバッファのサイズ
-	ibView.SizeInBytes = sizeVB;
+	ibView.SizeInBytes = sizeIB;
 
 	//テクスチャバッファ設定
 	//ヒープ設定
@@ -491,7 +491,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//シェーダーリソースビュー設定
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};	//設定構造体
 	srvDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;	//RGBA float
-	D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;	//2Dテクスチャ
 	srvDesc.Texture2D.MipLevels = 1;
 
@@ -626,7 +626,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	samplerDesc.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
 	samplerDesc.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;			//ピクセルシェーダからのみ使用可能
 
-
 	// ルートシグネチャ
 	ID3D12RootSignature* rootSignature;
 	// ルートシグネチャの設定
@@ -744,11 +743,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		//定数バッファビュー(CBV)の設定コマンド
 		commandList->SetGraphicsRootConstantBufferView(0, constBuffMaterial->GetGPUVirtualAddress());
-		//SRVヒープの設定コマンド
+		//シェーダリソースビュー(SRV)ヒープの設定コマンド
 		commandList->SetDescriptorHeaps(1, &srvHeap);
-		//SRVヒープの先頭ハンドルを取得(SRVを指してるはず)
-		D3D12_GPU_DESCRIPTOR_HANDLE srvGpuHandle = srvHeap->GetCPUDescriptorHandleForHeapStart();
-		//SRVヒープの先頭にあるSRVをルートパラメータ1番に設定
+		//シェーダリソースビュー(SRV)ヒープの先頭ハンドルを取得(SRVを指してるはず)
+		D3D12_GPU_DESCRIPTOR_HANDLE srvGpuHandle = srvHeap->GetGPUDescriptorHandleForHeapStart();
+		//シェーダリソースビュー(SRV)ヒープの先頭にあるSRVをルートパラメータ1番に設定
 		commandList->SetGraphicsRootDescriptorTable(1, srvGpuHandle);
 
 		// 描画コマンド
