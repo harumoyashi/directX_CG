@@ -2,6 +2,8 @@
 #include <vector>
 #include <string>
 
+#include <DirectXTex.h>
+
 #include <d3d12.h>
 #include <dxgi1_6.h>	//Visual Studio Graphics Debugger‚ªŒë“®ì‹N‚±‚µ‚½‚çA1_4‚É‚·‚é‚Æ‰ğŒˆ‚·‚é‚©‚à
 #include <cassert>
