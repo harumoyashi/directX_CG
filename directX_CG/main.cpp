@@ -381,6 +381,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// ラスタライザの設定
 	pipelineDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;	// カリングしない
+	if (key[DIK_2])
+	{
+
+	}
 	pipelineDesc.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID; // ポリゴン内塗りつぶし(D3D12_FILL_MODE_WIREFRAMEにするとワイヤーフレームに)
 	pipelineDesc.RasterizerState.DepthClipEnable = true; // 深度クリッピングを有効に
 
@@ -484,17 +488,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		}
 
 		// 4.描画コマンドここから
-		// ビューポート設定コマンド
-		D3D12_VIEWPORT viewport{};
-		viewport.Width = window_width;
-		viewport.Height = window_height;
-		viewport.TopLeftX = 0;
-		viewport.TopLeftY = 0;
-		viewport.MinDepth = 0.0f;	//最小震度
-		viewport.MaxDepth = 1.0f;	//最大深度
-		// ビューポート設定コマンドを、コマンドリストに積む
-		commandList->RSSetViewports(1, &viewport);
-		
 		// シザー矩形
 		D3D12_RECT scissorRect{};
 		scissorRect.left = 0; // 切り抜き座標左
@@ -514,8 +507,63 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		// 頂点バッファビューの設定コマンド
 		commandList->IASetVertexBuffers(0, 1, &vbView);
 
+		//1つ目
+		// ビューポート設定コマンド
+		D3D12_VIEWPORT viewport{};
+		viewport.Width = window_width - window_width / 3;
+		viewport.Height = window_height - window_height / 3;
+		viewport.TopLeftX = 0;
+		viewport.TopLeftY = 0;
+		viewport.MinDepth = 0.0f;	//最小震度
+		viewport.MaxDepth = 1.0f;	//最大深度
+		// ビューポート設定コマンドを、コマンドリストに積む
+		commandList->RSSetViewports(1, &viewport);
+
 		// 描画コマンド
 		commandList->DrawInstanced(_countof(vertices), 1, 0, 0); // 全ての頂点を使って描画
+
+		//2つ目
+		// ビューポート設定コマンド
+		viewport.Width = window_width - window_width / 3;
+		viewport.Height = window_height/3;
+		viewport.TopLeftX = 0;
+		viewport.TopLeftY = window_height - window_height / 3;
+		viewport.MinDepth = 0.0f;	//最小震度
+		viewport.MaxDepth = 1.0f;	//最大深度
+		// ビューポート設定コマンドを、コマンドリストに積む
+		commandList->RSSetViewports(1, &viewport);
+
+		// 描画コマンド
+		commandList->DrawInstanced(_countof(vertices), 1, 0, 0); // 全ての頂点を使って描画
+
+		//3つ目
+		// ビューポート設定コマンド
+		viewport.Width = window_width/3;
+		viewport.Height = window_height - window_height / 3;
+		viewport.TopLeftX = window_width - window_width / 3;
+		viewport.TopLeftY = 0;
+		viewport.MinDepth = 0.0f;	//最小震度
+		viewport.MaxDepth = 1.0f;	//最大深度
+		// ビューポート設定コマンドを、コマンドリストに積む
+		commandList->RSSetViewports(1, &viewport);
+
+		// 描画コマンド
+		commandList->DrawInstanced(_countof(vertices), 1, 0, 0); // 全ての頂点を使って描画
+
+		//4つ目
+		// ビューポート設定コマンド
+		viewport.Width = window_width/3;
+		viewport.Height = window_height/3;
+		viewport.TopLeftX = window_width - window_width / 3;
+		viewport.TopLeftY = window_height - window_height / 3;
+		viewport.MinDepth = 0.0f;	//最小震度
+		viewport.MaxDepth = 1.0f;	//最大深度
+		// ビューポート設定コマンドを、コマンドリストに積む
+		commandList->RSSetViewports(1, &viewport);
+
+		// 描画コマンド
+		commandList->DrawInstanced(_countof(vertices), 1, 0, 0); // 全ての頂点を使って描画
+
 		// 4.描画コマンドここまで
 
 		// 5.リソースバリアを戻す
