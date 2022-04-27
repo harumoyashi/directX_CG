@@ -12,11 +12,7 @@ using namespace DirectX;
 #include <d3dcompiler.h>
 #pragma comment(lib, "d3dcompiler.lib")
 
-#define DIRECTINPUT_VERSION  0x0800 //DirectInputのバージョン指定
-#include <dinput.h>
-
-#pragma comment(lib,"dinput8.lib")
-#pragma comment(lib,"dxguid.lib")
+#include "DirectXInput.h"
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
@@ -221,31 +217,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	UINT64 fenceVal = 0;
 	result = device->CreateFence(fenceVal, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
 
-	//DirectInputの初期化
-	IDirectInput8* directInput = nullptr;
-	result = DirectInput8Create(
-		w.hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8,
-		(void**)&directInput, nullptr
-	);
-	assert(SUCCEEDED(result));
-
-	//キーボードデバイスの生成
-	IDirectInputDevice8* keyboard = nullptr;
-	result = directInput->CreateDevice(GUID_SysKeyboard, &keyboard, NULL);
-	assert(SUCCEEDED(result));
-
-	//入力データ形式のセット
-	result = keyboard->SetDataFormat(&c_dfDIKeyboard);	//標準形式
-	assert(SUCCEEDED(result));
-
-	//排他制御レベルのセット
-	result = keyboard->SetCooperativeLevel(
-		//DISCL_FOREGROUND：画面が手前にある場合のみ入力を受け付ける
-		//DISCL_NONEXCLUSIVE：デバイスをこのアプリだけで専有しない
-		//DISCL_NOWINKEY：Windowsキーを無効にする
-		hwnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY
-	);
-	assert(SUCCEEDED(result));
+	//input初期化
+	DirectXInput keyboard;
+	keyboard.InputInit(result, w, hwnd);
 	//DirectX初期化ここまで
 #pragma endregion
 #pragma region 描画初期化処理
@@ -254,6 +228,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	{ -0.5f, -0.5f, 0.0f }, // 左下
 	{ -0.5f, +0.5f, 0.0f }, // 左上
 	{ +0.5f, -0.5f, 0.0f }, // 右下
+	{ +0.5f, +0.5f, 0.0f }, // 右上
 	};
 	// 頂点データ全体のサイズ = 頂点データ一つ分のサイズ * 頂点データの要素数
 	UINT sizeVB = static_cast<UINT>(sizeof(XMFLOAT3) * _countof(vertices));
@@ -381,11 +356,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// ラスタライザの設定
 	pipelineDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;	// カリングしない
-	if (key[DIK_2])
-	{
-
-	}
 	pipelineDesc.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID; // ポリゴン内塗りつぶし(D3D12_FILL_MODE_WIREFRAMEにするとワイヤーフレームに)
+
 	pipelineDesc.RasterizerState.DepthClipEnable = true; // 深度クリッピングを有効に
 
 	// ブレンドステート
@@ -449,18 +421,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 #pragma region DirectX毎フレーム処理
 		//DirectX毎フレーム　ここから
-		// //キーボード情報の取得開始
-		keyboard->Acquire();
+		keyboard.InputUpdate();
 
-		//全キーの入力状態を取得する
-		BYTE key[256] = {};
-		keyboard->GetDeviceState(sizeof(key), key);
-
-		//数字の0キーが押されていたら
-		if (key[DIK_0])
+		//ワイヤーフレームの切り替え
+		if (keyboard.IsKeyDown(DIK_2))
 		{
-			OutputDebugStringA("Hit 0\n");	//出力ウィンドウに「Hit 0」と表示
+			pipelineDesc.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;
 		}
+		else
+		{
+			pipelineDesc.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID; // ポリゴン内塗りつぶし(D3D12_FILL_MODE_WIREFRAMEにするとワイヤーフレームに)
+		}
+
+		//グラフィックスパイプラインステート生成し直し
+		result = device->CreateGraphicsPipelineState(&pipelineDesc, IID_PPV_ARGS(&pipelineState));
+		assert(SUCCEEDED(result));
 
 		// バックバッファの番号を取得(2つなので0番か1番)
 		UINT bbIndex = swapChain->GetCurrentBackBufferIndex();
@@ -481,7 +456,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		FLOAT clearColor[] = { 0.1f,0.25f, 0.5f,0.0f }; // 青っぽい色
 		commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
 
-		if (key[DIK_SPACE])
+		if (keyboard.IsKeyDown(DIK_SPACE))
 		{
 			FLOAT clearColor[] = { 0.9f,0.1f, 0.5f,0.0f }; // 青っぽい色
 			commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
@@ -502,7 +477,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		commandList->SetGraphicsRootSignature(rootSignature);
 
 		// プリミティブ形状の設定コマンド
-		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); // 三角形リスト
+		if (keyboard.IsKeyDown(DIK_1))
+		{
+			commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP); // 三角形リスト
+		}
+		else
+		{
+			commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); // 三角形リスト
+		}
 
 		// 頂点バッファビューの設定コマンド
 		commandList->IASetVertexBuffers(0, 1, &vbView);
@@ -525,7 +507,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//2つ目
 		// ビューポート設定コマンド
 		viewport.Width = window_width - window_width / 3;
-		viewport.Height = window_height/3;
+		viewport.Height = window_height / 3;
 		viewport.TopLeftX = 0;
 		viewport.TopLeftY = window_height - window_height / 3;
 		viewport.MinDepth = 0.0f;	//最小震度
@@ -538,7 +520,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		//3つ目
 		// ビューポート設定コマンド
-		viewport.Width = window_width/3;
+		viewport.Width = window_width / 3;
 		viewport.Height = window_height - window_height / 3;
 		viewport.TopLeftX = window_width - window_width / 3;
 		viewport.TopLeftY = 0;
@@ -552,8 +534,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		//4つ目
 		// ビューポート設定コマンド
-		viewport.Width = window_width/3;
-		viewport.Height = window_height/3;
+		viewport.Width = window_width / 3;
+		viewport.Height = window_height / 3;
 		viewport.TopLeftX = window_width - window_width / 3;
 		viewport.TopLeftY = window_height - window_height / 3;
 		viewport.MinDepth = 0.0f;	//最小震度
