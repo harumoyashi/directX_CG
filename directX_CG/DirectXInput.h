@@ -12,4 +12,5 @@ public:
 	static bool IsKeyDown(char key);		//‰Ÿ‚µ‚Á‚Ï‚È‚µ
 	static bool IsKeyTrigger(char key);		//‰Ÿ‚µ‚½uŠÔ
 	static bool GetKeyReleased(char key);	//—£‚µ‚½uŠÔ
+	bool GetKeyReleaseTrigger(char key);	//—£‚µ‚½uŠÔ
 };

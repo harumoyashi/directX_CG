@@ -33,6 +33,9 @@ void DirectXInput::InputInit(HRESULT result, WNDCLASSEX w, HWND hwnd)
 
 	// 排他制御レベルのセット
 	result = keyboard->SetCooperativeLevel(
+		//DISCL_FOREGROUND：画面が手前にある場合のみ入力を受け付ける
+		//DISCL_NONEXCLUSIVE：デバイスをこのアプリだけで専有しない
+		//DISCL_NOWINKEY：Windowsキーを無効にする
 		hwnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
 	assert(SUCCEEDED(result));
 }
@@ -66,8 +69,14 @@ bool DirectXInput::IsKeyTrigger(char key)
 	return keys[key] && !prev[key];
 }
 
-//離した瞬間
+//離してるとき
 bool DirectXInput::GetKeyReleased(char key)
 {
 	return !keys[key] && !prev[key];
+}
+
+//離した瞬間
+bool DirectXInput::GetKeyReleaseTrigger(char key)
+{
+	return !keys[key] && prev[key];
 }
