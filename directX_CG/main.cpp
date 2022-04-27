@@ -312,13 +312,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//全ピクセルの色を初期化
 	for (size_t i = 0; i < imageDataCount; i++)
 	{
-		imageData[i].x = 1.0f;	//R
-		imageData[i].y = 0.0f;	//G
-		imageData[i].z = 0.0f;	//B
-		imageData[i].w = 1.0f;	//A
+		if (i / 10 % 2 == 0)
+		{
+			imageData[i].x = 1.0f;	//R
+			imageData[i].y = 0.0f;	//G
+			imageData[i].z = 0.0f;	//B
+			imageData[i].w = 1.0f;	//A
+		}
+		else
+		{
+			imageData[i].x = 0.0f;	//R
+			imageData[i].y = 0.0f;	//G
+			imageData[i].z = 1.0f;	//B
+			imageData[i].w = 1.0f;	//A
+		}
 	}
 
-	
+
 
 	//頂点データ構造体
 	struct Vertex
@@ -615,7 +625,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	pipelineDesc.SampleDesc.Count = 1; // 1ピクセルにつき1回サンプリング
 
 	//テクスチャサンプラーの設定
-	D3D12_STATIC_SAMPLER_DESC samplerDesc{};					
+	D3D12_STATIC_SAMPLER_DESC samplerDesc{};
 	samplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;					//横繰り返し（タイリング）
 	samplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;					//縦繰り返し（タイリング）
 	samplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;					//奥行繰り返し（タイリング）
