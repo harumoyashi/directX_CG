@@ -141,9 +141,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ConstBuffer.h" />
     <ClInclude Include="DirectXInput.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ConstBuffer.cpp" />
     <ClCompile Include="DirectXInput.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
