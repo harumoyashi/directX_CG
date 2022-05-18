@@ -1,4 +1,4 @@
-#include <windows.h>
+#include "MyWindows.h"
 #include <vector>
 #include <string>
 
@@ -19,21 +19,7 @@ using namespace DirectX;
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
 
-#pragma region ウィンドプロシージャ
-//面倒だけど書かなきゃいけない関数
-LRESULT WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
-{
-	switch (msg)
-	{
-		//ウィンドウが破棄されたら呼ばれる
-	case WM_DESTROY:
-		PostQuitMessage(0);	//OSに対して「もうこのアプリは終わる」と伝える
-		return 0;
-	}
-	return DefWindowProc(hwnd, msg, wparam, lparam);	//既定の処理を行う
-}
-#pragma endregion
-
+#pragma region 構造体宣言
 //定数バッファ用構造体
 struct ConstBufferDataMaterial
 {
@@ -45,56 +31,19 @@ struct  ConstBufferDataTransform
 {
 	XMMATRIX mat;	//3D変換行列
 };
+#pragma endregion
 
 
 //Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma region WindowsAPI初期化
-	//コンソールへの文字出力
-	OutputDebugStringA("Hello,DirectX!!\n");
-
-	const int window_width = 1280;
-	const int window_height = 720;
-
-	//ウィンドウクラスの生成＆登録
-	WNDCLASSEX w{};
-
-	w.cbSize = sizeof(WNDCLASSEX);
-	w.lpfnWndProc = (WNDPROC)WindowProc;		//ウィンドウプロシージャを設定
-	w.lpszClassName = L"DX12Sample";			//アプリケーションクラス名
-	w.hInstance = GetModuleHandle(nullptr);		//ハンドルの取得
-	w.hCursor = LoadCursor(NULL, IDC_ARROW);	//カーソル指定
-
-	RegisterClassEx(&w);	//アプリケーションクラス（ウィンドウクラスの指定をOSに伝える）
-
-	RECT wrc = { 0,0,window_width,window_height };	//ウィンドウサイズを決める
-
-	//関数を使ってウィンドウのサイズを補正する
-	AdjustWindowRect(&wrc, WS_OVERLAPPEDWINDOW, false);
-
-	//ウィンドウオブジェクトの生成
-	HWND hwnd = CreateWindow(
-		w.lpszClassName,		//クラス名指定
-		L"DX12テスト",			//タイトルバーの文字
-		WS_OVERLAPPEDWINDOW,	//タイトルバーと境界線があるウィンドウ
-		CW_USEDEFAULT,			//表示x座標はOSにお任せ
-		CW_USEDEFAULT,			//表示y座標はOSにお任せ
-		wrc.right - wrc.left,	//ウィンドウ幅
-		wrc.bottom - wrc.top,	//ウィンドウ高
-		nullptr,				//親ウィンドウハンドル
-		nullptr,				//メニューハンドル
-		w.hInstance,			//呼び出しアプリケーションハンドル
-		nullptr					//追加パラメーター
-	);
-
-	//ウィンドウ表示
-	ShowWindow(hwnd, SW_SHOW);
-
-	MSG msg = {};
+	Windows win;	//ウィンドウクラス
+	win.Set();
+	win.CreateWindowObj();
+	win.Display();
 #pragma endregion
 #pragma region DirectX初期化
 	//DirectX初期化ここから
-
 #ifdef _DEBUG
 	//デバッグレイヤーをオンに
 	ID3D12Debug* debugController;
@@ -114,6 +63,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ID3D12CommandQueue* commandQueue = nullptr;
 	ID3D12DescriptorHeap* rtvHeap = nullptr;
 
+	ConstBufferDataTransform* constMapTransform = nullptr;
 	ID3D12Resource* constBuffTransform = nullptr;			//定数バッファのGPUリソースのポインタ
 
 	// DXGIファクトリーの生成
@@ -197,7 +147,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 	// スワップチェーンの生成
 	result = dxgiFactory->CreateSwapChainForHwnd(
-		commandQueue, hwnd, &swapChainDesc, nullptr, nullptr,
+		commandQueue, win.hwnd, &swapChainDesc, nullptr, nullptr,
 		(IDXGISwapChain1**)&swapChain);
 	assert(SUCCEEDED(result));
 
@@ -253,7 +203,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//input初期化
 	DirectXInput keyboard;
-	keyboard.InputInit(result, w, hwnd);
+	keyboard.InputInit(result, win.w, win.hwnd);
 
 	//DirectX初期化ここまで
 #pragma endregion
@@ -315,19 +265,42 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		assert(SUCCEEDED(result));
 
 		//定数バッファのマッピング
-		ConstBufferDataTransform* constMapTransform = nullptr;
 		result = constBuffTransform->Map(0, nullptr, (void**)&constMapTransform);	//マッピング
 		assert(SUCCEEDED(result));
-
-		//単位行列を代入
-		constMapTransform->mat = XMMatrixIdentity();
-
-		constMapTransform->mat.r[0].m128_f32[0] = 2.0f / window_width;
-		constMapTransform->mat.r[1].m128_f32[1] = -2.0f / window_height;
-
-		constMapTransform->mat.r[3].m128_f32[0] = -1.0f;
-		constMapTransform->mat.r[3].m128_f32[1] = 1.0f;
 	}
+
+	/*XMMATRIX oldVer = XMMatrixIdentity();
+	oldVer.r[0].m128_f32[0] = 2.0f / window_width;
+	oldVer.r[1].m128_f32[1] = -2.0f / window_height;
+
+	oldVer.r[3].m128_f32[0] = -1.0f;
+	oldVer.r[3].m128_f32[1] = 1.0f;
+
+	XMMATRIX newVer = XMMatrixOrthographicOffCenterLH(
+		0,window_width,
+		window_height,0,
+		0.0f, 1.0f
+	);*/
+
+	//平行投影変換//
+	//単位行列を代入
+	constMapTransform->mat = XMMatrixIdentity();
+
+	/*constMapTransform->mat.r[0].m128_f32[0] = 2.0f / window_width;
+	constMapTransform->mat.r[1].m128_f32[1] = -2.0f / window_height;
+
+	constMapTransform->mat.r[3].m128_f32[0] = -1.0f;
+	constMapTransform->mat.r[3].m128_f32[1] = 1.0f;*/
+
+	//平行投影変換
+	constMapTransform->mat = XMMatrixOrthographicOffCenterLH(
+		0, win.width,
+		win.height, 0,
+		0.0f, 1.0f
+	);
+
+	//投資投影変換//
+
 
 	//値を書き込むと自動的に転送される
 	constMapMaterial->color = XMFLOAT4(1, 0, 0, 0.5f);	//RGBAで半透明の赤
@@ -734,22 +707,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	result = device->CreateGraphicsPipelineState(&pipelineDesc, IID_PPV_ARGS(&pipelineState));
 	assert(SUCCEEDED(result));
 #pragma endregion
-
-
-
 	//ゲームループ
 	while (true)
 	{
 #pragma region ウィンドウメッセージ処理
-		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+		if (PeekMessage(&win.msg, nullptr, 0, 0, PM_REMOVE))
 		{
-			TranslateMessage(&msg);	//キー入力メッセージの処理
-			DispatchMessage(&msg);	//プロシージャにメッセージを送る
+			TranslateMessage(&win.msg);	//キー入力メッセージの処理
+			DispatchMessage(&win.msg);	//プロシージャにメッセージを送る
 		}
 
 
 		//アプリケーションが終わるときにmwssageがWM_QUITになる
-		if (msg.message == WM_QUIT)
+		if (win.msg.message == WM_QUIT)
 		{
 			break;
 		}
@@ -791,8 +761,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		// 4.描画コマンドここから
 		// ビューポート設定コマンド
 		D3D12_VIEWPORT viewport{};
-		viewport.Width = window_width;
-		viewport.Height = window_height;
+		viewport.Width = win.width;
+		viewport.Height = win.height;
 		viewport.TopLeftX = 0;
 		viewport.TopLeftY = 0;
 		viewport.MinDepth = 0.0f;	//最小震度
@@ -803,9 +773,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		// シザー矩形
 		D3D12_RECT scissorRect{};
 		scissorRect.left = 0; // 切り抜き座標左
-		scissorRect.right = scissorRect.left + window_width; // 切り抜き座標右
+		scissorRect.right = scissorRect.left + win.width; // 切り抜き座標右
 		scissorRect.top = 0; // 切り抜き座標上
-		scissorRect.bottom = scissorRect.top + window_height; // 切り抜き座標下
+		scissorRect.bottom = scissorRect.top + win.height; // 切り抜き座標下
 		// シザー矩形設定コマンドを、コマンドリストに積む
 		commandList->RSSetScissorRects(1, &scissorRect);
 
@@ -875,7 +845,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	}
 #pragma region WindowsAPI後始末
 	//もうクラスは使わないので登録解除する
-	UnregisterClass(w.lpszClassName, w.hInstance);
+	UnregisterClass(win.w.lpszClassName, win.w.hInstance);
 #pragma endregion
 
 	return 0;

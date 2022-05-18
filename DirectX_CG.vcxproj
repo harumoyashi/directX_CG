@@ -143,11 +143,13 @@
   <ItemGroup>
     <ClInclude Include="ConstBuffer.h" />
     <ClInclude Include="DirectXInput.h" />
+    <ClInclude Include="MyWindows.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ConstBuffer.cpp" />
     <ClCompile Include="DirectXInput.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MyWindows.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Basic.hlsli" />
