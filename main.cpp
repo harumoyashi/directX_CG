@@ -130,8 +130,24 @@ keyboard.InputInit(win.w, win.hwnd);
 		0.0f, 1.0f
 	);
 
-	//投資投影変換//
+	//透視投影変換//
+	directX.constMapTransform->mat = XMMatrixPerspectiveFovLH(
+		XMConvertToRadians(45.0f),		//上下画角45度
+		(float)win.width / win.height,	//アスペクト比(画面横幅/画面縦幅)
+		0.1f, 1000.0f					//前端、奥端
+	);
 
+	//射影投影変換//
+	XMMATRIX matProjection = XMMatrixPerspectiveFovLH(
+		XMConvertToRadians(45.0f),		//上下画角45度
+		(float)win.width / win.height,	//アスペクト比(画面横幅/画面縦幅)
+		0.1f, 1000.0f					//前端、奥端
+	);
+
+	//ここでビュー変換行列計算
+
+	//定数バッファに転送
+	directX.constMapTransform->mat = matProjection;
 
 	//値を書き込むと自動的に転送される
 	constMapMaterial->color = XMFLOAT4(1, 0, 0, 0.5f);	//RGBAで半透明の赤
@@ -210,11 +226,11 @@ keyboard.InputInit(win.w, win.hwnd);
 
 	// 頂点データ
 	Vertex vertices[] = {
-		//	x		y		z		u	v
-		{{ 0.0f  , 100.0f, 0.0f }, {0.0f,1.0f}},	// 左下
-		{{ 0.0f  , 0.0f  , 0.0f }, {0.0f,0.0f}},	// 左上
-		{{ 100.0f, 100.0f, 0.0f }, {1.0f,1.0f}},	// 右下
-		{{ 100.0f, 0.0f  , 0.0f }, {1.0f,0.0f}},	// 右上
+		//	x		y		z			u	v
+		{{ -50.0f, -50.0f, 50.0f }, {0.0f,1.0f}},	// 左下
+		{{ -50.0f, 50.0f , 50.0f }, {0.0f,0.0f}},	// 左上
+		{{ 50.0f , -50.0f, 50.0f }, {1.0f,1.0f}},	// 右下
+		{{ 50.0f , 50.0f , 50.0f }, {1.0f,0.0f}},	// 右上
 	};
 
 	// 頂点データ全体のサイズ = 頂点データ一つ分のサイズ * 頂点データの要素数

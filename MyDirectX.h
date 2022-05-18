@@ -27,7 +27,7 @@ public:
 	//基本オブジェクトの生成
 	//受け皿になる変数生成
 
-	//リソースビューを作成するための仮想アダプタ
+	//色々なもの作成するための仮想アダプタ
 	ID3D12Device* device = nullptr;
 	//アダプターの列挙状態の変化を検出できるようにするためのインターフェース
 	IDXGIFactory7* dxgiFactory = nullptr;
