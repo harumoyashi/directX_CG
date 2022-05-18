@@ -3,15 +3,6 @@
 #include <vector>
 #include <string>
 
-#include <DirectXTex.h>
-
-#include <d3d12.h>
-#include <dxgi1_6.h>	//Visual Studio Graphics Debuggerが誤動作起こしたら、1_4にすると解決するかも
-#include <cassert>
-
-#include <DirectXMath.h>
-using namespace DirectX;
-
 #include <d3dcompiler.h>
 #pragma comment(lib, "d3dcompiler.lib")
 
@@ -26,12 +17,6 @@ struct ConstBufferDataMaterial
 {
 	XMFLOAT4 color;	//色(RGBA)
 };
-
-////定数バッファ用データ構造体（3D変換行列）
-//struct  ConstBufferDataTransform
-//{
-//	XMMATRIX mat;	//3D変換行列
-//};
 #pragma endregion
 
 //Windowsアプリでのエントリーポイント(main関数)
@@ -44,12 +29,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma endregion
 #pragma region DirectX初期化
 	//DirectX初期化ここから
+	HRESULT result;
 	MyDirectX directX;
 	directX.Init(win.hwnd);
 
 //input初期化
 DirectXInput keyboard;
-keyboard.InputInit(directX.result, win.w, win.hwnd);
+keyboard.InputInit(result, win.w, win.hwnd);
 
 	//DirectX初期化ここまで
 #pragma endregion
@@ -69,7 +55,7 @@ keyboard.InputInit(directX.result, win.w, win.hwnd);
 
 	ID3D12Resource* constBuffMaterial = nullptr;
 	//定数バッファの生成
-	directX.result = directX.device->CreateCommittedResource(
+	result = directX.device->CreateCommittedResource(
 		&cbHeapProp,	//ヒープ設定
 		D3D12_HEAP_FLAG_NONE,
 		&cbResouceDesc,	//リソース設定
@@ -77,12 +63,12 @@ keyboard.InputInit(directX.result, win.w, win.hwnd);
 		nullptr,
 		IID_PPV_ARGS(&constBuffMaterial)
 	);
-	assert(SUCCEEDED(directX.result));
+	assert(SUCCEEDED(result));
 
 	//定数バッファのマッピング
 	ConstBufferDataMaterial* constMapMaterial = nullptr;
-	directX.result = constBuffMaterial->Map(0, nullptr, (void**)&constMapMaterial);	//マッピング
-	assert(SUCCEEDED(directX.result));
+	result = constBuffMaterial->Map(0, nullptr, (void**)&constMapMaterial);	//マッピング
+	assert(SUCCEEDED(result));
 
 	{
 		//ヒープ設定
@@ -100,7 +86,7 @@ keyboard.InputInit(directX.result, win.w, win.hwnd);
 
 		ID3D12Resource* constBuffMaterial = nullptr;
 		//定数バッファの生成
-		directX.result = directX.device->CreateCommittedResource(
+		result = directX.device->CreateCommittedResource(
 			&cbHeapProp,	//ヒープ設定
 			D3D12_HEAP_FLAG_NONE,
 			&cbResouceDesc,	//リソース設定
@@ -108,11 +94,11 @@ keyboard.InputInit(directX.result, win.w, win.hwnd);
 			nullptr,
 			IID_PPV_ARGS(&directX.constBuffTransform)
 		);
-		assert(SUCCEEDED(directX.result));
+		assert(SUCCEEDED(result));
 
 		//定数バッファのマッピング
-		directX.result = directX.constBuffTransform->Map(0, nullptr, (void**)&directX.constMapTransform);	//マッピング
-		assert(SUCCEEDED(directX.result));
+		result = directX.constBuffTransform->Map(0, nullptr, (void**)&directX.constMapTransform);	//マッピング
+		assert(SUCCEEDED(result));
 	}
 
 	/*XMMATRIX oldVer = XMMatrixIdentity();
@@ -197,17 +183,17 @@ keyboard.InputInit(directX.result, win.w, win.hwnd);
 	TexMetadata metadate{};
 	ScratchImage scratchImg{};
 	//WICテクスチャのロード
-	directX.result = LoadFromWICFile(
+	result = LoadFromWICFile(
 		L"Resources/itiro_kimegao.png",
 		WIC_FLAGS_NONE,
 		&metadate, scratchImg);
 
 	ScratchImage mipChain{};
 	//ミップマップ生成
-	directX.result = GenerateMipMaps(
+	result = GenerateMipMaps(
 		scratchImg.GetImages(), scratchImg.GetImageCount(), scratchImg.GetMetadata(),
 		TEX_FILTER_DEFAULT, 0, mipChain);
-	if (SUCCEEDED(directX.result))
+	if (SUCCEEDED(result))
 	{
 		scratchImg = std::move(mipChain);
 		metadate = scratchImg.GetMetadata();
@@ -251,19 +237,19 @@ keyboard.InputInit(directX.result, win.w, win.hwnd);
 
 	// 頂点バッファの生成
 	ID3D12Resource* vertBuff = nullptr;
-	directX.result = directX.device->CreateCommittedResource(
+	result = directX.device->CreateCommittedResource(
 		&heapProp, // ヒープ設定
 		D3D12_HEAP_FLAG_NONE,
 		&resDesc, // リソース設定
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		nullptr,
 		IID_PPV_ARGS(&vertBuff));
-	assert(SUCCEEDED(directX.result));
+	assert(SUCCEEDED(result));
 
 	// GPU上のバッファに対応した仮想メモリ(メインメモリ上)を取得
 	Vertex* vertMap = nullptr;
-	directX.result = vertBuff->Map(0, nullptr, (void**)&vertMap);
-	assert(SUCCEEDED(directX.result));
+	result = vertBuff->Map(0, nullptr, (void**)&vertMap);
+	assert(SUCCEEDED(result));
 	// 全頂点に対して
 	for (int i = 0; i < _countof(vertices); i++) {
 		vertMap[i] = vertices[i]; // 座標をコピー
@@ -314,7 +300,7 @@ keyboard.InputInit(directX.result, win.w, win.hwnd);
 
 	//インデックスバッファの生成
 	ID3D12Resource* indexBuff = nullptr;
-	directX.result = directX.device->CreateCommittedResource(
+	result = directX.device->CreateCommittedResource(
 		&heapProp,
 		D3D12_HEAP_FLAG_NONE,
 		&resDesc,
@@ -325,7 +311,7 @@ keyboard.InputInit(directX.result, win.w, win.hwnd);
 
 	//インデックスバッファをマッピング
 	uint16_t* indexMap = nullptr;
-	directX.result = indexBuff->Map(0, nullptr, (void**)&indexMap);
+	result = indexBuff->Map(0, nullptr, (void**)&indexMap);
 	//全インデックスに対して
 	for (int i = 0; i < _countof(indices); i++)
 	{
@@ -362,7 +348,7 @@ keyboard.InputInit(directX.result, win.w, win.hwnd);
 	//テクスチャバッファの生成
 	ID3D12Resource* texBuff = nullptr;
 
-	directX.result = directX.device->CreateCommittedResource(
+	result = directX.device->CreateCommittedResource(
 		&textureHeapProp,
 		D3D12_HEAP_FLAG_NONE,
 		&textureResouceDesc,
@@ -377,14 +363,14 @@ keyboard.InputInit(directX.result, win.w, win.hwnd);
 		//ミップマップレベルを指定してイメージを取得
 		const Image* img = scratchImg.GetImage(i, 0, 0);
 		//テクスチャバッファにデータ転送
-		directX.result = texBuff->WriteToSubresource(
+		result = texBuff->WriteToSubresource(
 			(UINT)i,
 			nullptr,				//全領域へコピー
 			img->pixels,			//元データアドレス
 			(UINT)img->rowPitch,	//1ラインサイズ
 			(UINT)img->slicePitch	//全サイズ
 		);
-		assert(SUCCEEDED(directX.result));
+		assert(SUCCEEDED(result));
 	}
 
 	//シェーダーリソースビューの作成
@@ -402,7 +388,7 @@ keyboard.InputInit(directX.result, win.w, win.hwnd);
 	ID3DBlob* psBlob = nullptr; // ピクセルシェーダオブジェクト
 	ID3DBlob* errorBlob = nullptr; // エラーオブジェクト
 	// 頂点シェーダの読み込みとコンパイル
-	directX.result = D3DCompileFromFile(
+	result = D3DCompileFromFile(
 		L"BasicVS.hlsl", // シェーダファイル名
 		nullptr,
 		D3D_COMPILE_STANDARD_FILE_INCLUDE, // インクルード可能にする
@@ -412,7 +398,7 @@ keyboard.InputInit(directX.result, win.w, win.hwnd);
 		&vsBlob, &errorBlob);
 
 	// エラーなら
-	if (FAILED(directX.result)) {
+	if (FAILED(result)) {
 		// errorBlobからエラー内容をstring型にコピー
 		std::string error;
 		error.resize(errorBlob->GetBufferSize());
@@ -426,7 +412,7 @@ keyboard.InputInit(directX.result, win.w, win.hwnd);
 	}
 
 	// ピクセルシェーダの読み込みとコンパイル
-	directX.result = D3DCompileFromFile(
+	result = D3DCompileFromFile(
 		L"BasicPS.hlsl", // シェーダファイル名
 		nullptr,
 		D3D_COMPILE_STANDARD_FILE_INCLUDE, // インクルード可能にする
@@ -436,7 +422,7 @@ keyboard.InputInit(directX.result, win.w, win.hwnd);
 		&psBlob, &errorBlob);
 
 	// エラーなら
-	if (FAILED(directX.result)) {
+	if (FAILED(result)) {
 		// errorBlobからエラー内容をstring型にコピー
 		std::string error;
 		error.resize(errorBlob->GetBufferSize());
@@ -538,20 +524,20 @@ keyboard.InputInit(directX.result, win.w, win.hwnd);
 
 	// ルートシグネチャのシリアライズ
 	ID3DBlob* rootSigBlob = nullptr;
-	directX.result = D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1_0,
+	result = D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1_0,
 		&rootSigBlob, &errorBlob);
-	assert(SUCCEEDED(directX.result));
-	directX.result = directX.device->CreateRootSignature(0, rootSigBlob->GetBufferPointer(), rootSigBlob->GetBufferSize(),
+	assert(SUCCEEDED(result));
+	result = directX.device->CreateRootSignature(0, rootSigBlob->GetBufferPointer(), rootSigBlob->GetBufferSize(),
 		IID_PPV_ARGS(&rootSignature));
-	assert(SUCCEEDED(directX.result));
+	assert(SUCCEEDED(result));
 	rootSigBlob->Release();
 	// パイプラインにルートシグネチャをセット
 	pipelineDesc.pRootSignature = rootSignature;
 
 	// パイプランステートの生成
 	ID3D12PipelineState* pipelineState = nullptr;
-	directX.result = directX.device->CreateGraphicsPipelineState(&pipelineDesc, IID_PPV_ARGS(&pipelineState));
-	assert(SUCCEEDED(directX.result));
+	result = directX.device->CreateGraphicsPipelineState(&pipelineDesc, IID_PPV_ARGS(&pipelineState));
+	assert(SUCCEEDED(result));
 #pragma endregion
 	//ゲームループ
 	while (true)
@@ -661,16 +647,16 @@ keyboard.InputInit(directX.result, win.w, win.hwnd);
 #pragma endregion
 
 		// 命令のクローズ
-		directX.result = directX.commandList->Close();
-		assert(SUCCEEDED(directX.result));
+		result = directX.commandList->Close();
+		assert(SUCCEEDED(result));
 		// コマンドリストの実行
 		ID3D12CommandList* commandLists[] = { directX.commandList };
 		directX.commandQueue->ExecuteCommandLists(1, commandLists);
 #pragma endregion
 
 		// 画面に表示するバッファをフリップ(裏表の入替え)
-		directX.result = directX.swapChain->Present(1, 0);
-		assert(SUCCEEDED(directX.result));
+		result = directX.swapChain->Present(1, 0);
+		assert(SUCCEEDED(result));
 
 		// コマンドの実行完了を待つ
 		directX.commandQueue->Signal(directX.fence, ++directX.fenceVal);
@@ -681,11 +667,11 @@ keyboard.InputInit(directX.result, win.w, win.hwnd);
 			CloseHandle(event);
 		}
 		// キューをクリア
-		directX.result = directX.commandAllocator->Reset();
-		assert(SUCCEEDED(directX.result));
+		result = directX.commandAllocator->Reset();
+		assert(SUCCEEDED(result));
 		// 再びコマンドリストを貯める準備
-		directX.result = directX.commandList->Reset(directX.commandAllocator, nullptr);
-		assert(SUCCEEDED(directX.result));
+		result = directX.commandList->Reset(directX.commandAllocator, nullptr);
+		assert(SUCCEEDED(result));
 
 		//DirectX毎フレーム　ここまで
 	}

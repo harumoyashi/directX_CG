@@ -4,10 +4,11 @@
 
 #include <d3d12.h>
 #include <dxgi1_6.h>	//Visual Studio Graphics Debuggerが誤動作起こしたら、1_4にすると解決するかも
-#include <cassert>
 
 #include <DirectXMath.h>
 using namespace DirectX;
+
+#include "DirectXInput.h"
 
 class MyDirectX
 {
@@ -22,6 +23,7 @@ public:
 
 	//基本オブジェクトの生成
 	//受け皿になる変数生成
+
 	HRESULT result;
 	ID3D12Device* device = nullptr;
 	IDXGIFactory7* dxgiFactory = nullptr;

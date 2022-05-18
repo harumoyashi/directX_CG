@@ -4,13 +4,18 @@
 class DirectXInput
 {
 public:
-	// 初期化とアップデートの関数 用意
+	//input初期化
 	static void InputInit(HRESULT result, WNDCLASSEX w, HWND hwnd);
+	//input更新
 	static void InputUpdate();
 
-	// キーボード入力処理用 (返り値0,1)
-	static bool IsKeyDown(char key);		//押しっぱなし
-	static bool IsKeyTrigger(char key);		//押した瞬間
-	static bool GetKeyReleased(char key);	//離してるとき
-	static bool GetKeyReleaseTrigger(char key);	//離した瞬間
+	//キーボード入力処理用 (返り値0,1)
+	//押しっぱなし
+	static bool IsKeyDown(char key);
+	//押した瞬間
+	static bool IsKeyTrigger(char key);
+	//離してるとき
+	static bool GetKeyReleased(char key);
+	//離した瞬間
+	static bool GetKeyReleaseTrigger(char key);
 };
