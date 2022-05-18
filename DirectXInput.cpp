@@ -17,8 +17,10 @@ static BYTE keys[256] = {};
 // 全キーの1F前の入力状態を取得する
 static BYTE prev[256] = {};
 
-void DirectXInput::InputInit(HRESULT result, WNDCLASSEX w, HWND hwnd)
+void DirectXInput::InputInit(WNDCLASSEX w, HWND hwnd)
 {
+	HRESULT result;
+
 	// DirectInputの初期化
 	result = DirectInput8Create(
 		w.hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8,

@@ -5,7 +5,7 @@ class DirectXInput
 {
 public:
 	//input‰Šú‰»
-	static void InputInit(HRESULT result, WNDCLASSEX w, HWND hwnd);
+	static void InputInit(WNDCLASSEX w, HWND hwnd);
 	//inputXV
 	static void InputUpdate();
 

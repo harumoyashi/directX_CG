@@ -35,8 +35,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 //input‰Šú‰»
 DirectXInput keyboard;
-keyboard.InputInit(result, win.w, win.hwnd);
-
+keyboard.InputInit(win.w, win.hwnd);
 	//DirectX‰Šú‰»‚±‚±‚Ü‚Å
 #pragma endregion
 #pragma region •`‰æ‰Šú‰»ˆ—
