@@ -145,6 +145,7 @@
     <ClInclude Include="MyDirectX.h" />
     <ClInclude Include="DirectXInput.h" />
     <ClInclude Include="MyWindows.h" />
+    <ClInclude Include="Vector3.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ConstBuffer.cpp" />
@@ -152,6 +153,7 @@
     <ClCompile Include="DirectXInput.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MyWindows.cpp" />
+    <ClCompile Include="Vector3.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Basic.hlsli" />
