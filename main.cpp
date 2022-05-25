@@ -33,9 +33,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	MyDirectX directX;
 	directX.Init(win.hwnd);
 
-//input初期化
-DirectXInput keyboard;
-keyboard.InputInit(win.w, win.hwnd);
+	//input初期化
+	DirectXInput key;
+	key.InputInit(win.w, win.hwnd);
 	//DirectX初期化ここまで
 #pragma endregion
 #pragma region 描画初期化処理
@@ -145,9 +145,17 @@ keyboard.InputInit(win.w, win.hwnd);
 	);
 
 	//ここでビュー変換行列計算
+	XMMATRIX matView;
+	XMFLOAT3 eye(0, 0, -100);	//視点座標
+	XMFLOAT3 target(0, 0, 0);	//注視点座標
+	XMFLOAT3 up(0, 1, 0);		//上方向ベクトル
+	//ビュー変換行列作成
+	matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
+
+	float angle = 0.0f;	//カメラの回転角
 
 	//定数バッファに転送
-	directX.constMapTransform->mat = matProjection;
+	directX.constMapTransform->mat = matView * matProjection;
 
 	//値を書き込むと自動的に転送される
 	constMapMaterial->color = XMFLOAT4(1, 0, 0, 0.5f);	//RGBAで半透明の赤
@@ -227,10 +235,10 @@ keyboard.InputInit(win.w, win.hwnd);
 	// 頂点データ
 	Vertex vertices[] = {
 		//	x		y		z			u	v
-		{{ -50.0f, -50.0f, 50.0f }, {0.0f,1.0f}},	// 左下
-		{{ -50.0f, 50.0f , 50.0f }, {0.0f,0.0f}},	// 左上
-		{{ 50.0f , -50.0f, 50.0f }, {1.0f,1.0f}},	// 右下
-		{{ 50.0f , 50.0f , 50.0f }, {1.0f,0.0f}},	// 右上
+		{{ -50.0f, -50.0f, 0.0f }, {0.0f,1.0f}},	// 左下
+		{{ -50.0f, 50.0f , 0.0f }, {0.0f,0.0f}},	// 左上
+		{{ 50.0f , -50.0f, 0.0f }, {1.0f,1.0f}},	// 右下
+		{{ 50.0f , 50.0f , 0.0f }, {1.0f,0.0f}},	// 右上
 	};
 
 	// 頂点データ全体のサイズ = 頂点データ一つ分のサイズ * 頂点データの要素数
@@ -574,7 +582,21 @@ keyboard.InputInit(win.w, win.hwnd);
 
 #pragma region DirectX毎フレーム処理
 		//DirectX毎フレーム　ここから
-		keyboard.InputUpdate();
+		key.InputUpdate();
+
+		if (key.IsKeyDown(DIK_D)|| key.IsKeyDown(DIK_A))
+		{
+			if (key.IsKeyDown(DIK_D)) angle += XMConvertToRadians(10.0f);
+			else if (key.IsKeyDown(DIK_A)) angle -= XMConvertToRadians(10.0f);
+
+			//angleラジアンだけY軸周りに回転。半径は-100
+			eye.x = -100 * sinf(angle);
+			eye.z = -100 * cosf(angle);
+			//ビュー変換行列再作成
+			matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
+		}
+
+		directX.constMapTransform->mat = matView * matProjection;
 
 		//値を書き込むと自動的に転送される
 		constMapMaterial->color = XMFLOAT4(1, 0, 0, 0.5f);	//RGBAで半透明の赤
