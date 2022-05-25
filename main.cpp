@@ -1,6 +1,8 @@
 #include "MyWindows.h"
 #include "MyDirectX.h"
+#include "Vector3.h"
 #include <vector>
+#include "Matrix4.h"
 #include <string>
 
 #include <d3dcompiler.h>
@@ -100,6 +102,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		assert(SUCCEEDED(result));
 	}
 
+#pragma region 行列の計算
 	/*XMMATRIX oldVer = XMMatrixIdentity();
 	oldVer.r[0].m128_f32[0] = 2.0f / window_width;
 	oldVer.r[1].m128_f32[1] = -2.0f / window_height;
@@ -154,8 +157,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	float angle = 0.0f;	//カメラの回転角
 
-	//定数バッファに転送
-	directX.constMapTransform->mat = matView * matProjection;
+	XMFLOAT3 scale = { 1.0f,1.0f,1.0f };	//スケーリング倍率
+	XMFLOAT3 rotation = { 0.0f,0.0f,0.0f };	//回転角
+	XMFLOAT3 position = { 0.0f,0.0f,0.0f };	//座標
+#pragma endregion
 
 	//値を書き込むと自動的に転送される
 	constMapMaterial->color = XMFLOAT4(1, 0, 0, 0.5f);	//RGBAで半透明の赤
@@ -584,19 +589,48 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//DirectX毎フレーム　ここから
 		key.InputUpdate();
 
-		if (key.IsKeyDown(DIK_D)|| key.IsKeyDown(DIK_A))
-		{
-			if (key.IsKeyDown(DIK_D)) angle += XMConvertToRadians(10.0f);
-			else if (key.IsKeyDown(DIK_A)) angle -= XMConvertToRadians(10.0f);
+#pragma region 行列の計算
+		//if (key.IsKeyDown(DIK_D) || key.IsKeyDown(DIK_A))
+		//{
+		//	if (key.IsKeyDown(DIK_D)) angle += XMConvertToRadians(10.0f);
+		//	else if (key.IsKeyDown(DIK_A)) angle -= XMConvertToRadians(10.0f);
 
-			//angleラジアンだけY軸周りに回転。半径は-100
-			eye.x = -100 * sinf(angle);
-			eye.z = -100 * cosf(angle);
-			//ビュー変換行列再作成
-			matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
+		//	//angleラジアンだけY軸周りに回転。半径は-100
+		//	eye.x = -100 * sinf(angle);
+		//	eye.z = -100 * cosf(angle);
+		//	//ビュー変換行列再作成
+		//	matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
+		//}
+
+		//いずれかのキーを押したとき
+		if (key.IsKeyDown(DIK_UP) || key.IsKeyDown(DIK_DOWN)|| key.IsKeyDown(DIK_RIGHT) || key.IsKeyDown(DIK_LEFT))
+		{
+			if (key.IsKeyDown(DIK_UP)) { position.z += 1.0f; }
+			else if (key.IsKeyDown(DIK_DOWN)) { position.z -= 1.0f; }
+			if (key.IsKeyDown(DIK_RIGHT)) { position.x += 1.0f; }
+			else if (key.IsKeyDown(DIK_LEFT)) { position.x -= 1.0f; }
 		}
 
-		directX.constMapTransform->mat = matView * matProjection;
+		//ワールド行列
+		XMMATRIX matScale;	//スケーリング行列
+		matScale = XMMatrixScaling(scale.x, scale.y, scale.z);
+
+		XMMATRIX matRot = XMMatrixIdentity();	//回転行列
+		matRot *= XMMatrixRotationZ(rotation.z);	//Z軸周りに0度回転してから
+		matRot *= XMMatrixRotationX(XMConvertToRadians(rotation.x));	//X軸周りに15度回転してから
+		matRot *= XMMatrixRotationY(XMConvertToRadians(rotation.y));	//Y軸周りに30度回転
+
+		XMMATRIX matTrans;	//平行移動行列
+		matTrans = XMMatrixTranslation(position.x, position.y, position.z);
+
+		XMMATRIX matWorld = XMMatrixIdentity();	//単位行列代入
+		matWorld *= matScale;	//ワールド座標にスケーリングを反映
+		matWorld *= matRot;	//ワールド座標に回転を反映
+		matWorld *= matTrans;	//ワールド座標に平行移動を反映
+
+		//定数バッファに送信
+		directX.constMapTransform->mat = matWorld * matView * matProjection;
+#pragma endregion
 
 		//値を書き込むと自動的に転送される
 		constMapMaterial->color = XMFLOAT4(1, 0, 0, 0.5f);	//RGBAで半透明の赤

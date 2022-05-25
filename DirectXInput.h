@@ -11,11 +11,11 @@ public:
 
 	//キーボード入力処理用 (返り値0,1)
 	//押しっぱなし
-	static bool IsKeyDown(char key);
+	static bool IsKeyDown(UINT8 key);	//UINTはビット数指定したら型自由ぽい
 	//押した瞬間
-	static bool IsKeyTrigger(char key);
+	static bool IsKeyTrigger(UINT8 key);
 	//離してるとき
-	static bool GetKeyReleased(char key);
+	static bool GetKeyReleased(UINT8 key);
 	//離した瞬間
-	static bool GetKeyReleaseTrigger(char key);
+	static bool GetKeyReleaseTrigger(UINT8 key);
 };
