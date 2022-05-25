@@ -602,14 +602,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//	matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
 		//}
 
+		angle += XMConvertToRadians(10.0f);
+		eye.x = -10 * sinf(angle);
+		eye.y = -10 * cosf(angle);
+		//ビュー変換行列再作成
+		matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
+
 		//いずれかのキーを押したとき
-		if (key.IsKeyDown(DIK_UP) || key.IsKeyDown(DIK_DOWN)|| key.IsKeyDown(DIK_RIGHT) || key.IsKeyDown(DIK_LEFT))
+		if (key.IsKeyDown(DIK_UP) || key.IsKeyDown(DIK_DOWN) || key.IsKeyDown(DIK_RIGHT) || key.IsKeyDown(DIK_LEFT))
 		{
-			if (key.IsKeyDown(DIK_UP)) { position.z += 1.0f; }
-			else if (key.IsKeyDown(DIK_DOWN)) { position.z -= 1.0f; }
+			if (key.IsKeyDown(DIK_UP)) { position.y += 1.0f; }
+			else if (key.IsKeyDown(DIK_DOWN)) { position.y -= 1.0f; }
 			if (key.IsKeyDown(DIK_RIGHT)) { position.x += 1.0f; }
 			else if (key.IsKeyDown(DIK_LEFT)) { position.x -= 1.0f; }
 		}
+
+		position.z += 1.0f;
 
 		//ワールド行列
 		XMMATRIX matScale;	//スケーリング行列
