@@ -40,10 +40,6 @@ void MyDirectX::Init(HWND hwnd)
 		// レンダーターゲットビューの生成
 		device->CreateRenderTargetView(backBuffers[i], &rtvDesc, rtvHandle);
 	}
-
-	// フェンスの生成
-	result = device->CreateFence(fenceVal, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
-	assert(SUCCEEDED(result));
 }
 
 void MyDirectX::ChoiceAdapters()

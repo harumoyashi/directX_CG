@@ -41,6 +41,59 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//DirectX初期化ここまで
 #pragma endregion
 #pragma region 描画初期化処理
+	//深度バッファ
+	D3D12_RESOURCE_DESC depthResourceDesc{};
+	depthResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+	depthResourceDesc.Width = win.width;	//レンダーターゲットに合わせる
+	depthResourceDesc.Height = win.height;	//レンダーターゲットに合わせる
+	depthResourceDesc.DepthOrArraySize = 1;
+	depthResourceDesc.Format = DXGI_FORMAT_D32_FLOAT;	//深度値フォーマット
+	depthResourceDesc.SampleDesc.Count = 1;
+	depthResourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;	//デプスステンシル
+
+	//深度値用ヒーププロパティ
+	D3D12_HEAP_PROPERTIES depthHeapProp{};
+	depthHeapProp.Type = D3D12_HEAP_TYPE_DEFAULT;
+	//深度値のクリア設定
+	D3D12_CLEAR_VALUE depthClearValue{};
+	depthClearValue.DepthStencil.Depth = 1.0f;	//深度値1.0f(最大値)でクリア
+	depthClearValue.Format = DXGI_FORMAT_D32_FLOAT;	//深度値フォーマット
+
+	//リソース生成
+	ID3D12Resource* depthBuff = nullptr;
+	result = directX.device->CreateCommittedResource(
+		&depthHeapProp,
+		D3D12_HEAP_FLAG_NONE,
+		&depthResourceDesc,
+		D3D12_RESOURCE_STATE_DEPTH_WRITE,	//深度値書き込みに使用
+		&depthClearValue,
+		IID_PPV_ARGS(&depthBuff)
+	);
+
+	//深度ビュー用デスクリプタヒープ作成
+	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc{};
+	dsvHeapDesc.NumDescriptors = 1;	//深度ビューは1つ
+	dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;	//デプスステンシルビュー
+	ID3D12DescriptorHeap* dsvHeap = nullptr;
+	result = directX.device->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&dsvHeap));
+
+	//深度ビュー作成
+	D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
+	dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;	//深度値フォーマット
+	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+	directX.device->CreateDepthStencilView(
+		depthBuff,
+		&dsvDesc, dsvHeap->GetCPUDescriptorHandleForHeapStart()
+	);
+
+	//CPUとGPUの同期に使われるやつ
+	ID3D12Fence* fence = nullptr;
+	UINT64 fenceVal = 0;
+
+	// フェンスの生成
+	result = directX.device->CreateFence(fenceVal, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
+	assert(SUCCEEDED(result));
+
 	//ヒープ設定
 	D3D12_HEAP_PROPERTIES cbHeapProp{};
 	cbHeapProp.Type = D3D12_HEAP_TYPE_UPLOAD;	//GPUへの転送用
@@ -212,7 +265,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ScratchImage scratchImg{};
 	//WICテクスチャのロード
 	result = LoadFromWICFile(
-		L"Resources/itiro_kimegao.png",
+		L"Resources/mario.jpg",
 		WIC_FLAGS_NONE,
 		&metadate, scratchImg);
 
@@ -239,11 +292,42 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// 頂点データ
 	Vertex vertices[] = {
-		//	x		y		z			u	v
-		{{ -50.0f, -50.0f, 0.0f }, {0.0f,1.0f}},	// 左下
-		{{ -50.0f, 50.0f , 0.0f }, {0.0f,0.0f}},	// 左上
-		{{ 50.0f , -50.0f, 0.0f }, {1.0f,1.0f}},	// 右下
-		{{ 50.0f , 50.0f , 0.0f }, {1.0f,0.0f}},	// 右上
+		//	x		y		z		u	v
+		//前
+		{{ -5.0f, -5.0f, -5.0f }, {0.0f,1.0f}},	// 左下
+		{{ -5.0f,  5.0f, -5.0f }, {0.0f,0.0f}},	// 左上
+		{{  5.0f, -5.0f, -5.0f }, {1.0f,1.0f}},	// 右下
+		{{  5.0f,  5.0f, -5.0f }, {1.0f,0.0f}},	// 右上
+
+		//後
+		{{ -5.0f, -5.0f, 5.0f }, {0.0f,1.0f}},	// 左下
+		{{ -5.0f,  5.0f, 5.0f }, {0.0f,0.0f}},	// 左上
+		{{  5.0f, -5.0f, 5.0f }, {1.0f,1.0f}},	// 右下
+		{{  5.0f,  5.0f, 5.0f }, {1.0f,0.0f}},	// 右上
+
+		 // 左
+		{{-5.0f,-5.0f,-5.0f }, {0.0f, 1.0f}},    // 左下
+		{{-5.0f,-5.0f, 5.0f }, {0.0f, 0.0f}},    // 左上
+		{{-5.0f, 5.0f,-5.0f }, {1.0f, 1.0f}},    // 右下
+		{{-5.0f, 5.0f, 5.0f }, {1.0f, 0.0f}},    // 右上
+
+		// 右
+		{{ 5.0f,-5.0f,-5.0f }, {0.0f, 1.0f}},    // 左下
+		{{ 5.0f,-5.0f, 5.0f }, {0.0f, 0.0f}},    // 左上
+		{{ 5.0f, 5.0f,-5.0f }, {1.0f, 1.0f}},    // 右下
+		{{ 5.0f, 5.0f, 5.0f }, {1.0f, 0.0f}},    // 右上
+
+		// 上
+		{{-5.0f,-5.0f,-5.0f }, {0.0f, 1.0f}},    // 左下
+		{{ 5.0f,-5.0f,-5.0f }, {0.0f, 0.0f}},    // 左上
+		{{-5.0f,-5.0f, 5.0f }, {1.0f, 1.0f}},    // 右下
+		{{ 5.0f,-5.0f, 5.0f }, {1.0f, 0.0f}},    // 右上
+
+		// 下
+		{{-5.0f, 5.0f,-5.0f }, {0.0f, 1.0f}},    // 左下
+		{{ 5.0f, 5.0f,-5.0f }, {0.0f, 0.0f}},    // 左上
+		{{-5.0f, 5.0f, 5.0f }, {1.0f, 1.0f}},    // 右下
+		{{ 5.0f, 5.0f, 5.0f }, {1.0f, 0.0f}},    // 右上
 	};
 
 	// 頂点データ全体のサイズ = 頂点データ一つ分のサイズ * 頂点データの要素数
@@ -297,8 +381,24 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//インデックスデータ
 	unsigned short indices[] =
 	{
-		0,1,2,	//三角形１つ目
-		1,2,3,	//三角形２つ目
+		//前
+		0,1,2,	//三角形1つ目
+		1,2,3,	//三角形2つ目
+		//後
+		4,5,6,	//三角形3つ目
+		5,6,7,	//三角形4つ目
+		//左
+		8,9,10,	//三角形5つ目
+		9,10,11,	//三角形6つ目
+		//右
+		12,13,14,	//三角形7つ目
+		13,14,15,	//三角形8つ目
+		//下
+		16,17,18,	//三角形9つ目
+		17,18,19,	//三角形10つ目
+		//上
+		20,21,22,	//三角形11つ目
+		21,22,23,	//三角形12つ目
 	};
 
 	////インデックスデータ(線のやつ)
@@ -523,6 +623,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// 図形の形状設定
 	pipelineDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 
+	//デプスステンシルステートの設定
+	pipelineDesc.DepthStencilState.DepthEnable = true;
+	pipelineDesc.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;	//書き込み許可
+	pipelineDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS;	//小さければ合格
+	pipelineDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;	//深度値フォーマット
+
 	// その他の設定
 	pipelineDesc.NumRenderTargets = 1; // 描画対象は1つ
 	pipelineDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB; // 0~255指定のRGBA
@@ -602,11 +708,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//	matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
 		//}
 
-		eye.z -= 1.0f;
+		/*eye.z -= 1.0f;*/
 		//ビュー変換行列再作成
 		matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
 
-		rotation.z += 0.1f;
+		rotation.x += 0.2f;
+		/*rotation.y += 0.2f;*/
 
 		//いずれかのキーを押したとき
 		if (key.IsKeyDown(DIK_W) || key.IsKeyDown(DIK_S) || key.IsKeyDown(DIK_D) || key.IsKeyDown(DIK_A))
@@ -655,11 +762,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		// レンダーターゲットビューのハンドルを取得
 		D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = directX.rtvHeap->GetCPUDescriptorHandleForHeapStart();
 		rtvHandle.ptr += bbIndex * directX.device->GetDescriptorHandleIncrementSize(directX.rtvHeapDesc.Type);
-		directX.commandList->OMSetRenderTargets(1, &rtvHandle, false, nullptr);
+		D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvHeap->GetCPUDescriptorHandleForHeapStart();
+		directX.commandList->OMSetRenderTargets(1, &rtvHandle, false, &dsvHandle);
 
 		// 3.画面クリア R G B A
 		FLOAT clearColor[] = { 0.1f,0.25f,0.5f,0.0f }; // 青っぽい色
 		directX.commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+		directX.commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
 		//if (key[DIK_SPACE])
 		//{
@@ -736,10 +845,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		assert(SUCCEEDED(result));
 
 		// コマンドの実行完了を待つ
-		directX.commandQueue->Signal(directX.fence, ++directX.fenceVal);
-		if (directX.fence->GetCompletedValue() != directX.fenceVal) {
+		directX.commandQueue->Signal(fence, ++fenceVal);
+		if (fence->GetCompletedValue() != fenceVal) {
 			HANDLE event = CreateEvent(nullptr, false, false, nullptr);
-			directX.fence->SetEventOnCompletion(directX.fenceVal, event);
+			fence->SetEventOnCompletion(fenceVal, event);
 			WaitForSingleObject(event, INFINITE);
 			CloseHandle(event);
 		}

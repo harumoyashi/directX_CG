@@ -74,10 +74,6 @@ public:
 	//レンダーターゲットビューの設定
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
 
-	//CPUとGPUの同期に使われるやつ
-	ID3D12Fence* fence = nullptr;
-	UINT64 fenceVal = 0;
-
 	//DirectX初期化
 	void Init(HWND hwnd);
 
