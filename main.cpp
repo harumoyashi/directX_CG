@@ -138,7 +138,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		cbResouceDesc.SampleDesc.Count = 1;
 		cbResouceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 
-		ID3D12Resource* constBuffMaterial = nullptr;
+		ID3D12Resource* constBuffTransform0 = nullptr;
+		MyDirectX::ConstBufferDataTransform* constMapTransform0 = nullptr;
 		//定数バッファの生成
 		result = directX.device->CreateCommittedResource(
 			&cbHeapProp,	//ヒープ設定
@@ -146,7 +147,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			&cbResouceDesc,	//リソース設定
 			D3D12_RESOURCE_STATE_GENERIC_READ,
 			nullptr,
-			IID_PPV_ARGS(&directX.constBuffTransform)
+			IID_PPV_ARGS(&constBuffTransform0)
 		);
 		assert(SUCCEEDED(result));
 
