@@ -24,6 +24,13 @@ public:
 		XMMATRIX mat;	//3D変換行列
 	};
 
+	//定数バッファ0番
+	ID3D12Resource* constBuffTransform0 = nullptr;
+	ConstBufferDataTransform* constMapTransform0 = nullptr;
+	//定数バッファ1番
+	ID3D12Resource* constBuffTransform1 = nullptr;
+	MyDirectX::ConstBufferDataTransform* constMapTransform1 = nullptr;
+
 	//基本オブジェクトの生成
 	//受け皿になる変数生成
 

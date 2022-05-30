@@ -138,21 +138,34 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		cbResouceDesc.SampleDesc.Count = 1;
 		cbResouceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 
-		ID3D12Resource* constBuffTransform0 = nullptr;
-		MyDirectX::ConstBufferDataTransform* constMapTransform0 = nullptr;
-		//定数バッファの生成
+		//定数バッファ0番の生成
 		result = directX.device->CreateCommittedResource(
 			&cbHeapProp,	//ヒープ設定
 			D3D12_HEAP_FLAG_NONE,
 			&cbResouceDesc,	//リソース設定
 			D3D12_RESOURCE_STATE_GENERIC_READ,
 			nullptr,
-			IID_PPV_ARGS(&constBuffTransform0)
+			IID_PPV_ARGS(&directX.constBuffTransform0)
 		);
 		assert(SUCCEEDED(result));
 
-		//定数バッファのマッピング
-		result = directX.constBuffTransform->Map(0, nullptr, (void**)&directX.constMapTransform);	//マッピング
+		//定数バッファ0番のマッピング
+		result = directX.constBuffTransform0->Map(0, nullptr, (void**)&directX.constMapTransform0);	//マッピング
+		assert(SUCCEEDED(result));
+
+		//定数バッファ1番の生成
+		result = directX.device->CreateCommittedResource(
+			&cbHeapProp,	//ヒープ設定
+			D3D12_HEAP_FLAG_NONE,
+			&cbResouceDesc,	//リソース設定
+			D3D12_RESOURCE_STATE_GENERIC_READ,
+			nullptr,
+			IID_PPV_ARGS(&directX.constBuffTransform1)
+		);
+		assert(SUCCEEDED(result));
+
+		//定数バッファ1番のマッピング
+		result = directX.constBuffTransform1->Map(0, nullptr, (void**)&directX.constMapTransform1);	//マッピング
 		assert(SUCCEEDED(result));
 	}
 
@@ -172,7 +185,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//平行投影変換//
 	//単位行列を代入
-	directX.constMapTransform->mat = XMMatrixIdentity();
+	directX.constMapTransform0->mat = XMMatrixIdentity();
 
 	/*constMapTransform->mat.r[0].m128_f32[0] = 2.0f / window_width;
 	constMapTransform->mat.r[1].m128_f32[1] = -2.0f / window_height;
@@ -181,14 +194,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	constMapTransform->mat.r[3].m128_f32[1] = 1.0f;*/
 
 	//平行投影変換
-	directX.constMapTransform->mat = XMMatrixOrthographicOffCenterLH(
+	directX.constMapTransform0->mat = XMMatrixOrthographicOffCenterLH(
 		0, win.width,
 		win.height, 0,
 		0.0f, 1.0f
 	);
 
 	//透視投影変換//
-	directX.constMapTransform->mat = XMMatrixPerspectiveFovLH(
+	directX.constMapTransform0->mat = XMMatrixPerspectiveFovLH(
 		XMConvertToRadians(45.0f),		//上下画角45度
 		(float)win.width / win.height,	//アスペクト比(画面横幅/画面縦幅)
 		0.1f, 1000.0f					//前端、奥端
@@ -780,8 +793,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		matWorld *= matTrans;	//ワールド座標に平行移動を反映
 
 		//定数バッファに送信
-		directX.constMapTransform->mat = matWorld * matView * matProjection;
+		directX.constMapTransform0->mat = matWorld * matView * matProjection;
 #pragma endregion
+		//ワールド変換行列
+		XMMATRIX matWorld1 = XMMatrixIdentity();
+
+		//各種変形行列を計算
+		XMMATRIX matScale1 = XMMatrixScaling(1.0f, 1.0f, 1.0f);
+		XMMATRIX matRot1 = XMMatrixRotationY(XM_PI / 4.0f);
+		XMMATRIX matTrans1 = XMMatrixTranslation(-20.0f, 0, 0);
+
+		//ワールド行列を合成
+		matWorld1 = matTrans1 * matRot1 * matTrans1;
+
+		//ワールド、ビュー、射影行列を合成してシェーダーに転送
+		directX.constMapTransform1->mat = matWorld1 * matView * matProjection;
 
 		//値を書き込むと自動的に転送される
 		constMapMaterial->color = XMFLOAT4(1, 1, 1, 1);	//RGBAで半透明の赤
@@ -856,10 +882,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		D3D12_GPU_DESCRIPTOR_HANDLE srvGpuHandle = directX.srvHeap->GetGPUDescriptorHandleForHeapStart();
 		//シェーダリソースビュー(SRV)ヒープの先頭にあるSRVをルートパラメータ1番に設定
 		directX.commandList->SetGraphicsRootDescriptorTable(1, srvGpuHandle);
-		//定数バッファビュー（CRV）の設定コマンド
+		//0番定数バッファビュー（CRV）の設定コマンド
 		//ルートパラメータ2番に3D変換行列の定数バッファを渡す
-		directX.commandList->SetGraphicsRootConstantBufferView(2, directX.constBuffTransform->GetGPUVirtualAddress());
+		directX.commandList->SetGraphicsRootConstantBufferView(2, directX.constBuffTransform0->GetGPUVirtualAddress());
+		// 描画コマンド
+		directX.commandList->DrawIndexedInstanced(_countof(indices), 1, 0, 0, 0); // インデックスバッファを使って描画
 
+		//1番定数バッファビュー（CRV）の設定コマンド
+		//ルートパラメータ2番に3D変換行列の定数バッファを渡す
+		directX.commandList->SetGraphicsRootConstantBufferView(2, directX.constBuffTransform1->GetGPUVirtualAddress());
 		// 描画コマンド
 		directX.commandList->DrawIndexedInstanced(_countof(indices), 1, 0, 0, 0); // インデックスバッファを使って描画
 		// 4.描画コマンドここまで
