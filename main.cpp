@@ -4,6 +4,7 @@
 #include <vector>
 #include "Matrix4.h"
 #include <string>
+#include "Texture.h"
 
 #include <d3dcompiler.h>
 #pragma comment(lib, "d3dcompiler.lib")
@@ -208,27 +209,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//	imageData[i].w = 1.0f;	//A
 	//}
 
-	TexMetadata metadate{};
-	ScratchImage scratchImg{};
-	//WICテクスチャのロード
-	result = LoadFromWICFile(
-		L"Resources/itiro_kimegao.png",
-		WIC_FLAGS_NONE,
-		&metadate, scratchImg);
+	const int maxTexture = 2;
+	Texture texture[maxTexture];
 
-	ScratchImage mipChain{};
-	//ミップマップ生成
-	result = GenerateMipMaps(
-		scratchImg.GetImages(), scratchImg.GetImageCount(), scratchImg.GetMetadata(),
-		TEX_FILTER_DEFAULT, 0, mipChain);
-	if (SUCCEEDED(result))
+	texture[0].Lord(L"Resources/itiro_kimegao.png");
+	texture[1].Lord(L"Resources/brackHole.jpg");
+
+	for (int i = 0; i < maxTexture; i++)
 	{
-		scratchImg = std::move(mipChain);
-		metadate = scratchImg.GetMetadata();
+		texture[i].CreateMipMap();
+		texture[i].SetSRGB();
 	}
-
-	//読み込んだディフューズテクスチャをSRGBとして扱う
-	metadate.format = MakeSRGB(metadate.format);
 
 	//頂点データ構造体
 	struct Vertex
@@ -357,48 +348,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// インデックスバッファのサイズ
 	ibView.SizeInBytes = sizeIB;
 
-	//テクスチャバッファ設定
-	//ヒープ設定
-	D3D12_HEAP_PROPERTIES textureHeapProp{};
-	textureHeapProp.Type = D3D12_HEAP_TYPE_CUSTOM;
-	textureHeapProp.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_WRITE_BACK;
-	textureHeapProp.MemoryPoolPreference = D3D12_MEMORY_POOL_L0;
-	//リソース設定
-	D3D12_RESOURCE_DESC textureResouceDesc{};
-	textureResouceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-	textureResouceDesc.Format = metadate.format;
-	textureResouceDesc.Width = metadate.width;	//幅
-	textureResouceDesc.Height = (UINT)metadate.height;	//高さ
-	textureResouceDesc.DepthOrArraySize = (UINT16)metadate.arraySize;
-	textureResouceDesc.MipLevels = (UINT16)metadate.mipLevels;
-	textureResouceDesc.SampleDesc.Count = 1;
-
-	//テクスチャバッファの生成
-	ID3D12Resource* texBuff = nullptr;
-
-	result = directX.device->CreateCommittedResource(
-		&textureHeapProp,
-		D3D12_HEAP_FLAG_NONE,
-		&textureResouceDesc,
-		D3D12_RESOURCE_STATE_GENERIC_READ,
-		nullptr,
-		IID_PPV_ARGS(&texBuff)
-	);
-
-	//全ミップマップについて
-	for (size_t i = 0; i < metadate.mipLevels; i++)
+	for (int i = 0; i < maxTexture; i++)
 	{
-		//ミップマップレベルを指定してイメージを取得
-		const Image* img = scratchImg.GetImage(i, 0, 0);
-		//テクスチャバッファにデータ転送
-		result = texBuff->WriteToSubresource(
-			(UINT)i,
-			nullptr,				//全領域へコピー
-			img->pixels,			//元データアドレス
-			(UINT)img->rowPitch,	//1ラインサイズ
-			(UINT)img->slicePitch	//全サイズ
-		);
-		assert(SUCCEEDED(result));
+		//テクスチャバッファ設定
+		texture[i].SetTexBuff();
+		//テクスチャバッファの生成
+		texture[i].CreateTexBuff(directX.device);
+		//全ミップマップについて
+		texture[i].SetMipMap();
 	}
 
 	//シェーダーリソースビューの作成
@@ -409,8 +366,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;	//2Dテクスチャ
 	srvDesc.Texture2D.MipLevels = resDesc.MipLevels;
 
-	//ハンドルの指す位置にシェーダーリソースビュー作成
-	directX.device->CreateShaderResourceView(texBuff, &srvDesc, directX.srvHandle);
+	for (int i = 0; i < maxTexture; i++)
+	{
+		//ハンドルの指す位置にシェーダーリソースビュー作成
+		directX.device->CreateShaderResourceView(texture[i].texBuff, &srvDesc, directX.srvHandle);
+	}
 
 	ID3DBlob* vsBlob = nullptr; // 頂点シェーダオブジェクト
 	ID3DBlob* psBlob = nullptr; // ピクセルシェーダオブジェクト
@@ -602,11 +562,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//	matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
 		//}
 
-		eye.z -= 1.0f;
+		/*eye.z -= 1.0f;*/
 		//ビュー変換行列再作成
 		matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
 
-		rotation.z += 0.1f;
+		/*rotation.z += 0.1f;*/
 
 		//いずれかのキーを押したとき
 		if (key.IsKeyDown(DIK_W) || key.IsKeyDown(DIK_S) || key.IsKeyDown(DIK_D) || key.IsKeyDown(DIK_A))
