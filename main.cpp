@@ -117,6 +117,10 @@ enum PartId
 {
 	kRoot,		//大元
 	kSpine,		//脊椎
+	kUpLegRootL,	//左脚付け根
+	kUpLegRootR,	//右脚付け根
+	kKneeL,		//左ひざ
+	kKneeR,		//右ひざ
 	kChest,		//胸
 	kHead,		//頭
 	kUpArmL,	//左二の腕
@@ -127,18 +131,20 @@ enum PartId
 	kHandR,		//右手
 	kWaist,		//腰
 	kHip,		//おしり
-	kLegRootL,	//左脚付け根
-	kLegL,		//左脚
+	kUpLegL,	//左大腿
+	kLowLegL,	//左下腿
 	kFootL,		//左足
-	kLegRootR,	//右脚付け根
-	kLegR,		//右脚
+	kUpLegR,	//右大腿
+	kLowLegR,	//右下腿
 	kFootR,		//右足
+
+	kFloor,
 
 	kNumPartId	//構造体の数
 };
 
-float armRotSpeed;
-float fArmRotSpeed;
+float rotSpeed;
+float legRotSpeed;
 
 //Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
@@ -254,7 +260,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		object3ds[i].InitializeObject3d(&object3ds[i], directX.device);
 	}
 
-	//各パーツ初期化
+#pragma region 各パーツ初期化
 	const float jointDistance = 15.0f;
 
 	object3ds[PartId::kRoot].position = { 0,0,0 };
@@ -262,12 +268,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	object3ds[PartId::kSpine].position = { 0,jointDistance,0 };
 	object3ds[PartId::kSpine].parent = &object3ds[PartId::kRoot];
 
-	object3ds[PartId::kChest].position = { 0,jointDistance,0 };
-	object3ds[PartId::kChest].parent = &object3ds[PartId::kWaist];
+	object3ds[PartId::kChest].position = { 0,0,0 };
+	object3ds[PartId::kChest].parent = &object3ds[PartId::kSpine];
 
 	object3ds[PartId::kHead].position = { 0,jointDistance,0 };
 	object3ds[PartId::kHead].scale = { 1.5f,1.5f,1.5f };
-	object3ds[PartId::kHead].parent = &object3ds[PartId::kChest];
+	object3ds[PartId::kHead].parent = &object3ds[PartId::kSpine];
 
 	object3ds[PartId::kUpArmL].position = { -jointDistance * 0.8f,-2.0f,0 };
 	object3ds[PartId::kUpArmL].rotation = { 0,0,-0.05f };
@@ -301,26 +307,49 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	object3ds[PartId::kHip].position = { 0,-jointDistance,0 };
 	object3ds[PartId::kHip].parent = &object3ds[PartId::kWaist];
 
-	object3ds[PartId::kLegRootL].position = { -jointDistance * 0.5f,0,0 };
-	object3ds[PartId::kLegRootL].parent = &object3ds[PartId::kHip];
+	object3ds[PartId::kUpLegRootL].position = { -jointDistance * 0.5f,0,0 };
+	object3ds[PartId::kUpLegRootL].parent = &object3ds[PartId::kHip];
 
-	object3ds[PartId::kLegL].position = { 0,-jointDistance,0 };
-	object3ds[PartId::kLegL].scale = { 0.8f,2.0f,0.8f };
-	object3ds[PartId::kLegL].parent = &object3ds[PartId::kLegRootL];
+	object3ds[PartId::kUpLegL].position = { 0,-jointDistance,0 };
+	object3ds[PartId::kUpLegL].scale = { 0.8f,2.0f,0.8f };
+	object3ds[PartId::kUpLegL].parent = &object3ds[PartId::kUpLegRootL];
 
-	object3ds[PartId::kFootL].position = { 0,-jointDistance * 0.8f,0 };
-	object3ds[PartId::kFootL].parent = &object3ds[PartId::kLegL];
+	object3ds[PartId::kKneeL].position = { 0,-jointDistance * 0.3f,0 };
+	object3ds[PartId::kKneeL].scale = { 1.0f,0.5f,1.0f };
+	object3ds[PartId::kKneeL].parent = &object3ds[PartId::kUpLegL];
 
-	object3ds[PartId::kLegRootR].position = { jointDistance * 0.5f,0,0 };
-	object3ds[PartId::kLegRootR].parent = &object3ds[PartId::kHip];
+	object3ds[PartId::kLowLegL].position = { 0,-jointDistance,0 };
+	object3ds[PartId::kLowLegL].scale = { 1.0f,2.0f,1.0f };
+	object3ds[PartId::kLowLegL].parent = &object3ds[PartId::kKneeL];
 
-	object3ds[PartId::kLegR].position = { 0,-jointDistance,0 };
-	object3ds[PartId::kLegR].scale = { 0.8f,2.0f,0.8f };
-	object3ds[PartId::kLegR].parent = &object3ds[PartId::kLegRootR];
+	object3ds[PartId::kFootL].position = { 0,-jointDistance * 0.6f,-2.0f };
+	object3ds[PartId::kFootL].scale = { 1.0f,0.5f,1.3f };
+	object3ds[PartId::kFootL].parent = &object3ds[PartId::kLowLegL];
 
-	object3ds[PartId::kFootR].position = { 0,-jointDistance * 0.8f,0 };
-	object3ds[PartId::kFootR].parent = &object3ds[PartId::kLegR];
+	object3ds[PartId::kUpLegRootR].position = { jointDistance * 0.5f,0,0 };
+	object3ds[PartId::kUpLegRootR].parent = &object3ds[PartId::kHip];
 
+	object3ds[PartId::kUpLegR].position = { 0,-jointDistance,0 };
+	object3ds[PartId::kUpLegR].scale = { 0.8f,2.0f,0.8f };
+	object3ds[PartId::kUpLegR].parent = &object3ds[PartId::kUpLegRootR];
+
+	object3ds[PartId::kKneeR].position = { 0,-jointDistance * 0.3f,0 };
+	object3ds[PartId::kKneeR].scale = { 1.0f,0.5f,1.0f };
+	object3ds[PartId::kKneeR].parent = &object3ds[PartId::kUpLegR];
+
+	object3ds[PartId::kLowLegR].position = { 0,-jointDistance * 0.8f,0 };
+	object3ds[PartId::kLowLegR].scale = { 1.0f,2.0f,1.0f };
+	object3ds[PartId::kLowLegR].parent = &object3ds[PartId::kKneeR];
+
+	object3ds[PartId::kFootR].position = { 0,-jointDistance * 0.6f,-2.0f };
+	object3ds[PartId::kFootR].scale = { 1.0f,0.5f,1.3f };
+	object3ds[PartId::kFootR].parent = &object3ds[PartId::kLowLegR];
+
+	object3ds[PartId::kFloor].position = { 0,-920.0f,0 };
+	object3ds[PartId::kFloor].scale = { 30.0f,1.0f,30.0f };
+	object3ds[PartId::kFloor].parent = &object3ds[PartId::kRoot];
+
+#pragma endregion
 #pragma region 行列の計算
 	//射影投影変換//
 	XMMATRIX matProjection = XMMatrixPerspectiveFovLH(
@@ -337,7 +366,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//ビュー変換行列作成
 	matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
 
-	float angle = 0.0f;	//カメラの回転角
+	XMFLOAT3 angle = {};	//カメラの回転角
 #pragma endregion
 
 	//値を書き込むと自動的に転送される
@@ -372,7 +401,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ScratchImage scratchImg{};
 	//WICテクスチャのロード
 	result = LoadFromWICFile(
-		L"Resources/mario.jpg",
+		L"Resources/orange_texture.png",
 		WIC_FLAGS_NONE,
 		&metadate, scratchImg);
 
@@ -477,18 +506,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		21,20,22,	//三角形11つ目
 		21,22,23,	//三角形12つ目
 	};
-
-	////インデックスデータ(線のやつ)
-	//uint16_t indices[] =
-	//{
-	//	0,1,
-	//	2,1,
-	//	2,3,
-	//	0,3,
-	//	2,5,
-	//	3,4,
-	//	4,5
-	//};
 
 	//インデックスデータ全体のサイズ
 	UINT sizeIB = static_cast<UINT>(sizeof(uint16_t) * _countof(indices));
@@ -842,12 +859,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma region 行列の計算
 		if (key.IsKeyDown(DIK_D) || key.IsKeyDown(DIK_A))
 		{
-			if (key.IsKeyDown(DIK_D)) angle += XMConvertToRadians(10.0f);
-			else if (key.IsKeyDown(DIK_A)) angle -= XMConvertToRadians(10.0f);
+			if (key.IsKeyDown(DIK_D)) angle.y += XMConvertToRadians(10.0f);
+			else if (key.IsKeyDown(DIK_A)) angle.y -= XMConvertToRadians(10.0f);
 
-			//angleラジアンだけY軸周りに回転。半径は-100
-			eye.x = -300 * sinf(angle);
-			eye.z = -300 * cosf(angle);
+			//angleラジアンだけY軸周りに回転。半径は-300
+			eye.x = -300 * sinf(angle.y);
+			eye.z = -300 * cosf(angle.y);
+
 			//ビュー変換行列再作成
 			matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
 		}
@@ -855,44 +873,48 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//座標操作
 		if (key.IsKeyDown(DIK_UP) || key.IsKeyDown(DIK_DOWN) || key.IsKeyDown(DIK_RIGHT) || key.IsKeyDown(DIK_LEFT))
 		{
-			if (key.IsKeyDown(DIK_UP)) { object3ds[0].position.z += 1.0f; }
-			else if (key.IsKeyDown(DIK_DOWN)) { object3ds[0].position.z -= 1.0f; }
-			if (key.IsKeyDown(DIK_RIGHT)) { object3ds[0].position.x += 1.0f; }
-			else if (key.IsKeyDown(DIK_LEFT)) { object3ds[0].position.x -= 1.0f; }
+			if (key.IsKeyDown(DIK_UP)) { object3ds[1].position.z -= 1.0f; }
+			else if (key.IsKeyDown(DIK_DOWN)) { object3ds[1].position.z += 1.0f; }
+			if (key.IsKeyDown(DIK_RIGHT)) { object3ds[1].position.x += 1.0f; }
+			else if (key.IsKeyDown(DIK_LEFT)) { object3ds[1].position.x -= 1.0f; }
 		}
 
-		////上半身回転
-		//if (key.IsKeyDown(DIK_U) || key.IsKeyDown(DIK_I))
-		//{
-		//	if (key.IsKeyDown(DIK_U)) { object3ds[kChest].rotation.y += 0.05f; }
-		//	else if (key.IsKeyDown(DIK_I)) { object3ds[kChest].rotation.y -= 0.05f; }
-		//}
 
-		////下半身回転
-		//if (key.IsKeyDown(DIK_J) || key.IsKeyDown(DIK_K))
-		//{
-		//	if (key.IsKeyDown(DIK_J)) { object3ds[kHip].rotation.y += 0.05f; }
-		//	else if (key.IsKeyDown(DIK_K)) { object3ds[kHip].rotation.y -= 0.05f; }
-		//}
+		if (key.IsKeyDown(DIK_SPACE))
+		{
+			rotSpeed += 0.04f;
+		}
+		/*else
+		{
+			rotSpeed = PI;
+		}*/
 
-		armRotSpeed += 0.05f;
-		fArmRotSpeed += 0.05f;
-
-		object3ds[kLegRootL].rotation.x = sinf(armRotSpeed);
-		object3ds[kLegRootR].rotation.x = sinf(-armRotSpeed);
-
-		object3ds[kUpArmL].rotation.x = 0.5f * sinf(-armRotSpeed);
-		object3ds[kUpArmR].rotation.x = 0.5f * sinf(armRotSpeed);
-
+		//二の腕の振り
+		object3ds[kUpArmL].rotation.x = 0.5f * sinf(-rotSpeed);
+		object3ds[kUpArmR].rotation.x = 0.5f * sinf(rotSpeed);
 		//前腕の振り
-		object3ds[kForeArmL].rotation.x = 0.2f * (cosf(fArmRotSpeed) + 0.9f);
-		object3ds[kForeArmR].rotation.x = 0.2f * (sinf(fArmRotSpeed) + 0.9f);
+		object3ds[kForeArmL].rotation.x = 0.2f * (cosf(rotSpeed) + 0.9f);
+		object3ds[kForeArmR].rotation.x = 0.2f * (sinf(rotSpeed) + 0.9f);
 
-		/*object3ds[kForeArmL].position.z = 4.0f * cosf(-armRotSpeed);
-		object3ds[kForeArmR].position.z = 4.0f * cosf(armRotSpeed);*/
+		//脚付け根の回転
+		object3ds[kUpLegRootL].rotation.x = 0.3f * sinf(rotSpeed) + 0.2f;
+		object3ds[kUpLegRootR].rotation.x = 0.3f * sinf(-rotSpeed) + 0.2f;
+		//膝の回転(膝の描画なし)
+		object3ds[kKneeL].rotation.x = 0.5f * sinf(rotSpeed) - 0.5f;
+		object3ds[kKneeR].rotation.x = 0.5f * sinf(-rotSpeed) - 0.5f;
+		////足の回転
+		//object3ds[kFootL].rotation.x = 0.1f * sinf(rotSpeed) + 0.2f;
+		//object3ds[kFootR].rotation.x = 0.1f * sinf(-rotSpeed) + 0.2f;
 
+		//重心移動
+		object3ds[kSpine].position.y = 0.5f * -sinf(rotSpeed * 2.0f) + 2.0f;
+		object3ds[kSpine].rotation.x = 0.03f * -sinf(rotSpeed * 2.0f) - 0.03f;
 
-		/*eye.z -= 1.0f;*/
+		//胸の捻り
+		object3ds[kChest].rotation.y = 0.1f * sinf(rotSpeed);
+		//おしりの捻り
+		object3ds[kHip].rotation.y = 0.1f * -sinf(rotSpeed);
+
 		////ビュー変換行列再作成
 		//matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
 
@@ -913,39 +935,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			object3ds[i].UpdateObject3d(&object3ds[i], matView, matProjection);
 		}
 
-		////ワールド行列
-		//XMMATRIX matScale;	//スケーリング行列
-		//matScale = XMMatrixScaling(scale.x, scale.y, scale.z);
-
-		//XMMATRIX matRot = XMMatrixIdentity();	//回転行列
-		//matRot *= XMMatrixRotationZ(rotation.z);	//Z軸周りに0度回転してから
-		//matRot *= XMMatrixRotationX(XMConvertToRadians(rotation.x));	//X軸周りに15度回転してから
-		//matRot *= XMMatrixRotationY(XMConvertToRadians(rotation.y));	//Y軸周りに30度回転
-
-		//XMMATRIX matTrans;	//平行移動行列
-		//matTrans = XMMatrixTranslation(position.x, position.y, position.z);
-
-		//XMMATRIX matWorld = XMMatrixIdentity();	//単位行列代入
-		//matWorld *= matScale;	//ワールド座標にスケーリングを反映
-		//matWorld *= matRot;	//ワールド座標に回転を反映
-		//matWorld *= matTrans;	//ワールド座標に平行移動を反映
-
-		////定数バッファに送信
-		//directX.constMapTransform0->mat = matWorld * matView * matProjection;
 #pragma endregion
-		////ワールド変換行列
-		//XMMATRIX matWorld1 = XMMatrixIdentity();
-
-		////各種変形行列を計算
-		//XMMATRIX matScale1 = XMMatrixScaling(1.0f, 1.0f, 1.0f);
-		//XMMATRIX matRot1 = XMMatrixRotationY(XM_PI / 4.0f);
-		//XMMATRIX matTrans1 = XMMatrixTranslation(-20.0f, 0, 0);
-
-		////ワールド行列を合成
-		//matWorld1 = matTrans1 * matRot1 * matTrans1;
-
-		////ワールド、ビュー、射影行列を合成してシェーダーに転送
-		//directX.constMapTransform1->mat = matWorld1 * matView * matProjection;
 
 		//値を書き込むと自動的に転送される
 		constMapMaterial->color = XMFLOAT4(1, 1, 1, 1);	//RGBAで半透明の赤
@@ -971,12 +961,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		FLOAT clearColor[] = { 0.1f,0.25f,0.5f,0.0f }; // 青っぽい色
 		directX.commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
 		directX.commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-
-		//if (key[DIK_SPACE])
-		//{
-		//	FLOAT clearColor[] = { 0.0f,1.0f, 0.0f,0.0f }; // 赤っぽい色
-		//	commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
-		//}
 
 		// 4.描画コマンドここから
 		// ビューポート設定コマンド
@@ -1020,24 +1004,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		D3D12_GPU_DESCRIPTOR_HANDLE srvGpuHandle = directX.srvHeap->GetGPUDescriptorHandleForHeapStart();
 		//シェーダリソースビュー(SRV)ヒープの先頭にあるSRVをルートパラメータ1番に設定
 		directX.commandList->SetGraphicsRootDescriptorTable(1, srvGpuHandle);
-		////0番定数バッファビュー（CRV）の設定コマンド
-		////ルートパラメータ2番に3D変換行列の定数バッファを渡す
-		//directX.commandList->SetGraphicsRootConstantBufferView(2, directX.constBuffTransform0->GetGPUVirtualAddress());
-		//// 描画コマンド
-		//directX.commandList->DrawIndexedInstanced(_countof(indices), 1, 0, 0, 0); // インデックスバッファを使って描画
-
-		////1番定数バッファビュー（CRV）の設定コマンド
-		////ルートパラメータ2番に3D変換行列の定数バッファを渡す
-		//directX.commandList->SetGraphicsRootConstantBufferView(2, directX.constBuffTransform1->GetGPUVirtualAddress());
-		//// 描画コマンド
-		//directX.commandList->DrawIndexedInstanced(_countof(indices), 1, 0, 0, 0); // インデックスバッファを使って描画
 
 		for (int i = kChest; i < _countof(object3ds); i++)
 		{
-			if (i != kLegRootL && i != kLegRootR)
-			{
-				object3ds[i].DrawObject3d(&object3ds[i], directX.commandList, vbView, ibView, _countof(indices));
-			}
+			object3ds[i].DrawObject3d(&object3ds[i], directX.commandList, vbView, ibView, _countof(indices));
 		}
 		// 4.描画コマンドここまで
 
