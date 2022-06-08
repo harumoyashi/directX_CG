@@ -22,6 +22,8 @@ struct ConstBufferDataMaterial
 };
 #pragma endregion
 
+const int maxTexture = 2;
+
 //Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma region WindowsAPI初期化
@@ -102,6 +104,58 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		result = directX.constBuffTransform->Map(0, nullptr, (void**)&directX.constMapTransform);	//マッピング
 		assert(SUCCEEDED(result));
 	}
+
+	//シェーダリソースビュー(SRV)の最大個数
+	const size_t kMaxSRVCount = 2056;
+	// デスクリプタヒープの設定
+	directX.srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	directX.srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;	//シェーダから見えるように
+	directX.srvHeapDesc.NumDescriptors = kMaxSRVCount;	//デスクリプタの持てる数設定
+
+	//設定をもとにSRV用デスクリプタヒープを生成
+	result = directX.device->CreateDescriptorHeap(&directX.srvHeapDesc, IID_PPV_ARGS(&directX.srvHeap));
+	assert(SUCCEEDED(result));
+
+	//CBV,SRV,UAVの1個分のサイズを取得
+	UINT descriptorSize = directX.device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	//SRVヒープの先頭ハンドルを取得
+	directX.srvHandle = directX.srvHeap->GetCPUDescriptorHandleForHeapStart();
+	//ハンドルを1つ進める(SRVの位置)
+	directX.srvHandle.ptr += descriptorSize * 1;
+
+	////CBV(コンスタントバッファビュー)の設定
+	//D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc{};
+	////定数バッファビュー生成
+	//directX.device->CreateConstantBufferView(&cbvDesc, directX.srvHandle);
+
+	// デスクリプタヒープの設定
+	directX.rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV; //レンダーターゲットビュー
+	directX.rtvHeapDesc.NumDescriptors = directX.swapChainDesc.BufferCount; // 裏表の2つ
+	//RTVヒープの先頭ハンドルを取得
+	directX.device->CreateDescriptorHeap(&directX.rtvHeapDesc, IID_PPV_ARGS(&directX.rtvHeap));
+
+	// バックバッファ
+	directX.backBuffers.resize(directX.swapChainDesc.BufferCount);
+
+	// スワップチェーンの全てのバッファについて処理する
+	for (size_t i = 0; i < directX.backBuffers.size(); i++) {
+		// スワップチェーンからバッファを取得
+		directX.swapChain->GetBuffer((UINT)i, IID_PPV_ARGS(&directX.backBuffers[i]));
+		// デスクリプタヒープのハンドルを取得
+		directX.rtvHandle = directX.rtvHeap->GetCPUDescriptorHandleForHeapStart();
+		// 裏か表かでアドレスがずれる
+		directX.rtvHandle.ptr += i * directX.device->GetDescriptorHandleIncrementSize(directX.rtvHeapDesc.Type);
+
+		// シェーダーの計算結果をSRGBに変換して書き込む
+		directX.rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+		directX.rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+		// レンダーターゲットビューの生成
+		directX.device->CreateRenderTargetView(directX.backBuffers[i], &directX.rtvDesc, directX.rtvHandle);
+	}
+
+	// フェンスの生成
+	result = directX.device->CreateFence(directX.fenceVal, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&directX.fence));
+	assert(SUCCEEDED(result));
 
 #pragma region 行列の計算
 	/*XMMATRIX oldVer = XMMatrixIdentity();
@@ -209,11 +263,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//	imageData[i].w = 1.0f;	//A
 	//}
 
-	const int maxTexture = 2;
 	Texture texture[maxTexture];
 
-	texture[0].Lord(L"Resources/itiro_kimegao.png");
-	texture[1].Lord(L"Resources/brackHole.jpg");
+	texture[1].Lord(L"Resources/itiro_kimegao.png");
+	texture[0].Lord(L"Resources/brackHole.jpg");
 
 	for (int i = 0; i < maxTexture; i++)
 	{
@@ -660,6 +713,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		//インデックスバッファビューの設定コマンド
 		directX.commandList->IASetIndexBuffer(&ibView);
+
 
 		//定数バッファビュー(CBV)の設定コマンド
 		directX.commandList->SetGraphicsRootConstantBufferView(0, constBuffMaterial->GetGPUVirtualAddress());

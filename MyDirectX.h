@@ -93,9 +93,5 @@ private:
 	void CreateCommandGroup();
 	// スワップチェーンの生成
 	void CreateSwapChain(HWND hwnd);
-	//シェーダリソースビューのデスクリプタヒープ生成
-	void CreateSRVHeapDesc();
-	//レンダーターゲットビューのデスクリプタヒープ生成
-	void CreateRTVHeapDesc();
 };
 

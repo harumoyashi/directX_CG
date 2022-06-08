@@ -18,32 +18,6 @@ void MyDirectX::Init(HWND hwnd)
 	CreateCommandGroup();
 
 	CreateSwapChain(hwnd);
-
-	CreateSRVHeapDesc();
-	CreateRTVHeapDesc();
-
-	// バックバッファ
-	backBuffers.resize(swapChainDesc.BufferCount);
-
-	// スワップチェーンの全てのバッファについて処理する
-	for (size_t i = 0; i < backBuffers.size(); i++) {
-		// スワップチェーンからバッファを取得
-		swapChain->GetBuffer((UINT)i, IID_PPV_ARGS(&backBuffers[i]));
-		// デスクリプタヒープのハンドルを取得
-		rtvHandle = rtvHeap->GetCPUDescriptorHandleForHeapStart();
-		// 裏か表かでアドレスがずれる
-		rtvHandle.ptr += i * device->GetDescriptorHandleIncrementSize(rtvHeapDesc.Type);
-		
-		// シェーダーの計算結果をSRGBに変換して書き込む
-		rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-		rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-		// レンダーターゲットビューの生成
-		device->CreateRenderTargetView(backBuffers[i], &rtvDesc, rtvHandle);
-	}
-
-	// フェンスの生成
-	result = device->CreateFence(fenceVal, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
-	assert(SUCCEEDED(result));
 }
 
 void MyDirectX::ChoiceAdapters()
@@ -131,30 +105,4 @@ void MyDirectX::CreateSwapChain(HWND hwnd)
 		commandQueue, hwnd, &swapChainDesc, nullptr, nullptr,
 		(IDXGISwapChain1**)&swapChain);
 	assert(SUCCEEDED(result));
-}
-
-void MyDirectX::CreateSRVHeapDesc()
-{
-	//シェーダリソースビュー(SRV)の最大個数
-	const size_t kMaxSRVCount = 2056;
-	// デスクリプタヒープの設定
-	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;	//シェーダから見えるように
-	srvHeapDesc.NumDescriptors = kMaxSRVCount;	//デスクリプタの持てる数設定
-
-	//設定をもとにSRV用デスクリプタヒープを生成
-	result = device->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&srvHeap));
-	assert(SUCCEEDED(result));
-
-	//SRVヒープの先頭ハンドルを取得
-	srvHandle = srvHeap->GetCPUDescriptorHandleForHeapStart();
-}
-
-void MyDirectX::CreateRTVHeapDesc()
-{
-	// デスクリプタヒープの設定
-	rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV; //レンダーターゲットビュー
-	rtvHeapDesc.NumDescriptors = swapChainDesc.BufferCount; // 裏表の2つ
-	// デスクリプタヒープの生成
-	device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&rtvHeap));
 }
