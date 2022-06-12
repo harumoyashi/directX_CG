@@ -117,8 +117,8 @@ enum PartId
 {
 	kRoot,		//大元
 	kSpine,		//脊椎
-	kUpLegRootL,	//左脚付け根
-	kUpLegRootR,	//右脚付け根
+	kUpLegRootL,//左脚付け根
+	kUpLegRootR,//右脚付け根
 	kKneeL,		//左ひざ
 	kKneeR,		//右ひざ
 	kChest,		//胸
@@ -138,13 +138,17 @@ enum PartId
 	kLowLegR,	//右下腿
 	kFootR,		//右足
 
-	kFloor,
+	kFloor,		//床
 
 	kNumPartId	//構造体の数
 };
 
 float rotSpeed;
-float legRotSpeed;
+float armRotSpeed;
+float legRootRotSpeed;
+float lKneeRotSpeed;
+float rKneeRotSpeed;
+float footRotSpeed;
 
 //Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
@@ -253,6 +257,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	const size_t kObjectCount = kNumPartId;
 	//3Dオブジェクトの配列
 	Object3d object3ds[kObjectCount];
+
+	XMFLOAT3 objectRot[kObjectCount];
+	XMFLOAT3 spineTrans;
 
 	//オブジェクト初期化
 	for (int i = 0; i < _countof(object3ds); i++)
@@ -882,38 +889,75 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		if (key.IsKeyDown(DIK_SPACE))
 		{
-			rotSpeed += 0.04f;
+			rotSpeed += 0.05f;
+
+			if (sinf(rotSpeed) <= 0.0f)
+			{
+				lKneeRotSpeed += 0.1f;
+			}
+			else
+			{
+				rKneeRotSpeed += 0.1f;
+			}
 		}
 		/*else
 		{
 			rotSpeed = PI;
 		}*/
 
+		//回転情報を変数に格納//
 		//二の腕の振り
-		object3ds[kUpArmL].rotation.x = 0.5f * sinf(-rotSpeed);
-		object3ds[kUpArmR].rotation.x = 0.5f * sinf(rotSpeed);
+		objectRot[kUpArmL].x = 0.5f * sinf(-rotSpeed);
+		objectRot[kUpArmR].x = 0.5f * sinf(rotSpeed);
 		//前腕の振り
-		object3ds[kForeArmL].rotation.x = 0.2f * (cosf(rotSpeed) + 0.9f);
-		object3ds[kForeArmR].rotation.x = 0.2f * (sinf(rotSpeed) + 0.9f);
+		objectRot[kForeArmL].x = 0.2f * (cosf(rotSpeed) + 0.9f);
+		objectRot[kForeArmR].x = 0.2f * (sinf(rotSpeed) + 0.9f);
 
 		//脚付け根の回転
-		object3ds[kUpLegRootL].rotation.x = 0.3f * sinf(rotSpeed) + 0.2f;
-		object3ds[kUpLegRootR].rotation.x = 0.3f * sinf(-rotSpeed) + 0.2f;
-		//膝の回転(膝の描画なし)
-		object3ds[kKneeL].rotation.x = 0.5f * sinf(rotSpeed) - 0.5f;
-		object3ds[kKneeR].rotation.x = 0.5f * sinf(-rotSpeed) - 0.5f;
+		objectRot[kUpLegRootL].x = 0.3f * sinf(rotSpeed) + 0.2f;
+		objectRot[kUpLegRootR].x = 0.3f * sinf(-rotSpeed) + 0.2f;
+		////膝の回転(膝の描画なし)
+		//objectRot[kKneeL].x = 0.5f * sinf(lKneeRotSpeed + 1.0f) - 0.5f;
+		//objectRot[kKneeR].x = 0.5f * sinf(rKneeRotSpeed + 1.0f) - 0.5f;
 		////足の回転
-		//object3ds[kFootL].rotation.x = 0.1f * sinf(rotSpeed) + 0.2f;
-		//object3ds[kFootR].rotation.x = 0.1f * sinf(-rotSpeed) + 0.2f;
+		//objectRot[kFootL].x = 0.1f * sinf(rotSpeed) + 0.2f;
+		//objectRot[kFootR].x = 0.1f * sinf(-rotSpeed) + 0.2f;
 
 		//重心移動
-		object3ds[kSpine].position.y = 0.5f * -sinf(rotSpeed * 2.0f) + 2.0f;
-		object3ds[kSpine].rotation.x = 0.03f * -sinf(rotSpeed * 2.0f) - 0.03f;
+		spineTrans.y = 0.5f * -sinf(rotSpeed * 2.0f) + 2.0f;
+		objectRot[kSpine].x = 0.02f * -sinf(rotSpeed * 2.0f) - 0.03f;
 
 		//胸の捻り
-		object3ds[kChest].rotation.y = 0.1f * sinf(rotSpeed);
+		objectRot[kChest].y = 0.1f * sinf(rotSpeed);
 		//おしりの捻り
-		object3ds[kHip].rotation.y = 0.1f * -sinf(rotSpeed);
+		objectRot[kHip].y = 0.1f * -sinf(rotSpeed);
+
+		//格納しておいた回転情報を代入//
+		//二の腕の振り
+		object3ds[kUpArmL].rotation.x = objectRot[kUpArmL].x;
+		object3ds[kUpArmR].rotation.x = objectRot[kUpArmR].x;
+		//前腕の振り
+		object3ds[kForeArmL].rotation.x = objectRot[kForeArmL].x;
+		object3ds[kForeArmR].rotation.x = objectRot[kForeArmR].x;
+
+		//脚付け根の回転
+		object3ds[kUpLegRootL].rotation.x = objectRot[kUpLegRootL].x;
+		object3ds[kUpLegRootR].rotation.x = objectRot[kUpLegRootR].x;
+		//膝の回転(膝の描画なし)
+		object3ds[kKneeL].rotation.x = objectRot[kKneeL].x;
+		object3ds[kKneeR].rotation.x = objectRot[kKneeR].x;
+		////足の回転
+		//object3ds[kFootL].rotation.x = objectRot[kFootL].x;
+		//object3ds[kFootR].rotation.x = objectRot[kFootR].x;
+
+		//重心移動
+		object3ds[kSpine].position.y = spineTrans.y;
+		object3ds[kSpine].rotation.x = objectRot[kSpine].x;
+
+		//胸の捻り
+		object3ds[kChest].rotation.y = objectRot[kChest].y;
+		//おしりの捻り
+		object3ds[kHip].rotation.y = objectRot[kHip].y;
 
 		////ビュー変換行列再作成
 		//matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
