@@ -1,5 +1,6 @@
 #pragma once
 #include "MyDirectX.h"
+#include <DirectXMath.h>
 
 class Texture
 {
@@ -14,7 +15,19 @@ public:
 	D3D12_RESOURCE_DESC textureResouceDesc{};
 	ID3D12Resource* texBuff = nullptr;
 
+	//頂点データ構造体
+	struct Vertex
+	{
+		XMFLOAT3 pos;	//xyz座標
+		XMFLOAT2 uv;	//uv座標
+	};
+
+	std::vector<Vertex> vertices;
+
 public:
+	//初期化
+	void Initialize();
+
 	//WICテクスチャのロード
 	void Lord(const wchar_t* name_format);
 	//ミップマップ生成

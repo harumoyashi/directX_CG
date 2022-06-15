@@ -1,5 +1,14 @@
 #include "Texture.h"
 
+void Texture::Initialize()
+{
+	//						x		y		z		u		v
+	vertices.push_back({ { -50.0f, -50.0f, 0.0f }, {0.0f,1.0f} });	// ç∂â∫
+	vertices.push_back({ { -50.0f, 50.0f , 0.0f }, {0.0f,0.0f} });	// ç∂è„
+	vertices.push_back({ { 50.0f , -50.0f, 0.0f }, {1.0f,1.0f} });	// âEâ∫
+	vertices.push_back({ { 50.0f , 50.0f , 0.0f }, {1.0f,0.0f} });	// âEè„
+}
+
 void Texture::Lord(const wchar_t* name_format)
 {
 	result = LoadFromWICFile(
