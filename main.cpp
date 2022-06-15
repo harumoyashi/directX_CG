@@ -442,10 +442,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//	imageData[i].z = 0.0f;	//B
 	//	imageData[i].w = 1.0f;	//A
 	//}
-	 
+
 	//1枚目の画像
 	Texture texture[maxTexture];
-	texture[0].Load(L"Resources/mario.jpg");	
+	texture[0].Load(L"Resources/mario.jpg");
 	//2枚目の画像
 	texture[1].Load(L"Resources/reimu.png");
 
@@ -664,22 +664,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	textureHeapProp.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_WRITE_BACK;
 	textureHeapProp.MemoryPoolPreference = D3D12_MEMORY_POOL_L0;
 
+	//テクスチャ関連の処理まとめ
+	UINT incrementSize = directX.device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	for (size_t i = 0; i < maxTexture; i++)
 	{
 		texture[i].SetResouce();
 		texture[i].CreateTexBuff(directX.device, textureHeapProp);
 		texture[i].MipmapDataSend();
+		texture[i].CreateSRV(directX.device, directX.srvHandle);
+		//1つハンドルを進める
+		directX.srvHandle.ptr += incrementSize;
 	}
-
-	//シェーダーリソースビューの作成
-	texture[0].CreateSRV(directX.device, directX.srvHandle);
-
-	//1つハンドルを進める
-	UINT incrementSize = directX.device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	directX.srvHandle.ptr += incrementSize;
-
-	//シェーダーリソースビュー設定(2個目)
-	texture[1].CreateSRV(directX.device, directX.srvHandle);
 
 	ID3DBlob* vsBlob = nullptr; // 頂点シェーダオブジェクト
 	ID3DBlob* psBlob = nullptr; // ピクセルシェーダオブジェクト
