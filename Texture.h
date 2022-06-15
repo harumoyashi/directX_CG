@@ -33,3 +33,4 @@ public:
 	void NextHandle(ID3D12Device* device, D3D12_CPU_DESCRIPTOR_HANDLE srvHandle);
 };
 
+const int maxTexture = 2;

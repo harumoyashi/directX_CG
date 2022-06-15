@@ -442,15 +442,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//	imageData[i].z = 0.0f;	//B
 	//	imageData[i].w = 1.0f;	//A
 	//}
+	 
 	//1枚目の画像
-	Texture texture[2];
-	texture[0].Load(L"Resources/mario.jpg");
-		
+	Texture texture[maxTexture];
+	texture[0].Load(L"Resources/mario.jpg");	
 	//2枚目の画像
 	texture[1].Load(L"Resources/reimu.png");
 
-	texture[0].CreateMipmap();
-	texture[1].CreateMipmap();
+	for (size_t i = 0; i < maxTexture; i++)
+	{
+		texture[i].CreateMipmap();
+	}
 
 	//頂点データ構造体
 	struct Vertex
@@ -662,18 +664,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	textureHeapProp.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_WRITE_BACK;
 	textureHeapProp.MemoryPoolPreference = D3D12_MEMORY_POOL_L0;
 
-	//リソース設定
-	texture[0].SetResouce();
-	texture[1].SetResouce();
-
-
-	//テクスチャバッファの生成
-	texture[0].CreateTexBuff(directX.device, textureHeapProp);
-	texture[1].CreateTexBuff(directX.device, textureHeapProp);
-
-	//全ミップマップについて
-	texture[0].MipmapDataSend();
-	texture[1].MipmapDataSend();
+	for (size_t i = 0; i < maxTexture; i++)
+	{
+		texture[i].SetResouce();
+		texture[i].CreateTexBuff(directX.device, textureHeapProp);
+		texture[i].MipmapDataSend();
+	}
 
 	//シェーダーリソースビューの作成
 	texture[0].CreateSRV(directX.device, directX.srvHandle);
