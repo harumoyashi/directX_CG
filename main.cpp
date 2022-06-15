@@ -448,6 +448,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	texture[0].Load(L"Resources/mario.jpg");
 	//2枚目の画像
 	texture[1].Load(L"Resources/reimu.png");
+	//3枚目の画像
+	texture[2].Load(L"Resources/itiro_kimegao.png");
+
+	int texNum = 0;	//表示するテクスチャ番号
 
 	for (size_t i = 0; i < maxTexture; i++)
 	{
@@ -1029,10 +1033,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		directX.commandList->SetDescriptorHeaps(1, &directX.srvHeap);
 		//シェーダリソースビュー(SRV)ヒープの先頭ハンドルを取得(SRVを指してるはず)
 		D3D12_GPU_DESCRIPTOR_HANDLE srvGpuHandle = directX.srvHeap->GetGPUDescriptorHandleForHeapStart();
-		if (key.IsKeyDown(DIK_SPACE))
+		if (key.IsKeyTrigger(DIK_SPACE))
 		{
-			srvGpuHandle.ptr += incrementSize;
+			if (texNum < maxTexture - 1)
+			{
+				texNum++;
+			}
+			else
+			{
+				texNum = 0;
+			}
 		}
+
+		srvGpuHandle.ptr += incrementSize * texNum;
+
 		//シェーダリソースビュー(SRV)ヒープの先頭にあるSRVをルートパラメータ1番に設定
 		directX.commandList->SetGraphicsRootDescriptorTable(1, srvGpuHandle);
 		////0番定数バッファビュー（CRV）の設定コマンド
