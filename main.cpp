@@ -1,5 +1,6 @@
 #include "NWindows.h"
 #include "NDirectX.h"
+#include "NVector2.h"
 #include "NVector3.h"
 #include <vector>
 #include "NMatrix4.h"

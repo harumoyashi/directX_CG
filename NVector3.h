@@ -1,4 +1,7 @@
 #pragma once
+
+const float PI = 3.141592654f;
+
 class Vector3
 {
 public:
@@ -34,3 +37,8 @@ const Vector3 operator-(const Vector3& v1, const Vector3& v2);
 const Vector3 operator*(const Vector3& v, float s);
 const Vector3 operator*(float s, const Vector3& v);
 const Vector3 operator/(const Vector3& v, float s);
+
+//度数法→ラジアン
+float Degree2Radian(float degree);
+//度数法→ラジアン
+float Radian2Degree(float radian);

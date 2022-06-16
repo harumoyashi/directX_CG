@@ -44,7 +44,7 @@ Vector3 Vector3::operator+()const
 
 Vector3 Vector3::operator-()const
 {
-	return Vector3(-*this);
+	return Vector3(-x,-y,-z);
 }
 
 Vector3& Vector3::operator+=(const Vector3& v)
@@ -110,4 +110,14 @@ const Vector3 operator/(const Vector3& v, float s)
 {
 	Vector3 temp(v);
 	return temp /= s;
+}
+
+float Degree2Radian(float degree)
+{
+	return degree * PI / 180;
+}
+
+float Radian2Degree(float radian)
+{
+	return radian * 180 / PI;
 }

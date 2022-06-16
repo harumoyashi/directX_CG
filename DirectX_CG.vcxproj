@@ -145,6 +145,7 @@
     <ClInclude Include="NMatrix4.h" />
     <ClInclude Include="NDirectX.h" />
     <ClInclude Include="NDirectXInput.h" />
+    <ClInclude Include="NVector2.h" />
     <ClInclude Include="NWindows.h" />
     <ClInclude Include="NObject.h" />
     <ClInclude Include="NTexture.h" />
@@ -156,6 +157,7 @@
     <ClCompile Include="NDirectX.cpp" />
     <ClCompile Include="NDirectXInput.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="NVector2.cpp" />
     <ClCompile Include="NWindows.cpp" />
     <ClCompile Include="NObject.cpp" />
     <ClCompile Include="NTexture.cpp" />
