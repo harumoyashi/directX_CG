@@ -1,4 +1,4 @@
-#include "MyDirectX.h"
+#include "NDirectX.h"
 
 void MyDirectX::Init(HWND hwnd)
 {

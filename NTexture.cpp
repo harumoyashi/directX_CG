@@ -1,4 +1,4 @@
-#include "Texture.h"
+#include "NTexture.h"
 
 void Texture::Load(const wchar_t *pictureName)
 {

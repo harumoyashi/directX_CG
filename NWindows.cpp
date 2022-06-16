@@ -1,4 +1,4 @@
-#include "MyWindows.h"
+#include "NWindows.h"
 
 //ウィンドプロシージャ
 //面倒だけど書かなきゃいけない関数

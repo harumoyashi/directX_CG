@@ -142,22 +142,24 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ConstBuffer.h" />
-    <ClInclude Include="Matrix4.h" />
-    <ClInclude Include="MyDirectX.h" />
-    <ClInclude Include="DirectXInput.h" />
-    <ClInclude Include="MyWindows.h" />
-    <ClInclude Include="Texture.h" />
-    <ClInclude Include="Vector3.h" />
+    <ClInclude Include="NMatrix4.h" />
+    <ClInclude Include="NDirectX.h" />
+    <ClInclude Include="NDirectXInput.h" />
+    <ClInclude Include="NWindows.h" />
+    <ClInclude Include="NObject.h" />
+    <ClInclude Include="NTexture.h" />
+    <ClInclude Include="NVector3.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ConstBuffer.cpp" />
-    <ClCompile Include="Matrix4.cpp" />
-    <ClCompile Include="MyDirectX.cpp" />
-    <ClCompile Include="DirectXInput.cpp" />
+    <ClCompile Include="NMatrix4.cpp" />
+    <ClCompile Include="NDirectX.cpp" />
+    <ClCompile Include="NDirectXInput.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="MyWindows.cpp" />
-    <ClCompile Include="Texture.cpp" />
-    <ClCompile Include="Vector3.cpp" />
+    <ClCompile Include="NWindows.cpp" />
+    <ClCompile Include="NObject.cpp" />
+    <ClCompile Include="NTexture.cpp" />
+    <ClCompile Include="NVector3.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Basic.hlsli" />

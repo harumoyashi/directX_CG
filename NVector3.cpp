@@ -1,4 +1,4 @@
-#include "Vector3.h"
+#include "NVector3.h"
 #include <cmath>
 
 Vector3::Vector3() {

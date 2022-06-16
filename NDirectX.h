@@ -1,5 +1,5 @@
 #pragma once
-#include "MyWindows.h"
+#include "NWindows.h"
 #include <DirectXTex.h>
 
 #include <d3d12.h>
@@ -8,7 +8,7 @@
 #include <DirectXMath.h>
 using namespace DirectX;
 
-#include "DirectXInput.h"
+#include "NDirectXInput.h"
 
 class MyDirectX
 {

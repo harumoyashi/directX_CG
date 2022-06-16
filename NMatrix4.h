@@ -1,5 +1,5 @@
 #pragma once
-#include "Vector3.h"
+#include "NVector3.h"
 
 /// <summary>
 /// çsóÒ

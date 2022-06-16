@@ -1,16 +1,16 @@
-#include "MyWindows.h"
-#include "MyDirectX.h"
-#include "Vector3.h"
+#include "NWindows.h"
+#include "NDirectX.h"
+#include "NVector3.h"
 #include <vector>
 #include "Matrix4.h"
-#include "Texture.h"
+#include "NTexture.h"
 #include <string>
 #include <random>
 
 #include <d3dcompiler.h>
 #pragma comment(lib, "d3dcompiler.lib")
 
-#include "DirectXInput.h"
+#include "NDirectXInput.h"
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
