@@ -1,6 +1,36 @@
 #pragma once
 #include "NDirectX.h"
 
+enum PartId
+{
+	kRoot,		//大元
+	kSpine,		//脊椎
+	kUpLegRootL,//左脚付け根
+	kUpLegRootR,//右脚付け根
+	kKneeL,		//左ひざ
+	kKneeR,		//右ひざ
+	kChest,		//胸
+	kHead,		//頭
+	kUpArmL,	//左二の腕
+	kForeArmL,	//左前腕
+	kHandL,		//左手
+	kUpArmR,	//右二の腕
+	kForeArmR,	//右前腕
+	kHandR,		//右手
+	kWaist,		//腰
+	kHip,		//おしり
+	kUpLegL,	//左大腿
+	kLowLegL,	//左下腿
+	kFootL,		//左足
+	kUpLegR,	//右大腿
+	kLowLegR,	//右下腿
+	kFootR,		//右足
+
+	kFloor,		//床
+
+	kNumPartId	//構造体の数
+};
+
 //3Dオブジェクト型
 class Object3d
 {

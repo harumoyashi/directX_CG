@@ -4,6 +4,7 @@
 #include "NVector3.h"
 #include "NMatrix4.h"
 #include "NObject.h"
+#include "NMotion.h"
 #include "NTexture.h"
 #include <string>
 #include <random>
@@ -23,21 +24,6 @@ struct ConstBufferDataMaterial
 	XMFLOAT4 color;	//色(RGBA)
 };
 #pragma endregion
-
-//enum PartId
-//{
-//	kRoot,  //大元
-//	kSpine, //脊椎
-//	kChest, //胸
-//	kHead,  //頭
-//	kArmL,  //左腕
-//	kArmR,  //右腕
-//	kHip,   //おしり
-//	kLegL,  //左足
-//	kLegR,  //右足
-//
-//	kNumPartId
-//};
 
 //Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
@@ -187,67 +173,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//assert(SUCCEEDED(result));
 
 	}
-	////3Dオブジェクトの数
-	//const size_t kObjectCount = kNumPartId;
-	//3Dオブジェクトの配列
-	Object3d object3d;
-
-	////乱数シード生成器
-	//std::random_device seed_gen;
-	////メルセンヌ・ツイスター
-	//std::mt19937_64 engine(seed_gen());
-
-	/*for (int i = 0; i < _countof(object3ds); i++)
-	{*/
-		////乱数範囲(回転角用)
-		//std::uniform_real_distribution<float> rotDist(0.0f, XMConvertToDegrees(180.0f));
-		////乱数範囲(座標用)
-		//std::uniform_real_distribution<float> posDist(-30.0f, 30.0f);
-
-		//初期化
-		object3d.InitializeObject3d(&object3d, directX.device);
-
-		////親子構造のサンプル↓
-		//if (i > 0)
-		//{
-		//	//ひとつ前のオブジェクトを親オブジェクトとする
-		//	/*object3ds[i].parent = &object3ds[i - 1];*/
-		//	//親オブジェクトの9割の大きさ
-		//	object3ds[i].scale = { 0.9f,0.9f,0.9f };
-		//	//回転角設定
-		//	object3ds[i].rotation = { 0,0,0 };
-
-		//	////親オブジェクトに対してZ方向-8.0ずらす
-		//	//object3ds[i].position = { 0,0,0 };
-		//}
-	/*}*/
-
-	object3d.position = { 0,0,0 };
-
-	/*object3ds[PartId::kSpine].position = { 0,8.0f,0 };
-	object3ds[PartId::kSpine].parent = &object3ds[PartId::kRoot];
-
-	object3ds[PartId::kChest].position = { 0,0,0 };
-	object3ds[PartId::kChest].parent = &object3ds[PartId::kSpine];
-
-	object3ds[PartId::kHead].position = { 0,8.0f,0 };
-	object3ds[PartId::kHead].parent = &object3ds[PartId::kChest];
-
-	object3ds[PartId::kArmL].position = { -8.0f,0,0 };
-	object3ds[PartId::kArmL].parent = &object3ds[PartId::kChest];
-
-	object3ds[PartId::kArmR].position = { 8.0f,0,0 };
-	object3ds[PartId::kArmR].parent = &object3ds[PartId::kChest];
-
-	object3ds[PartId::kHip].position = { 0,-8.0f,0 };
-	object3ds[PartId::kHip].parent = &object3ds[PartId::kSpine];
-
-	object3ds[PartId::kLegL].position = { -8.0f,-8.0f,0 };
-	object3ds[PartId::kLegL].parent = &object3ds[PartId::kHip];
-
-	object3ds[PartId::kLegR].position = { 8.0f,-8.0f,0 };
-	object3ds[PartId::kLegR].parent = &object3ds[PartId::kHip];*/
-
+	
+	Motion motion;
+	motion.Initialize(directX.device);
 #pragma region 行列の計算
 	/*XMMATRIX oldVer = XMMatrixIdentity();
 	oldVer.r[0].m128_f32[0] = 2.0f / window_width;
@@ -295,7 +223,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//ここでビュー変換行列計算
 	XMMATRIX matView;
-	XMFLOAT3 eye(0, 0, -100);	//視点座標
+	XMFLOAT3 eye(0, 0, -200);	//視点座標
 	XMFLOAT3 target(0, 0, 0);	//注視点座標
 	XMFLOAT3 up(0, 1, 0);		//上方向ベクトル
 	//ビュー変換行列作成
@@ -789,34 +717,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			else if (key.IsKeyDown(DIK_A)) angle -= XMConvertToRadians(10.0f);
 
 			//angleラジアンだけY軸周りに回転。半径は-100
-			eye.x = -100 * sinf(angle);
-			eye.z = -100 * cosf(angle);
+			eye.x = -200 * sinf(angle);
+			eye.z = -200 * cosf(angle);
 			//ビュー変換行列再作成
 			matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
 		}
 
-		////座標操作
-		//if (key.IsKeyDown(DIK_UP) || key.IsKeyDown(DIK_DOWN) || key.IsKeyDown(DIK_RIGHT) || key.IsKeyDown(DIK_LEFT))
-		//{
-		//	if (key.IsKeyDown(DIK_UP)) { object3ds[0].position.y += 1.0f; }
-		//	else if (key.IsKeyDown(DIK_DOWN)) { object3ds[0].position.y -= 1.0f; }
-		//	if (key.IsKeyDown(DIK_RIGHT)) { object3ds[0].position.x += 1.0f; }
-		//	else if (key.IsKeyDown(DIK_LEFT)) { object3ds[0].position.x -= 1.0f; }
-		//}
-
-		////上半身回転
-		//if (key.IsKeyDown(DIK_U) || key.IsKeyDown(DIK_I))
-		//{
-		//	if (key.IsKeyDown(DIK_U)) { object3ds[kChest].rotation.y += 0.05f; }
-		//	else if (key.IsKeyDown(DIK_I)) { object3ds[kChest].rotation.y -= 0.05f; }
-		//}
-
-		////下半身回転
-		//if (key.IsKeyDown(DIK_J) || key.IsKeyDown(DIK_K))
-		//{
-		//	if (key.IsKeyDown(DIK_J)) { object3ds[kHip].rotation.y += 0.05f; }
-		//	else if (key.IsKeyDown(DIK_K)) { object3ds[kHip].rotation.y -= 0.05f; }
-		//}
+		motion.RotationKey();
+		motion.StartTimer();
 
 		/*eye.z -= 1.0f;*/
 		////ビュー変換行列再作成
@@ -834,11 +742,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//	else if (key.IsKeyDown(DIK_A)) { position.x -= 2.0f; }
 		//}
 
-		/*for (size_t i = 0; i < _countof(object3ds); i++)
-		{
-			object3ds[i].UpdateObject3d(&object3ds[i], matView, matProjection);
-		}*/
-		object3d.UpdateObject3d(&object3d, matView, matProjection);
+		motion.Update(matView, matProjection);
+		/*object3d.UpdateObject3d(&object3d, matView, matProjection);*/
 
 		////ワールド行列
 		//XMMATRIX matScale;	//スケーリング行列
@@ -974,11 +879,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//// 描画コマンド
 		//directX.commandList->DrawIndexedInstanced(_countof(indices), 1, 0, 0, 0); // インデックスバッファを使って描画
 
-		/*for (int i = kChest; i < _countof(object3ds); i++)
-		{
-			object3ds[i].DrawObject3d(&object3ds[i], directX.commandList, vbView, ibView, _countof(indices));
-		}*/
-		object3d.DrawObject3d(&object3d, directX.commandList, vbView, ibView, _countof(indices));
+		motion.Draw(directX.commandList, vbView, ibView, _countof(indices));
+		/*object3d.DrawObject3d(&object3d, directX.commandList, vbView, ibView, _countof(indices));*/
 		// 4.描画コマンドここまで
 
 		// 5.リソースバリアを戻す
