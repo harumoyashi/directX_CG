@@ -47,7 +47,7 @@ void Object3d::UpdateObject3d(Object3d* object, XMMATRIX& matView, XMMATRIX& mat
 
 	//ƒ[ƒ‹ƒhs—ñ‚ð‡¬
 	object->matWorld = XMMatrixIdentity();
-	object->matWorld = matTrans * matRot * matTrans;
+	object->matWorld = matScale * matRot * matTrans;
 
 	if (object->parent != nullptr)
 	{

@@ -7,7 +7,7 @@ void Motion::Initialize(ID3D12Device* device)
 		object3d[i].InitializeObject3d(&object3d[i], device);
 	}
 
-	const float jointDistance = 8.0f;
+	const float jointDistance = 15.0f;
 
 	object3d[PartId::kRoot].position = { 0,0,0 };
 
@@ -64,7 +64,7 @@ void Motion::Initialize(ID3D12Device* device)
 	object3d[PartId::kKneeL].scale = { 1.0f,0.5f,1.0f };
 	object3d[PartId::kKneeL].parent = &object3d[PartId::kUpLegL];
 
-	object3d[PartId::kLowLegL].position = { 0,-jointDistance,0 };
+	object3d[PartId::kLowLegL].position = { 0,-jointDistance * 0.8f,0 };
 	object3d[PartId::kLowLegL].scale = { 1.0f,2.0f,1.0f };
 	object3d[PartId::kLowLegL].parent = &object3d[PartId::kKneeL];
 
@@ -98,6 +98,8 @@ void Motion::Initialize(ID3D12Device* device)
 
 void Motion::Update(XMMATRIX matView, XMMATRIX matProjection)
 {
+
+
 	for (size_t i = 0; i < kNumPartId; i++)
 	{
 		object3d[i].UpdateObject3d(&object3d[i], matView, matProjection);
@@ -116,6 +118,10 @@ void Motion::StartTimer()
 {
 	if (key.IsKeyDown(DIK_RETURN))
 	{
+		if (timer>maxTimer)
+		{
+			timer = 0;
+		}
 		timer++;
 	}
 }

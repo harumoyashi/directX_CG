@@ -5,7 +5,8 @@
 class Motion
 {
 private:
-	int timer;	//モーションタイマー
+	int timer = 0;	//モーションタイマー
+	const int maxTimer = 300;
 
 	DirectXInput key;	//キーボード
 
