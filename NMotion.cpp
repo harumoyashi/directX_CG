@@ -4,8 +4,9 @@ void Motion::Initialize(ID3D12Device* device)
 {
 	for (int i = 0; i < kNumPartId; i++)
 	{
-		object3d[i].InitializeObject3d(&object3d[i], device);
+		object3d[i].InitializeObject3d(device);
 	}
+	floor.InitializeObject3d(device);
 
 	const float jointDistance = 15.0f;
 
@@ -91,27 +92,59 @@ void Motion::Initialize(ID3D12Device* device)
 	object3d[PartId::kFootR].scale = { 1.0f,0.5f,1.3f };
 	object3d[PartId::kFootR].parent = &object3d[PartId::kLowLegR];
 
-	object3d[PartId::kFloor].position = { 0,-920.0f,0 };
+	/*object3d[PartId::kFloor].position = { 0,-920.0f,0 };
 	object3d[PartId::kFloor].scale = { 30.0f,1.0f,30.0f };
-	object3d[PartId::kFloor].parent = &object3d[PartId::kRoot];
+	object3d[PartId::kFloor].parent = &object3d[PartId::kRoot];*/
+
+	floor.position = { 0,-90.0f,0 };
+	floor.scale = { 30.0f,1.0f,30.0f };
 }
 
 void Motion::Update(XMMATRIX matView, XMMATRIX matProjection)
 {
+	float rotSpeed = timer * 0.05f;
 
-
+#pragma region ‰ñ“]ˆ—
+	if (key.IsKeyDown(DIK_RETURN))
+	{
+		//“ñ‚Ì˜r‚ÌU‚è
+		object3d[kUpArmL].rotation.x = 0.5f * sinf(-rotSpeed);
+		object3d[kUpArmR].rotation.x = 0.5f * sinf(rotSpeed);
+		//‘O˜r‚ÌU‚è
+		object3d[kForeArmL].rotation.x = 0.2f * (cosf(rotSpeed) + 0.9f);
+		object3d[kForeArmR].rotation.x = 0.2f * (sinf(rotSpeed) + 0.9f);
+		//‹r•t‚¯ª‚Ì‰ñ“]
+		object3d[kUpLegRootL].rotation.x = 0.3f * sinf(rotSpeed) + 0.2f;
+		object3d[kUpLegRootR].rotation.x = 0.3f * sinf(-rotSpeed) + 0.2f;
+		////•G‚Ì‰ñ“](•G‚Ì•`‰æ‚È‚µ)
+		//object3d[kKneeL].rotation.x = 0.5f * sinf(rotSpeed) - 0.5f;
+		//object3d[kKneeR].rotation.x = 0.5f * sinf(-rotSpeed) - 0.5f;
+		////‘«‚Ì‰ñ“]
+		//object3d[kFootL].rotation.x = 0.1f * sinf(rotSpeed) + 0.2f;
+		//object3d[kFootR].rotation.x = 0.1f * sinf(-rotSpeed) + 0.2f;
+		//dSˆÚ“®
+		object3d[kSpine].position.y = 0.5f * -sinf(rotSpeed * 2.0f) + 2.0f;
+		object3d[kSpine].rotation.x = 0.03f * -sinf(rotSpeed * 2.0f) - 0.03f;
+		//‹¹‚Ì”P‚è
+		object3d[kChest].rotation.y = 0.1f * sinf(rotSpeed);
+		//‚¨‚µ‚è‚Ì”P‚è
+		object3d[kHip].rotation.y = 0.1f * -sinf(rotSpeed);
+	}
+#pragma endregion
 	for (size_t i = 0; i < kNumPartId; i++)
 	{
-		object3d[i].UpdateObject3d(&object3d[i], matView, matProjection);
+		object3d[i].UpdateObject3d(matView, matProjection);
 	}
+	floor.UpdateObject3d(matView, matProjection);
 }
 
 void Motion::Draw(ID3D12GraphicsCommandList* commandList, D3D12_VERTEX_BUFFER_VIEW vbView, D3D12_INDEX_BUFFER_VIEW ibView, int indicesSize)
 {
 	for (int i = kChest; i < kNumPartId; i++)
 	{
-		object3d[i].DrawObject3d(&object3d[i], commandList, vbView, ibView, indicesSize);
+		object3d[i].DrawObject3d(commandList, vbView, ibView, indicesSize);
 	}
+	floor.DrawObject3d(commandList, vbView, ibView, indicesSize);
 }
 
 void Motion::StartTimer()
@@ -123,6 +156,10 @@ void Motion::StartTimer()
 			timer = 0;
 		}
 		timer++;
+	}
+	else
+	{
+		timer = 0;
 	}
 }
 

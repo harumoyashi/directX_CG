@@ -26,8 +26,6 @@ enum PartId
 	kLowLegR,	//右下腿
 	kFootR,		//右足
 
-	kFloor,		//床
-
 	kNumPartId	//構造体の数
 };
 
@@ -50,10 +48,10 @@ public:
 
 public:
 	//初期化
-	void InitializeObject3d(Object3d* object, ID3D12Device* device);
+	void InitializeObject3d(ID3D12Device* device);
 	//更新
-	void UpdateObject3d(Object3d* object, XMMATRIX& matView, XMMATRIX& matProjection);
+	void UpdateObject3d(XMMATRIX& matView, XMMATRIX& matProjection);
 	//描画
-	void DrawObject3d(Object3d* object, ID3D12GraphicsCommandList* commandList,
+	void DrawObject3d(ID3D12GraphicsCommandList* commandList,
 		D3D12_VERTEX_BUFFER_VIEW& vbView, D3D12_INDEX_BUFFER_VIEW& ibView, UINT numIndices);
 };

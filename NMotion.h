@@ -6,13 +6,15 @@ class Motion
 {
 private:
 	int timer = 0;	//モーションタイマー
-	const int maxTimer = 300;
+	const int maxTimer = 200;
 
 	DirectXInput key;	//キーボード
 
 public:
 	//3Dオブジェクトの配列
 	Object3d object3d[kNumPartId];
+
+	Object3d floor;
 
 public:
 	//初期化
