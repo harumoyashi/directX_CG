@@ -1,12 +1,19 @@
 #pragma once
 #include "NDirectXInput.h"
 #include "NObject.h"
+#include "NEasing.h"
 
 class Motion
 {
 private:
-	int timer = 0;	//モーションタイマー
-	const int maxTimer = 200;
+	float speed = 0.05f;	//移動速度係数&タイマー速度
+	float timer = 0;		//モーションタイマー
+	float halfTimer = 0;	//モーションタイマー(ハーフ)
+	const float maxTimer = PI*2;
+	const float maxHalfTimer = PI;
+
+	float rotSpeed;
+	float legRotSpeed;
 
 	DirectXInput key;	//キーボード
 

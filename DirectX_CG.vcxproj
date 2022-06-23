@@ -142,6 +142,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ConstBuffer.h" />
+    <ClInclude Include="NEasing.h" />
     <ClInclude Include="NDebugText.h" />
     <ClInclude Include="NMotion.h" />
     <ClInclude Include="NMatrix4.h" />
@@ -157,6 +158,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ConstBuffer.cpp" />
+    <ClCompile Include="NEasing.cpp" />
     <ClCompile Include="NDebugText.cpp" />
     <ClCompile Include="NMotion.cpp" />
     <ClCompile Include="NMatrix4.cpp" />

@@ -102,40 +102,46 @@ void Motion::Initialize(ID3D12Device* device)
 
 void Motion::Update(XMMATRIX matView, XMMATRIX matProjection)
 {
-	float rotSpeed = timer * 0.05f;
+	rotSpeed = timer;	//基本の回転はタイマーと同じ値
+	legRotSpeed = maxHalfTimer * EaseIn(halfTimer / maxHalfTimer) + PI / 2;	//脚の付け根はイージングかけて、半分ずらしておく
+	//一回脚降ったら符号反転させて脚の振り逆に
+	if (timer - speed < maxHalfTimer)
+	{
+		legRotSpeed = -legRotSpeed;
+	}
 
 #pragma region 回転処理
 	if (key.IsKeyDown(DIK_RETURN))
 	{
 		//二の腕の振り
-		object3d[kUpArmL].rotation.x = 0.5f * sinf(-rotSpeed);
-		object3d[kUpArmR].rotation.x = 0.5f * sinf(rotSpeed);
+		object3d[kUpArmL].rotation.x = (0.5f/*+speed*2*/) * sinf(rotSpeed);
+		object3d[kUpArmR].rotation.x = 0.5f * sinf(-rotSpeed);
 		//前腕の振り
-		object3d[kForeArmL].rotation.x = 0.2f * (cosf(rotSpeed) + 0.9f);
-		object3d[kForeArmR].rotation.x = 0.2f * (sinf(rotSpeed) + 0.9f);
+		object3d[kForeArmL].rotation.x = 0.2f * (sinf(rotSpeed) + 0.9f);
+		object3d[kForeArmR].rotation.x = 0.2f * (sinf(-rotSpeed) + 0.9f);
 		//脚付け根の回転
-		object3d[kUpLegRootL].rotation.x = 0.3f * sinf(rotSpeed) + 0.2f;
-		object3d[kUpLegRootR].rotation.x = 0.3f * sinf(-rotSpeed) + 0.2f;
-		////膝の回転(膝の描画なし)
-		//object3d[kKneeL].rotation.x = 0.5f * sinf(rotSpeed) - 0.5f;
-		//object3d[kKneeR].rotation.x = 0.5f * sinf(-rotSpeed) - 0.5f;
+		object3d[kUpLegRootL].rotation.x = 0.8f * sinf(legRotSpeed) + 0.2f;
+		object3d[kUpLegRootR].rotation.x = 0.8f * sinf(-legRotSpeed) + 0.2f;
+		//膝の回転(膝の描画なし)
+		object3d[kKneeL].rotation.x = 0.5f * sinf(-legRotSpeed) - 0.5f;
+		object3d[kKneeR].rotation.x = 0.5f * sinf(legRotSpeed) - 0.5f;
 		////足の回転
 		//object3d[kFootL].rotation.x = 0.1f * sinf(rotSpeed) + 0.2f;
 		//object3d[kFootR].rotation.x = 0.1f * sinf(-rotSpeed) + 0.2f;
 		//重心移動
-		object3d[kSpine].position.y = 0.5f * -sinf(rotSpeed * 2.0f) + 2.0f;
-		object3d[kSpine].rotation.x = 0.03f * -sinf(rotSpeed * 2.0f) - 0.03f;
+		object3d[kSpine].position.y = 0.7f * -sinf(rotSpeed * 2.0f) + 2.0f;
+		object3d[kSpine].rotation.x = 0.03f * -sinf(rotSpeed * 2.0f) - 0.1f;
 		//胸の捻り
 		object3d[kChest].rotation.y = 0.1f * sinf(rotSpeed);
-		//おしりの捻り
-		object3d[kHip].rotation.y = 0.1f * -sinf(rotSpeed);
+		////おしりの捻り
+		//object3d[kHip].rotation.y = 0.1f * -sinf(rotSpeed);
 	}
 #pragma endregion
 	for (size_t i = 0; i < kNumPartId; i++)
 	{
 		object3d[i].UpdateObject3d(matView, matProjection);
 	}
-	floor.UpdateObject3d(matView, matProjection);
+	floor.UpdateObject3d(matView, matProjection);	//床
 }
 
 void Motion::Draw(ID3D12GraphicsCommandList* commandList, D3D12_VERTEX_BUFFER_VIEW vbView, D3D12_INDEX_BUFFER_VIEW ibView, int indicesSize)
@@ -144,35 +150,43 @@ void Motion::Draw(ID3D12GraphicsCommandList* commandList, D3D12_VERTEX_BUFFER_VI
 	{
 		object3d[i].DrawObject3d(commandList, vbView, ibView, indicesSize);
 	}
-	floor.DrawObject3d(commandList, vbView, ibView, indicesSize);
+	floor.DrawObject3d(commandList, vbView, ibView, indicesSize);	//床
 }
 
 void Motion::StartTimer()
 {
 	if (key.IsKeyDown(DIK_RETURN))
 	{
-		if (timer>maxTimer)
+		if (timer > maxTimer)
 		{
-			timer = 0;
+			timer = 0;	//タイマーリセット
 		}
-		timer++;
+		timer += speed;
+		//ハーフタイマー
+		if (halfTimer > maxHalfTimer)
+		{
+			halfTimer = 0;
+		}
+		halfTimer += speed;
 	}
 	else
 	{
+		//離したらタイマーリセット
 		timer = 0;
+		halfTimer = 0;
 	}
 }
 
 void Motion::RotationKey()
 {
-	//座標操作
-	if (key.IsKeyDown(DIK_UP) || key.IsKeyDown(DIK_DOWN) || key.IsKeyDown(DIK_RIGHT) || key.IsKeyDown(DIK_LEFT))
-	{
-		if (key.IsKeyDown(DIK_UP)) { object3d[0].position.y += 1.0f; }
-		else if (key.IsKeyDown(DIK_DOWN)) { object3d[0].position.y -= 1.0f; }
-		if (key.IsKeyDown(DIK_RIGHT)) { object3d[0].position.x += 1.0f; }
-		else if (key.IsKeyDown(DIK_LEFT)) { object3d[0].position.x -= 1.0f; }
-	}
+	////座標操作
+	//if (key.IsKeyDown(DIK_UP) || key.IsKeyDown(DIK_DOWN) || key.IsKeyDown(DIK_RIGHT) || key.IsKeyDown(DIK_LEFT))
+	//{
+	//	if (key.IsKeyDown(DIK_UP)) { object3d[0].position.y += 1.0f; }
+	//	else if (key.IsKeyDown(DIK_DOWN)) { object3d[0].position.y -= 1.0f; }
+	//	if (key.IsKeyDown(DIK_RIGHT)) { object3d[0].position.x += 1.0f; }
+	//	else if (key.IsKeyDown(DIK_LEFT)) { object3d[0].position.x -= 1.0f; }
+	//}
 
 	//上半身回転
 	if (key.IsKeyDown(DIK_U) || key.IsKeyDown(DIK_I))
@@ -187,4 +201,14 @@ void Motion::RotationKey()
 		if (key.IsKeyDown(DIK_J)) { object3d[kHip].rotation.y += 0.05f; }
 		else if (key.IsKeyDown(DIK_K)) { object3d[kHip].rotation.y -= 0.05f; }
 	}
+
+	////スピード変更
+	//if (key.IsKeyTrigger(DIK_UP) || key.IsKeyTrigger(DIK_DOWN))
+	//{
+	//	/*if (speed < 0.2f && speed >= 0.05f)
+	//	{*/
+	//		if (key.IsKeyTrigger(DIK_UP)) speed += 0.01f;
+	//		else if (key.IsKeyTrigger(DIK_DOWN)) speed -= 0.01f;
+	//	/*}*/
+	//}
 }
