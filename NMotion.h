@@ -6,14 +6,14 @@
 class Motion
 {
 private:
-	float speed = 0.05f;	//移動速度係数&タイマー速度
+	float speed = PI/20;	//移動速度係数&タイマー速度
 	float timer = 0;		//モーションタイマー
 	float halfTimer = 0;	//モーションタイマー(ハーフ)
 	const float maxTimer = PI*2;
 	const float maxHalfTimer = PI;
 
 	float rotSpeed;
-	float legRotSpeed;
+	float easeInRotSpeed;
 
 	DirectXInput key;	//キーボード
 

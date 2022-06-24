@@ -103,38 +103,38 @@ void Motion::Initialize(ID3D12Device* device)
 void Motion::Update(XMMATRIX matView, XMMATRIX matProjection)
 {
 	rotSpeed = timer;	//基本の回転はタイマーと同じ値
-	legRotSpeed = maxHalfTimer * EaseIn(halfTimer / maxHalfTimer) + PI / 2;	//脚の付け根はイージングかけて、半分ずらしておく
+	easeInRotSpeed = maxHalfTimer * EaseIn(halfTimer / maxHalfTimer) + PI / 2;	//脚の付け根はイージングかけて、半分ずらしておく
 	//一回脚降ったら符号反転させて脚の振り逆に
 	if (timer - speed < maxHalfTimer)
 	{
-		legRotSpeed = -legRotSpeed;
+		easeInRotSpeed = -easeInRotSpeed;
 	}
 
 #pragma region 回転処理
 	if (key.IsKeyDown(DIK_RETURN))
 	{
 		//二の腕の振り
-		object3d[kUpArmL].rotation.x = (0.5f/*+speed*2*/) * sinf(rotSpeed);
-		object3d[kUpArmR].rotation.x = 0.5f * sinf(-rotSpeed);
+		object3d[kUpArmL].rotation.x = 1.2f * sinf(-easeInRotSpeed);
+		object3d[kUpArmR].rotation.x = 1.2f * sinf(easeInRotSpeed);
 		//前腕の振り
-		object3d[kForeArmL].rotation.x = 0.2f * (sinf(rotSpeed) + 0.9f);
-		object3d[kForeArmR].rotation.x = 0.2f * (sinf(-rotSpeed) + 0.9f);
+		object3d[kForeArmL].rotation.x = 0.3f * sinf(rotSpeed) + 0.9f;
+		object3d[kForeArmR].rotation.x = 0.3f * sinf(-rotSpeed) + 0.9f;
 		//脚付け根の回転
-		object3d[kUpLegRootL].rotation.x = 0.8f * sinf(legRotSpeed) + 0.2f;
-		object3d[kUpLegRootR].rotation.x = 0.8f * sinf(-legRotSpeed) + 0.2f;
+		object3d[kUpLegRootL].rotation.x = sinf(easeInRotSpeed) + 0.2f;
+		object3d[kUpLegRootR].rotation.x = sinf(-easeInRotSpeed) + 0.2f;
 		//膝の回転(膝の描画なし)
-		object3d[kKneeL].rotation.x = 0.5f * sinf(-legRotSpeed) - 0.5f;
-		object3d[kKneeR].rotation.x = 0.5f * sinf(legRotSpeed) - 0.5f;
-		////足の回転
-		//object3d[kFootL].rotation.x = 0.1f * sinf(rotSpeed) + 0.2f;
-		//object3d[kFootR].rotation.x = 0.1f * sinf(-rotSpeed) + 0.2f;
+		object3d[kKneeL].rotation.x = 0.8f * sinf(-easeInRotSpeed) - 1.2f;
+		object3d[kKneeR].rotation.x = 0.8f * sinf(easeInRotSpeed) - 1.2f;
+		//足の回転
+		object3d[kFootL].rotation.x = 0.2f * sinf(easeInRotSpeed) + 0.2f;
+		object3d[kFootR].rotation.x = 0.2f * sinf(-easeInRotSpeed) + 0.2f;
 		//重心移動
-		object3d[kSpine].position.y = 0.7f * -sinf(rotSpeed * 2.0f) + 2.0f;
-		object3d[kSpine].rotation.x = 0.03f * -sinf(rotSpeed * 2.0f) - 0.1f;
+		object3d[kSpine].position.y = 4.0f * sinf(rotSpeed * 2.0f) + 2.0f;
+		object3d[kSpine].rotation.x = 0.05f * sinf(easeInRotSpeed * 2.0f) - 0.1f;
 		//胸の捻り
-		object3d[kChest].rotation.y = 0.1f * sinf(rotSpeed);
-		////おしりの捻り
-		//object3d[kHip].rotation.y = 0.1f * -sinf(rotSpeed);
+		object3d[kChest].rotation.y = 0.2f * sinf(easeInRotSpeed);
+		//おしりの捻り
+		object3d[kHip].rotation.y = 0.1f * -sinf(easeInRotSpeed);
 	}
 #pragma endregion
 	for (size_t i = 0; i < kNumPartId; i++)
@@ -169,12 +169,12 @@ void Motion::StartTimer()
 		}
 		halfTimer += speed;
 	}
-	else
-	{
-		//離したらタイマーリセット
-		timer = 0;
-		halfTimer = 0;
-	}
+	//else
+	//{
+	//	//離したらタイマーリセット
+	//	timer = 0;
+	//	halfTimer = 0;
+	//}
 }
 
 void Motion::RotationKey()
