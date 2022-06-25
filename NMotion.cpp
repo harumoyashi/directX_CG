@@ -102,8 +102,9 @@ void Motion::Initialize(ID3D12Device* device)
 
 void Motion::Update(XMMATRIX matView, XMMATRIX matProjection)
 {
+	speed = PI * speedAmount;
 	rotSpeed = timer;	//Šî–{‚Ì‰ñ“]‚Íƒ^ƒCƒ}[‚Æ“¯‚¶’l
-	easeInRotSpeed = maxHalfTimer * EaseIn(halfTimer / maxHalfTimer) + PI / 2;	//‹r‚Ì•t‚¯ª‚ÍƒC[ƒWƒ“ƒO‚©‚¯‚ÄA”¼•ª‚¸‚ç‚µ‚Ä‚¨‚­
+	easeInRotSpeed = maxHalfTimer * EaseIn(halfTimer / maxHalfTimer,easeSpeed) + PI / 2;	//‹r‚Ì•t‚¯ª‚ÍƒC[ƒWƒ“ƒO‚©‚¯‚ÄA”¼•ª‚¸‚ç‚µ‚Ä‚¨‚­
 	//ˆê‰ñ‹r~‚Á‚½‚ç•„†”½“]‚³‚¹‚Ä‹r‚ÌU‚è‹t‚É
 	if (timer - speed < maxHalfTimer)
 	{
@@ -113,28 +114,14 @@ void Motion::Update(XMMATRIX matView, XMMATRIX matProjection)
 #pragma region ‰ñ“]ˆ—
 	if (key.IsKeyDown(DIK_RETURN))
 	{
-		//“ñ‚Ì˜r‚ÌU‚è
-		object3d[kUpArmL].rotation.x = 1.2f * sinf(-easeInRotSpeed);
-		object3d[kUpArmR].rotation.x = 1.2f * sinf(easeInRotSpeed);
-		//‘O˜r‚ÌU‚è
-		object3d[kForeArmL].rotation.x = 0.3f * sinf(rotSpeed) + 0.9f;
-		object3d[kForeArmR].rotation.x = 0.3f * sinf(-rotSpeed) + 0.9f;
-		//‹r•t‚¯ª‚Ì‰ñ“]
-		object3d[kUpLegRootL].rotation.x = sinf(easeInRotSpeed) + 0.2f;
-		object3d[kUpLegRootR].rotation.x = sinf(-easeInRotSpeed) + 0.2f;
-		//•G‚Ì‰ñ“](•G‚Ì•`‰æ‚È‚µ)
-		object3d[kKneeL].rotation.x = 0.8f * sinf(-easeInRotSpeed) - 1.2f;
-		object3d[kKneeR].rotation.x = 0.8f * sinf(easeInRotSpeed) - 1.2f;
-		//‘«‚Ì‰ñ“]
-		object3d[kFootL].rotation.x = 0.2f * sinf(easeInRotSpeed) + 0.2f;
-		object3d[kFootR].rotation.x = 0.2f * sinf(-easeInRotSpeed) + 0.2f;
-		//dSˆÚ“®
-		object3d[kSpine].position.y = 4.0f * sinf(rotSpeed * 2.0f) + 2.0f;
-		object3d[kSpine].rotation.x = 0.05f * sinf(easeInRotSpeed * 2.0f) - 0.1f;
-		//‹¹‚Ì”P‚è
-		object3d[kChest].rotation.y = 0.2f * sinf(easeInRotSpeed);
-		//‚¨‚µ‚è‚Ì”P‚è
-		object3d[kHip].rotation.y = 0.1f * -sinf(easeInRotSpeed);
+		if (isMoveMode)
+		{
+			RunMode();
+		}
+		else
+		{
+			WalkMode();
+		}
 	}
 #pragma endregion
 	for (size_t i = 0; i < kNumPartId; i++)
@@ -211,4 +198,74 @@ void Motion::RotationKey()
 	//		else if (key.IsKeyTrigger(DIK_DOWN)) speed -= 0.01f;
 	//	/*}*/
 	//}
+
+	if (key.IsKeyTrigger(DIK_R))
+	{
+		if (!isMoveMode)
+		{
+			isMoveMode = true;
+		}
+		else
+		{
+			isMoveMode = false;
+		}
+	};
+}
+
+void Motion::RunMode()
+{
+	speedAmount = 0.05f;
+	easeSpeed = 4;
+
+	//“ñ‚Ì˜r‚ÌU‚è
+	object3d[kUpArmL].rotation.x =     1.2f  * sinf(-easeInRotSpeed);
+	object3d[kUpArmR].rotation.x =     1.2f  * sinf(easeInRotSpeed);
+	//‘O˜r‚ÌU‚è
+	object3d[kForeArmL].rotation.x =   0.3f  * sinf(rotSpeed) + 0.9f;
+	object3d[kForeArmR].rotation.x =   0.3f  * sinf(-rotSpeed) + 0.9f;
+	//‹r•t‚¯ª‚Ì‰ñ“]
+	object3d[kUpLegRootL].rotation.x =         sinf(easeInRotSpeed) + 0.2f;
+	object3d[kUpLegRootR].rotation.x =         sinf(-easeInRotSpeed) + 0.2f;
+	//•G‚Ì‰ñ“](•G‚Ì•`‰æ‚È‚µ)
+	object3d[kKneeL].rotation.x =      0.8f  * sinf(-easeInRotSpeed) - 1.2f;
+	object3d[kKneeR].rotation.x =      0.8f  * sinf(easeInRotSpeed) - 1.2f;
+	//‘«‚Ì‰ñ“]
+	object3d[kFootL].rotation.x =      0.2f  * sinf(easeInRotSpeed) + 0.2f;
+	object3d[kFootR].rotation.x =      0.2f  * sinf(-easeInRotSpeed) + 0.2f;
+	//dSˆÚ“®
+	object3d[kSpine].position.y =      4.0f  * sinf(rotSpeed * 2.0f) + 2.0f;
+	object3d[kSpine].rotation.x =      0.05f * sinf(easeInRotSpeed * 2.0f) - 0.1f;
+	//‹¹‚Ì”P‚è
+	object3d[kChest].rotation.y =      0.2f  * sinf(easeInRotSpeed);
+	//‚¨‚µ‚è‚Ì”P‚è
+	object3d[kHip].rotation.y =        0.1f  * -sinf(easeInRotSpeed);
+}
+
+void Motion::WalkMode()
+{
+	speedAmount = 0.02f;
+	easeSpeed = 2;
+
+	//“ñ‚Ì˜r‚ÌU‚è
+	object3d[kUpArmL].rotation.x =     0.5f  * sinf(-easeInRotSpeed);
+	object3d[kUpArmR].rotation.x =     0.5f  * sinf(easeInRotSpeed);
+	//‘O˜r‚ÌU‚è
+	object3d[kForeArmL].rotation.x =   0.2f  * (sinf(rotSpeed) + 0.9f);
+	object3d[kForeArmR].rotation.x =   0.2f  * (sinf(-rotSpeed) + 0.9f);
+	//‹r•t‚¯ª‚Ì‰ñ“]
+	object3d[kUpLegRootL].rotation.x = 0.4f  * sinf(easeInRotSpeed) + 0.2f;
+	object3d[kUpLegRootR].rotation.x = 0.4f  * sinf(-easeInRotSpeed) + 0.2f;
+	//•G‚Ì‰ñ“](•G‚Ì•`‰æ‚È‚µ)
+	object3d[kKneeL].rotation.x =      0.5f  * sinf(easeInRotSpeed) - 0.6f;
+	object3d[kKneeR].rotation.x =      0.5f  * sinf(-easeInRotSpeed) - 0.6f;
+	//‘«‚Ì‰ñ“]						     
+	object3d[kFootL].rotation.x =      0.1f  * sinf(easeInRotSpeed) + 0.1f;
+	object3d[kFootR].rotation.x =      0.1f  * sinf(-easeInRotSpeed) + 0.1f;
+	//dSˆÚ“®						     
+	object3d[kSpine].position.y =      0.7f  * sinf(rotSpeed * 2.0f) + 2.0f;
+	object3d[kSpine].rotation.x =      0.02f * sinf(easeInRotSpeed * 2.0f) - 0.03f;
+	//‹¹‚Ì”P‚è						     
+	object3d[kChest].rotation.y =      0.1f  * sinf(easeInRotSpeed);
+	//‚¨‚µ‚è‚Ì”P‚è				   	       
+	object3d[kHip].rotation.y =        0.1f  * -sinf(easeInRotSpeed);
 }

@@ -4,8 +4,8 @@ double EaseOut(double x, int i) {
 	return 1 - pow(1 - x, i);
 }
 
-double EaseIn(double x) {
-	return pow(x, 4);
+double EaseIn(double x,int i) {
+	return pow(x, i);
 }
 
 double EaseOutSine(double x) {
