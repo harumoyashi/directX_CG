@@ -725,6 +725,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		motion.RotationKey();
 		motion.StartTimer();
+		motion.Update(matView, matProjection);
 
 		/*eye.z -= 1.0f;*/
 		////ビュー変換行列再作成
@@ -742,7 +743,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//	else if (key.IsKeyDown(DIK_A)) { position.x -= 2.0f; }
 		//}
 
-		motion.Update(matView, matProjection);
 		/*object3d.UpdateObject3d(&object3d, matView, matProjection);*/
 
 		////ワールド行列

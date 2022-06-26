@@ -8,14 +8,15 @@ class Motion
 private:
 	float speedAmount = 0.05f;
 	float speed = PI * speedAmount;	//移動速度係数&タイマー速度
-	float timer = 0;		//モーションタイマー
-	float halfTimer = 0;	//モーションタイマー(ハーフ)
+	float timer = 0;				//モーションタイマー
+	float halfTimer = 0;			//モーションタイマー(ハーフ)
 	const float maxTimer = PI * 2;
 	const float maxHalfTimer = PI;
 
-	float rotSpeed;
-	float easeInRotSpeed;
-	int easeSpeed = 4;
+	float rotSpeed;			//振る速度
+	float easeInRotSpeed;	//イージング掛けたバージョン
+	int easeSpeed = 4;		//イージングの加減
+	float swingVec = 1.0f;	//腕や足を振る方向
 
 	bool isMoveMode = true;	//true:run,false:walk
 
@@ -42,5 +43,7 @@ public:
 	void RunMode();
 	//歩きモード
 	void WalkMode();
+
+	float clamp(float value,float min,float max);
 };
 
