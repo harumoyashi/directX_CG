@@ -711,10 +711,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		key.InputUpdate();
 
 #pragma region 行列の計算
-		if (key.IsKeyDown(DIK_D) || key.IsKeyDown(DIK_A))
+		if (key.IsKeyDown(DIK_RIGHT) || key.IsKeyDown(DIK_LEFT))
 		{
-			if (key.IsKeyDown(DIK_D)) angle += XMConvertToRadians(10.0f);
-			else if (key.IsKeyDown(DIK_A)) angle -= XMConvertToRadians(10.0f);
+			if (key.IsKeyDown(DIK_RIGHT)) angle += XMConvertToRadians(10.0f);
+			else if (key.IsKeyDown(DIK_LEFT)) angle -= XMConvertToRadians(10.0f);
 
 			//angleラジアンだけY軸周りに回転。半径は-100
 			eye.x = -250 * sinf(angle);

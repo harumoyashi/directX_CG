@@ -172,14 +172,14 @@ void Motion::StartTimer()
 
 void Motion::RotationKey()
 {
-	////ç¿ïWëÄçÏ
-	//if (key.IsKeyDown(DIK_UP) || key.IsKeyDown(DIK_DOWN) || key.IsKeyDown(DIK_RIGHT) || key.IsKeyDown(DIK_LEFT))
-	//{
-	//	if (key.IsKeyDown(DIK_UP)) { object3d[0].position.y += 1.0f; }
-	//	else if (key.IsKeyDown(DIK_DOWN)) { object3d[0].position.y -= 1.0f; }
-	//	if (key.IsKeyDown(DIK_RIGHT)) { object3d[0].position.x += 1.0f; }
-	//	else if (key.IsKeyDown(DIK_LEFT)) { object3d[0].position.x -= 1.0f; }
-	//}
+	//ç¿ïWëÄçÏ
+	if (key.IsKeyDown(DIK_W) || key.IsKeyDown(DIK_S) || key.IsKeyDown(DIK_D) || key.IsKeyDown(DIK_A))
+	{
+		if (key.IsKeyDown(DIK_W)) { object3d[0].position.z -= 12.0f*speed; }
+		else if (key.IsKeyDown(DIK_S)) { object3d[0].position.z += 12.0f*speed; }
+		if (key.IsKeyDown(DIK_D)) { object3d[0].position.x += 1.0f; }
+		else if (key.IsKeyDown(DIK_A)) { object3d[0].position.x -= 1.0f; }
+	}
 
 	//è„îºêgâÒì]
 	if (key.IsKeyDown(DIK_U) || key.IsKeyDown(DIK_I))
