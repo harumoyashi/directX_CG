@@ -84,7 +84,7 @@ struct Object3d
 
 		//ƒ[ƒ‹ƒhs—ñ‚ð‡¬
 		object->matWorld = XMMatrixIdentity();
-		object->matWorld = matTrans * matRot * matTrans;
+		object->matWorld = matScale * matRot * matTrans;
 
 		if (object->parent != nullptr)
 		{
@@ -947,6 +947,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		{
 			if (key.IsKeyDown(DIK_J)) { object3ds[kHip].rotation.y += 0.05f; }
 			else if (key.IsKeyDown(DIK_K)) { object3ds[kHip].rotation.y -= 0.05f; }
+		}
+
+		if (key.IsKeyDown(DIK_R) || key.IsKeyDown(DIK_T))
+		{
+			if (key.IsKeyDown(DIK_R)) { object3ds[kRoot].scale.x += 0.5f; }
+			else if (key.IsKeyDown(DIK_T)) { object3ds[kRoot].scale.x -= 0.5f; }
 		}
 
 		/*eye.z -= 1.0f;*/
