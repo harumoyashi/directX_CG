@@ -143,7 +143,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//input初期化
 	DirectXInput key;
+	DirectXInput pad;
 	key.InputInit(win.w, win.hwnd);
+	pad.InputInit(win.w, win.hwnd);
 	//DirectX初期化ここまで
 #pragma endregion
 #pragma region 描画初期化処理
@@ -914,17 +916,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		key.InputUpdate();
 
 #pragma region 行列の計算
-		if (key.IsKeyDown(DIK_D) || key.IsKeyDown(DIK_A))
-		{
-			if (key.IsKeyDown(DIK_D)) angle += XMConvertToRadians(10.0f);
-			else if (key.IsKeyDown(DIK_A)) angle -= XMConvertToRadians(10.0f);
+		//if (pad.IsButtonDown(0) || pad.IsButtonDown(1))
+		//{
+		//	if (pad.IsButtonDown(0)) angle += XMConvertToRadians(10.0f);
+		//	else if (pad.IsButtonDown(1)) angle -= XMConvertToRadians(10.0f);
 
-			//angleラジアンだけY軸周りに回転。半径は-100
-			eye.x = -100 * sinf(angle);
-			eye.z = -100 * cosf(angle);
-			//ビュー変換行列再作成
-			matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
-		}
+		//	//angleラジアンだけY軸周りに回転。半径は-100
+		//	eye.x = -100 * sinf(angle);
+		//	eye.z = -100 * cosf(angle);
+		//	//ビュー変換行列再作成
+		//	matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
+		//}
 
 		//座標操作
 		if (key.IsKeyDown(DIK_UP) || key.IsKeyDown(DIK_DOWN) || key.IsKeyDown(DIK_RIGHT) || key.IsKeyDown(DIK_LEFT))

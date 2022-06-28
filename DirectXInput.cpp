@@ -10,12 +10,17 @@
 // DirectInputの初期化
 static IDirectInput8* directInput = nullptr;
 static IDirectInputDevice8* keyboard = nullptr;
+static IDirectInputDevice8* pad = nullptr;
 
 // 全キーの入力状態を取得する
 static BYTE keys[256] = {};
-
 // 全キーの1F前の入力状態を取得する
 static BYTE prev[256] = {};
+
+//// 全パッドの入力状態を取得する
+//static BYTE pads[256] = {};
+//// 全パッドの1F前の入力状態を取得する
+//static BYTE prevPads[256] = {};
 
 void DirectXInput::InputInit(WNDCLASSEX w, HWND hwnd)
 {
@@ -29,6 +34,9 @@ void DirectXInput::InputInit(WNDCLASSEX w, HWND hwnd)
 	// キーボードデバイスの生成
 	result = directInput->CreateDevice(GUID_SysKeyboard, &keyboard, NULL);
 	assert(SUCCEEDED(result));
+	//// パッドデバイスの生成
+	//result = directInput->CreateDevice(GUID_SysKeyboard, &pad, NULL);
+	//assert(SUCCEEDED(result));
 	// 入力データ形式のセット
 	result = keyboard->SetDataFormat(&c_dfDIKeyboard); // 標準形式
 	assert(SUCCEEDED(result));
@@ -81,4 +89,16 @@ bool DirectXInput::GetKeyReleased(UINT8 key)
 bool DirectXInput::GetKeyReleaseTrigger(UINT8 key)
 {
 	return !keys[key] && prev[key];
+}
+
+
+//ボタン
+bool DirectXInput::IsButtonDown(UINT8 pad)
+{
+	return pads[pad];
+}
+
+bool DirectXInput::IsButtonTrigger(UINT8 pad)
+{
+	return pads[pad] && !prevPads[pad];
 }

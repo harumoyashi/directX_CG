@@ -18,4 +18,10 @@ public:
 	static bool GetKeyReleased(UINT8 key);
 	//離した瞬間
 	static bool GetKeyReleaseTrigger(UINT8 key);
+
+	//パッド入力処理用
+	//押しっぱなし
+	static bool IsButtonDown(UINT8 pad);	//UINTはビット数指定したら型自由ぽい
+	//押した瞬間
+	static bool IsButtonTrigger(UINT8 pad);
 };
