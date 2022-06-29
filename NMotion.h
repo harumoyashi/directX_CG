@@ -5,9 +5,17 @@
 
 class Motion
 {
+	struct Speed
+	{
+		float spd;
+		const float min;
+		const float max;
+		const float spdAmount = (max - min) / 10.0f;
+	};
+
 private:
-	float speedAmount = 0.05f;
-	float speed = PI * speedAmount;	//移動速度係数&タイマー速度
+	Speed speedAmount = {0.02f,0.02f,0.1f};
+	float speed = PI * speedAmount.spd;	//移動速度係数&タイマー速度
 	float timer = 0;				//モーションタイマー
 	float halfTimer = 0;			//モーションタイマー(ハーフ)
 	const float maxTimer = PI * 2;
@@ -15,10 +23,20 @@ private:
 
 	float rotSpeed;			//振る速度
 	float easeInRotSpeed;	//イージング掛けたバージョン
-	int easeSpeed = 4;		//イージングの加減
+	Speed easeSpeed = { 2.0f,2.0f,4.0f };	//イージングの加減
 	float swingVec = 1.0f;	//腕や足を振る方向
 
-	bool isMoveMode = true;	//true:run,false:walk
+	//各部位の回転スピード設定
+	Speed upArmSpd =      { 0.5f,0.5f,1.2f };
+	Speed foreArmSpd =    { 0.2f,0.2f,0.3f };
+	Speed upLegSpd =      { 0.4f,0.4f,1.0f };
+	Speed kneeSpd =       { 0.5f,0.5f,0.8f };
+	Speed footSpd =       { 0.1f,0.1f,0.2f };
+	Speed centroidSpd =   { 0.7f,0.7f,4.0f };
+	Speed bodyTiltSpd =   { 0.02f,0.02f,0.05f };
+	Speed chestTwistSpd = { 0.1f,0.1f,0.2f };
+
+	bool isMoveMode = false;	//true:run,false:walk
 
 	DirectXInput key;	//キーボード
 

@@ -18,4 +18,9 @@ public:
 	static bool GetKeyReleased(UINT8 key);
 	//離した瞬間
 	static bool GetKeyReleaseTrigger(UINT8 key);
+
+	//static bool IsButtonDown();
+	////コールバック関数
+	//BOOL CALLBACK EnumJoysticksCallback(const DIDEVICEINSTANCE* pdidInstance, VOID* pContext);
+	//BOOL CALLBACK EnumAxesCallback(const DIDEVICEOBJECTINSTANCE* pdidoi, VOID* pContext);
 };

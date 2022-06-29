@@ -102,9 +102,9 @@ void Motion::Initialize(ID3D12Device* device)
 
 void Motion::Update(XMMATRIX matView, XMMATRIX matProjection)
 {
-	speed = PI * speedAmount;
+	speed = PI * speedAmount.spd;
 	rotSpeed = timer;	//基本の回転はタイマーと同じ値
-	easeInRotSpeed = maxHalfTimer * EaseIn(halfTimer / maxHalfTimer, easeSpeed) + PI / 2 * swingVec;	//脚の付け根はイージングかけて、半分ずらしておく
+	easeInRotSpeed = maxHalfTimer * EaseIn(halfTimer / maxHalfTimer, easeSpeed.spd) + PI / 2 * swingVec;	//脚の付け根はイージングかけて、半分ずらしておく
 
 	//超えたら戻す処理
 	easeInRotSpeed = clamp(easeInRotSpeed, -PI - PI / 2, PI + PI / 2);
@@ -175,49 +175,65 @@ void Motion::RotationKey()
 	//座標操作
 	if (key.IsKeyDown(DIK_W) || key.IsKeyDown(DIK_S) || key.IsKeyDown(DIK_D) || key.IsKeyDown(DIK_A))
 	{
-		if (key.IsKeyDown(DIK_W)) { object3d[0].position.z -= 12.0f*speed; }
-		else if (key.IsKeyDown(DIK_S)) { object3d[0].position.z += 12.0f*speed; }
+		if (key.IsKeyDown(DIK_W)) { object3d[0].position.z -= 12.0f * speed; }
+		else if (key.IsKeyDown(DIK_S)) { object3d[0].position.z += 12.0f * speed; }
 		if (key.IsKeyDown(DIK_D)) { object3d[0].position.x += 1.0f; }
 		else if (key.IsKeyDown(DIK_A)) { object3d[0].position.x -= 1.0f; }
 	}
 
-	//上半身回転
-	if (key.IsKeyDown(DIK_U) || key.IsKeyDown(DIK_I))
-	{
-		if (key.IsKeyDown(DIK_U)) { object3d[kChest].rotation.y += 0.05f; }
-		else if (key.IsKeyDown(DIK_I)) { object3d[kChest].rotation.y -= 0.05f; }
-	}
-
-	//下半身回転
-	if (key.IsKeyDown(DIK_J) || key.IsKeyDown(DIK_K))
-	{
-		if (key.IsKeyDown(DIK_J)) { object3d[kHip].rotation.y += 0.05f; }
-		else if (key.IsKeyDown(DIK_K)) { object3d[kHip].rotation.y -= 0.05f; }
-	}
-
 	//スピード変更
-	if (key.IsKeyTrigger(DIK_UP) || key.IsKeyTrigger(DIK_DOWN))
+
+	if (speedAmount.spd <= speedAmount.max && speedAmount.spd >= speedAmount.min)
 	{
-		if (speedAmount < 0.2f && speedAmount >= 0.02f)
+		if (key.IsKeyTrigger(DIK_UP))
 		{
-			if (key.IsKeyTrigger(DIK_UP)) speedAmount += 0.01f;
-			else if (key.IsKeyTrigger(DIK_DOWN)) speedAmount -= 0.01f;
+			speedAmount.spd += speedAmount.spdAmount;
+			upArmSpd.spd += upArmSpd.spdAmount;
+			foreArmSpd.spd += foreArmSpd.spdAmount;
+			upLegSpd.spd += upLegSpd.spdAmount;
+			kneeSpd.spd += kneeSpd.spdAmount;
+			footSpd.spd += footSpd.spdAmount;
+			centroidSpd.spd += centroidSpd.spdAmount;
+			bodyTiltSpd.spd += bodyTiltSpd.spdAmount;
+			chestTwistSpd.spd += chestTwistSpd.spdAmount;
+		}
+		else if (key.IsKeyTrigger(DIK_DOWN))
+		{
+			speedAmount.spd -= speedAmount.spdAmount;
+			upArmSpd.spd -= upArmSpd.spdAmount;
+			foreArmSpd.spd -= foreArmSpd.spdAmount;
+			upLegSpd.spd -= upLegSpd.spdAmount;
+			kneeSpd.spd -= kneeSpd.spdAmount;
+			footSpd.spd -= footSpd.spdAmount;
+			centroidSpd.spd -= centroidSpd.spdAmount;
+			bodyTiltSpd.spd -= bodyTiltSpd.spdAmount;
+			chestTwistSpd.spd -= chestTwistSpd.spdAmount;
 		}
 	}
+	speedAmount.spd = clamp(speedAmount.spd, speedAmount.min, speedAmount.max);
+	upArmSpd.spd = clamp(upArmSpd.spd, upArmSpd.min, upArmSpd.max);
+	foreArmSpd.spd = clamp(foreArmSpd.spd, foreArmSpd.min, foreArmSpd.max);
+	upLegSpd.spd = clamp(upLegSpd.spd, upLegSpd.min, upLegSpd.max);
+	kneeSpd.spd = clamp(kneeSpd.spd, kneeSpd.min, kneeSpd.max);
+	footSpd.spd = clamp(footSpd.spd, footSpd.min, footSpd.max);
+	centroidSpd.spd = clamp(centroidSpd.spd, centroidSpd.min, centroidSpd.max);
+	bodyTiltSpd.spd = clamp(bodyTiltSpd.spd, bodyTiltSpd.min, bodyTiltSpd.max);
+	chestTwistSpd.spd = clamp(chestTwistSpd.spd, chestTwistSpd.min, chestTwistSpd.max);
+
 
 	if (key.IsKeyTrigger(DIK_R))
 	{
 		if (!isMoveMode)
 		{
 			isMoveMode = true;
-			speedAmount = 0.05f;
-			easeSpeed = 4;
+			speedAmount.spd = speedAmount.max;
+			easeSpeed.spd = easeSpeed.max;
 		}
 		else
 		{
 			isMoveMode = false;
-			speedAmount = 0.02f;
-			easeSpeed = 2;
+			speedAmount.spd = speedAmount.min;
+			easeSpeed.spd = easeSpeed.min;
 		}
 	};
 }
@@ -241,7 +257,7 @@ void Motion::RunMode()
 	object3d[kFootR].rotation.x = 0.2f * sinf(-easeInRotSpeed) + 0.2f;
 	//重心移動
 	object3d[kSpine].position.y = 4.0f * sinf(rotSpeed * 2.0f) + 2.0f;
-	object3d[kSpine].rotation.x = 0.05f * sinf(easeInRotSpeed * 2.0f) - 0.1f;
+	object3d[kSpine].rotation.x = 0.05f * sinf(easeInRotSpeed * 2.0f) - bodyTiltSpd.spd*2.0f;
 	//胸の捻り
 	object3d[kChest].rotation.y = 0.2f * sinf(easeInRotSpeed);
 	//おしりの捻り
@@ -251,25 +267,25 @@ void Motion::RunMode()
 void Motion::WalkMode()
 {
 	//二の腕の振り
-	object3d[kUpArmL].rotation.x = 0.5f * sinf(-easeInRotSpeed);
-	object3d[kUpArmR].rotation.x = 0.5f * sinf(easeInRotSpeed);
+	object3d[kUpArmL].rotation.x = upArmSpd.spd * sinf(-easeInRotSpeed);
+	object3d[kUpArmR].rotation.x = upArmSpd.spd * sinf(easeInRotSpeed);
 	//前腕の振り
-	object3d[kForeArmL].rotation.x = 0.2f * (sinf(rotSpeed) + 0.9f);
-	object3d[kForeArmR].rotation.x = 0.2f * (sinf(-rotSpeed) + 0.9f);
+	object3d[kForeArmL].rotation.x = foreArmSpd.spd * (sinf(rotSpeed) + 0.9f);
+	object3d[kForeArmR].rotation.x = foreArmSpd.spd * (sinf(-rotSpeed) + 0.9f);
 	//脚付け根の回転
-	object3d[kUpLegRootL].rotation.x = 0.4f * sinf(easeInRotSpeed) + 0.2f;
-	object3d[kUpLegRootR].rotation.x = 0.4f * sinf(-easeInRotSpeed) + 0.2f;
+	object3d[kUpLegRootL].rotation.x = upLegSpd.spd * sinf(easeInRotSpeed) + 0.2f;
+	object3d[kUpLegRootR].rotation.x = upLegSpd.spd * sinf(-easeInRotSpeed) + 0.2f;
 	//膝の回転(膝の描画なし)
-	object3d[kKneeL].rotation.x = 0.5f * sinf(easeInRotSpeed) - 0.6f;
-	object3d[kKneeR].rotation.x = 0.5f * sinf(-easeInRotSpeed) - 0.6f;
+	object3d[kKneeL].rotation.x = kneeSpd.spd * sinf(easeInRotSpeed) - 0.6f;
+	object3d[kKneeR].rotation.x = kneeSpd.spd * sinf(-easeInRotSpeed) - 0.6f;
 	//足の回転						     
-	object3d[kFootL].rotation.x = 0.1f * sinf(easeInRotSpeed) + 0.1f;
-	object3d[kFootR].rotation.x = 0.1f * sinf(-easeInRotSpeed) + 0.1f;
+	object3d[kFootL].rotation.x = footSpd.spd * sinf(easeInRotSpeed) + footSpd.spd;
+	object3d[kFootR].rotation.x = footSpd.spd * sinf(-easeInRotSpeed) + footSpd.spd;
 	//重心移動						     
-	object3d[kSpine].position.y = 0.7f * sinf(rotSpeed * 2.0f) + 2.0f;
-	object3d[kSpine].rotation.x = 0.02f * sinf(easeInRotSpeed * 2.0f) - 0.03f;
+	object3d[kSpine].position.y = centroidSpd.spd * sinf(rotSpeed * 2.0f) + 2.0f;
+	object3d[kSpine].rotation.x = bodyTiltSpd.spd * sinf(easeInRotSpeed * 2.0f) - bodyTiltSpd.spd*2.0f;
 	//胸の捻り						     
-	object3d[kChest].rotation.y = 0.1f * sinf(easeInRotSpeed);
+	object3d[kChest].rotation.y = chestTwistSpd.spd * sinf(easeInRotSpeed);
 	//おしりの捻り				   	       
 	object3d[kHip].rotation.y = 0.1f * -sinf(easeInRotSpeed);
 }
