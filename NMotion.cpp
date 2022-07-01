@@ -123,14 +123,7 @@ void Motion::Update(XMMATRIX matView, XMMATRIX matProjection)
 #pragma region âÒì]èàóù
 	/*if (key.IsKeyDown(DIK_RETURN))
 	{*/
-	if (isMoveMode)
-	{
-		RunMode();
-	}
-	else
-	{
-		WalkMode();
-	}
+	WalkMode();
 	/*}*/
 #pragma endregion
 	for (size_t i = 0; i < kNumPartId; i++)
@@ -165,8 +158,6 @@ void Motion::StartTimer()
 	{
 		halfTimer = clamp(halfTimer, 0.0f, maxHalfTimer);
 	}
-
-
 	/*}*/
 }
 
@@ -196,6 +187,8 @@ void Motion::RotationKey()
 			centroidSpd.spd += centroidSpd.spdAmount;
 			bodyTiltSpd.spd += bodyTiltSpd.spdAmount;
 			chestTwistSpd.spd += chestTwistSpd.spdAmount;
+			elbowPlusSpd.spd += elbowPlusSpd.spdAmount;
+			kneePlusSpd.spd += kneePlusSpd.spdAmount;
 		}
 		else if (key.IsKeyTrigger(DIK_DOWN))
 		{
@@ -208,8 +201,11 @@ void Motion::RotationKey()
 			centroidSpd.spd -= centroidSpd.spdAmount;
 			bodyTiltSpd.spd -= bodyTiltSpd.spdAmount;
 			chestTwistSpd.spd -= chestTwistSpd.spdAmount;
+			elbowPlusSpd.spd -= elbowPlusSpd.spdAmount;
+			kneePlusSpd.spd -= kneePlusSpd.spdAmount;
 		}
 	}
+	//çsÇ´Ç∑Ç¨ÇΩÇÁñﬂÇ∑
 	speedAmount.spd = clamp(speedAmount.spd, speedAmount.min, speedAmount.max);
 	upArmSpd.spd = clamp(upArmSpd.spd, upArmSpd.min, upArmSpd.max);
 	foreArmSpd.spd = clamp(foreArmSpd.spd, foreArmSpd.min, foreArmSpd.max);
@@ -219,23 +215,21 @@ void Motion::RotationKey()
 	centroidSpd.spd = clamp(centroidSpd.spd, centroidSpd.min, centroidSpd.max);
 	bodyTiltSpd.spd = clamp(bodyTiltSpd.spd, bodyTiltSpd.min, bodyTiltSpd.max);
 	chestTwistSpd.spd = clamp(chestTwistSpd.spd, chestTwistSpd.min, chestTwistSpd.max);
+	elbowPlusSpd.spd = clamp(elbowPlusSpd.spd, elbowPlusSpd.min, elbowPlusSpd.max);
+	kneePlusSpd.spd = clamp(kneePlusSpd.spd, kneePlusSpd.min, kneePlusSpd.max);
 
-
-	if (key.IsKeyTrigger(DIK_R))
+	if (speedAmount.spd < 0.05f)
 	{
-		if (!isMoveMode)
-		{
-			isMoveMode = true;
-			speedAmount.spd = speedAmount.max;
-			easeSpeed.spd = easeSpeed.max;
-		}
-		else
-		{
-			isMoveMode = false;
-			speedAmount.spd = speedAmount.min;
-			easeSpeed.spd = easeSpeed.min;
-		}
-	};
+		rotVec = -1.0f;
+	}
+	else if (speedAmount.spd >= 0.05f && speedAmount.spd < 0.07f)
+	{
+		rotVec = 0.0f;
+	}
+	else
+	{
+		rotVec = 1.0f;
+	}
 }
 
 void Motion::RunMode()
@@ -257,7 +251,7 @@ void Motion::RunMode()
 	object3d[kFootR].rotation.x = 0.2f * sinf(-easeInRotSpeed) + 0.2f;
 	//èdêSà⁄ìÆ
 	object3d[kSpine].position.y = 4.0f * sinf(rotSpeed * 2.0f) + 2.0f;
-	object3d[kSpine].rotation.x = 0.05f * sinf(easeInRotSpeed * 2.0f) - bodyTiltSpd.spd*2.0f;
+	object3d[kSpine].rotation.x = 0.05f * sinf(easeInRotSpeed * 2.0f) - bodyTiltSpd.spd * 2.0f;
 	//ãπÇÃîPÇË
 	object3d[kChest].rotation.y = 0.2f * sinf(easeInRotSpeed);
 	//Ç®ÇµÇËÇÃîPÇË
@@ -270,20 +264,20 @@ void Motion::WalkMode()
 	object3d[kUpArmL].rotation.x = upArmSpd.spd * sinf(-easeInRotSpeed);
 	object3d[kUpArmR].rotation.x = upArmSpd.spd * sinf(easeInRotSpeed);
 	//ëOòrÇÃêUÇË
-	object3d[kForeArmL].rotation.x = foreArmSpd.spd * (sinf(rotSpeed) + 0.9f);
-	object3d[kForeArmR].rotation.x = foreArmSpd.spd * (sinf(-rotSpeed) + 0.9f);
+	object3d[kForeArmL].rotation.x = foreArmSpd.spd * sinf(rotSpeed * -rotVec) + elbowPlusSpd.spd;
+	object3d[kForeArmR].rotation.x = foreArmSpd.spd * sinf(rotSpeed * rotVec) + elbowPlusSpd.spd;
 	//ãrïtÇØç™ÇÃâÒì]
 	object3d[kUpLegRootL].rotation.x = upLegSpd.spd * sinf(easeInRotSpeed) + 0.2f;
 	object3d[kUpLegRootR].rotation.x = upLegSpd.spd * sinf(-easeInRotSpeed) + 0.2f;
 	//ïGÇÃâÒì](ïGÇÃï`âÊÇ»Çµ)
-	object3d[kKneeL].rotation.x = kneeSpd.spd * sinf(easeInRotSpeed) - 0.6f;
-	object3d[kKneeR].rotation.x = kneeSpd.spd * sinf(-easeInRotSpeed) - 0.6f;
+	object3d[kKneeL].rotation.x = kneeSpd.spd * sinf(easeInRotSpeed * -rotVec) - kneePlusSpd.spd;
+	object3d[kKneeR].rotation.x = kneeSpd.spd * sinf(easeInRotSpeed * rotVec) - kneePlusSpd.spd;
 	//ë´ÇÃâÒì]						     
 	object3d[kFootL].rotation.x = footSpd.spd * sinf(easeInRotSpeed) + footSpd.spd;
 	object3d[kFootR].rotation.x = footSpd.spd * sinf(-easeInRotSpeed) + footSpd.spd;
 	//èdêSà⁄ìÆ						     
 	object3d[kSpine].position.y = centroidSpd.spd * sinf(rotSpeed * 2.0f) + 2.0f;
-	object3d[kSpine].rotation.x = bodyTiltSpd.spd * sinf(easeInRotSpeed * 2.0f) - bodyTiltSpd.spd*2.0f;
+	object3d[kSpine].rotation.x = bodyTiltSpd.spd * sinf(easeInRotSpeed * 2.0f) - bodyTiltSpd.spd * 2.0f;
 	//ãπÇÃîPÇË						     
 	object3d[kChest].rotation.y = chestTwistSpd.spd * sinf(easeInRotSpeed);
 	//Ç®ÇµÇËÇÃîPÇË				   	       

@@ -35,8 +35,10 @@ private:
 	Speed centroidSpd =   { 0.7f,0.7f,4.0f };
 	Speed bodyTiltSpd =   { 0.02f,0.02f,0.05f };
 	Speed chestTwistSpd = { 0.1f,0.1f,0.2f };
+	Speed elbowPlusSpd =  { 0.1f,0.1f,1.2f };
+	Speed kneePlusSpd =   { 0.6f,0.6f,1.2f };
 
-	bool isMoveMode = false;	//true:run,false:walk
+	float rotVec = -1.0f;	//true:run,false:walk
 
 	DirectXInput key;	//キーボード
 
