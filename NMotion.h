@@ -25,6 +25,7 @@ private:
 	float easeInRotSpeed;	//イージング掛けたバージョン
 	Speed easeSpeed = { 2.0f,2.0f,4.0f };	//イージングの加減
 	float swingVec = 1.0f;	//腕や足を振る方向
+	float angle = PI;
 
 	//各部位の回転スピード設定
 	Speed upArmSpd =      { 0.5f,0.5f,1.2f };

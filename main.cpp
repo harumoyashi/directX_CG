@@ -223,7 +223,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//ここでビュー変換行列計算
 	XMMATRIX matView;
-	XMFLOAT3 eye(0, 0, -250);	//視点座標
+	XMFLOAT3 eye(0, 0, -300);	//視点座標
 	XMFLOAT3 target(0, 0, 0);	//注視点座標
 	XMFLOAT3 up(0, 1, 0);		//上方向ベクトル
 	//ビュー変換行列作成
@@ -717,8 +717,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			else if (key.IsKeyDown(DIK_LEFT)) angle -= XMConvertToRadians(10.0f);
 
 			//angleラジアンだけY軸周りに回転。半径は-100
-			eye.x = -250 * sinf(angle);
-			eye.z = -250 * cosf(angle);
+			eye.x = -300 * sinf(angle);
+			eye.z = -300 * cosf(angle);
 			//ビュー変換行列再作成
 			matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
 		}

@@ -121,10 +121,10 @@ void Motion::Update(XMMATRIX matView, XMMATRIX matProjection)
 	}
 
 #pragma region 回転処理
-	/*if (key.IsKeyDown(DIK_RETURN))
-	{*/
-	WalkMode();
-	/*}*/
+	if (key.IsKeyDown(DIK_RETURN))
+	{
+		WalkMode();
+	}
 #pragma endregion
 	for (size_t i = 0; i < kNumPartId; i++)
 	{
@@ -144,36 +144,42 @@ void Motion::Draw(ID3D12GraphicsCommandList* commandList, D3D12_VERTEX_BUFFER_VI
 
 void Motion::StartTimer()
 {
-	/*if (key.IsKeyDown(DIK_RETURN))
-	{*/
-	timer += speed;
-	if (timer > maxTimer)
+	if (key.IsKeyDown(DIK_RETURN))
 	{
-		timer = clamp(timer, 0.0f, maxTimer);
-	}
+		timer += speed;
+		if (timer > maxTimer)
+		{
+			timer = clamp(timer, 0.0f, maxTimer);
+		}
 
-	//ハーフタイマー
-	halfTimer += speed;
-	if (halfTimer > maxHalfTimer)
-	{
-		halfTimer = clamp(halfTimer, 0.0f, maxHalfTimer);
+		//ハーフタイマー
+		halfTimer += speed;
+		if (halfTimer > maxHalfTimer)
+		{
+			halfTimer = clamp(halfTimer, 0.0f, maxHalfTimer);
+		}
 	}
-	/*}*/
 }
 
 void Motion::RotationKey()
 {
 	//座標操作
-	if (key.IsKeyDown(DIK_W) || key.IsKeyDown(DIK_S) || key.IsKeyDown(DIK_D) || key.IsKeyDown(DIK_A))
+	if (key.IsKeyDown(DIK_W) || key.IsKeyDown(DIK_S))
 	{
-		if (key.IsKeyDown(DIK_W)) { object3d[0].position.z -= 12.0f * speed; }
-		else if (key.IsKeyDown(DIK_S)) { object3d[0].position.z += 12.0f * speed; }
-		if (key.IsKeyDown(DIK_D)) { object3d[0].position.x += 1.0f; }
-		else if (key.IsKeyDown(DIK_A)) { object3d[0].position.x -= 1.0f; }
+		if (key.IsKeyDown(DIK_W))
+		{
+			angle -= XMConvertToRadians(12.0f * speed);
+		}
+		else if (key.IsKeyDown(DIK_S))
+		{
+			angle += XMConvertToRadians(12.0f * speed);
+		}
+		object3d[0].rotation.y = -angle;
+		object3d[0].position.z = 100.0f * sinf(angle);
+		object3d[0].position.x = 100.0f * cosf(angle);
 	}
 
 	//スピード変更
-
 	if (speedAmount.spd <= speedAmount.max && speedAmount.spd >= speedAmount.min)
 	{
 		if (key.IsKeyTrigger(DIK_UP))
