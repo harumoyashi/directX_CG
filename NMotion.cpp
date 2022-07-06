@@ -168,11 +168,11 @@ void Motion::RotationKey()
 	{
 		if (key.IsKeyDown(DIK_W))
 		{
-			angle -= XMConvertToRadians(12.0f * speed);
+			angle -= XMConvertToRadians(10.0f * speed);
 		}
 		else if (key.IsKeyDown(DIK_S))
 		{
-			angle += XMConvertToRadians(12.0f * speed);
+			angle += XMConvertToRadians(10.0f * speed);
 		}
 		object3d[0].rotation.y = -angle;
 		object3d[0].position.z = 100.0f * sinf(angle);
