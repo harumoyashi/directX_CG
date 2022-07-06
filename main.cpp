@@ -5,6 +5,7 @@
 #include "Matrix4.h"
 #include <string>
 #include <random>
+#include "InputPad.h"
 
 #include <d3dcompiler.h>
 #pragma comment(lib, "d3dcompiler.lib")
@@ -144,6 +145,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//inputèâä˙âª
 	DirectXInput key;
 	key.InputInit(win.w, win.hwnd);
+
+	InputPad pad;
+	pad.Initialize();
 	//DirectXèâä˙âªÇ±Ç±Ç‹Ç≈
 #pragma endregion
 #pragma region ï`âÊèâä˙âªèàóù
@@ -942,12 +946,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			else if (key.IsKeyDown(DIK_I)) { object3ds[kChest].rotation.y -= 0.05f; }
 		}
 
+		/*if (pad.IsButtonDown(XINPUT_GAMEPAD_A) || pad.IsButtonDown(XINPUT_GAMEPAD_B))
+		{
+			if (pad.IsButtonDown(XINPUT_GAMEPAD_A)) { object3ds[kChest].rotation.y += 0.05f; }
+			else if (pad.IsButtonDown(XINPUT_GAMEPAD_B)) { object3ds[kChest].rotation.y -= 0.05f; }
+		}*/
+
 		//â∫îºêgâÒì]
 		if (key.IsKeyDown(DIK_J) || key.IsKeyDown(DIK_K))
 		{
 			if (key.IsKeyDown(DIK_J)) { object3ds[kHip].rotation.y += 0.05f; }
 			else if (key.IsKeyDown(DIK_K)) { object3ds[kHip].rotation.y -= 0.05f; }
 		}
+
+		if (pad.isConnect == true) { object3ds[kHip].rotation.y += 0.05f; }
 
 		if (key.IsKeyDown(DIK_R) || key.IsKeyDown(DIK_T))
 		{
