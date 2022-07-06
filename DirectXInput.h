@@ -5,7 +5,7 @@
 #include <vector>
 #include <wrl.h>
 
-#include <XInput.h>
+//#include <XInput.h>
 #define DIRECTINPUT_VERSION 0x0800 // DirectInputのバージョン指定
 #include <dinput.h>
 
@@ -36,25 +36,25 @@ public:
 	static DirectXInput* GetInstance();
 
 	//input初期化
-	static void Initialize(WNDCLASSEX w, HWND hwnd);
+	void Initialize(WNDCLASSEX w, HWND hwnd);
 	//input更新
-	static void Update();
+	void Update();
 
 	//キーボード入力処理用 (返り値0,1)
 	//押しっぱなし
-	static bool IsKeyDown(UINT8 key);	//UINTはビット数指定したら型自由ぽい
-	//押した瞬間
-	static bool IsKeyTrigger(UINT8 key);
+	bool IsKeyDown(UINT8 key);	//UINTはビット数指定したら型自由ぽい
+   //押した瞬間
+	bool IsKeyTrigger(UINT8 key);
 	//離してるとき
-	static bool GetKeyReleased(UINT8 key);
+	bool GetKeyReleased(UINT8 key);
 	//離した瞬間
-	static bool GetKeyReleaseTrigger(UINT8 key);
+	bool GetKeyReleaseTrigger(UINT8 key);
 
 	//パッド入力処理用
 	//押しっぱなし
-	static bool IsButtonDown(UINT8 pad);	//UINTはビット数指定したら型自由ぽい
-	//押した瞬間
-	static bool IsButtonTrigger(UINT8 pad);
+	bool IsButtonDown(UINT8 pad);	//UINTはビット数指定したら型自由ぽい
+   //押した瞬間
+	bool IsButtonTrigger(UINT8 pad);
 
 private:
 	static BOOL CALLBACK
