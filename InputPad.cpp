@@ -22,6 +22,7 @@ void InputPad::Initialize()
 
 void InputPad::Update()
 {
+	XInputGetState(0, &state);
 	//// ‘OŒãXV
 	//for (int i = 0; i < 16; ++i)
 	//{

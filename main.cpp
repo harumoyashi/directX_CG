@@ -148,6 +148,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	InputPad pad;
 	pad.Initialize();
+
+	Vector2 LstickVec = {};
+
 	//DirectX初期化ここまで
 #pragma endregion
 #pragma region 描画初期化処理
@@ -318,10 +321,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	object3ds[PartId::kSpine].position = { 0,8.0f,0 };
 	object3ds[PartId::kSpine].parent = &object3ds[PartId::kRoot];
-	
+
 	object3ds[PartId::kChest].position = { 0,0,0 };
 	object3ds[PartId::kChest].parent = &object3ds[PartId::kSpine];
-	
+
 	object3ds[PartId::kHead].position = { 0,8.0f,0 };
 	object3ds[PartId::kHead].parent = &object3ds[PartId::kChest];
 
@@ -916,6 +919,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma region DirectX毎フレーム処理
 		//DirectX毎フレーム　ここから
 		key.InputUpdate();
+		pad.Update();
 
 #pragma region 行列の計算
 		if (key.IsKeyDown(DIK_D) || key.IsKeyDown(DIK_A))
@@ -946,11 +950,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			else if (key.IsKeyDown(DIK_I)) { object3ds[kChest].rotation.y -= 0.05f; }
 		}
 
-		/*if (pad.IsButtonDown(XINPUT_GAMEPAD_A) || pad.IsButtonDown(XINPUT_GAMEPAD_B))
+		if (pad.IsButtonDown(XINPUT_GAMEPAD_A) || pad.IsButtonDown(XINPUT_GAMEPAD_B))
 		{
 			if (pad.IsButtonDown(XINPUT_GAMEPAD_A)) { object3ds[kChest].rotation.y += 0.05f; }
 			else if (pad.IsButtonDown(XINPUT_GAMEPAD_B)) { object3ds[kChest].rotation.y -= 0.05f; }
-		}*/
+		}
+
+		LstickVec = pad.GetLStick(pad.state.Gamepad.sThumbLX / 10000.0f, pad.state.Gamepad.sThumbLY / 10000.0f);
+		object3ds[0].position.x += LstickVec.x;
+		object3ds[0].position.y += LstickVec.y;
 
 		//下半身回転
 		if (key.IsKeyDown(DIK_J) || key.IsKeyDown(DIK_K))
