@@ -1,5 +1,6 @@
 #pragma once
 #include "NDirectXInput.h"
+#include "NInputPad.h"
 #include "NObject.h"
 #include "NEasing.h"
 
@@ -10,7 +11,7 @@ class Motion
 		float spd;
 		const float min;
 		const float max;
-		const float spdAmount = (max - min) / 10.0f;
+		const float spdAmount = (max - min) / (10.0f - spd*10.0f);
 	};
 
 private:
@@ -43,6 +44,11 @@ private:
 	float rotVec = -1.0f;	//true:run,false:walk
 
 	DirectXInput key;	//キーボード
+	InputPad pad;
+
+	Vector2 stickVec = {};
+	float spd;
+	Vector2 frontVec = { 0,1 };
 
 public:
 	//3Dオブジェクトの配列

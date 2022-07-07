@@ -144,6 +144,7 @@
     <ClInclude Include="ConstBuffer.h" />
     <ClInclude Include="NEasing.h" />
     <ClInclude Include="NDebugText.h" />
+    <ClInclude Include="NInputPad.h" />
     <ClInclude Include="NMotion.h" />
     <ClInclude Include="NMatrix4.h" />
     <ClInclude Include="NDirectX.h" />
@@ -160,6 +161,7 @@
     <ClCompile Include="ConstBuffer.cpp" />
     <ClCompile Include="NEasing.cpp" />
     <ClCompile Include="NDebugText.cpp" />
+    <ClCompile Include="NInputPad.cpp" />
     <ClCompile Include="NMotion.cpp" />
     <ClCompile Include="NMatrix4.cpp" />
     <ClCompile Include="NDirectX.cpp" />

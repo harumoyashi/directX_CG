@@ -13,6 +13,7 @@
 #pragma comment(lib, "d3dcompiler.lib")
 
 #include "NDirectXInput.h"
+#include "NInputPad.h"
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
@@ -42,6 +43,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//input‰Šú‰»
 	DirectXInput key;
 	key.InputInit(win.w, win.hwnd);
+
 	//DirectX‰Šú‰»‚±‚±‚Ü‚Å
 #pragma endregion
 #pragma region •`‰æ‰Šú‰»ˆ—

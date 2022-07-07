@@ -2,6 +2,8 @@
 
 void Motion::Initialize(ID3D12Device* device)
 {
+	pad.Initialize();
+
 	for (int i = 0; i < kNumPartId; i++)
 	{
 		object3d[i].InitializeObject3d(device);
@@ -121,10 +123,10 @@ void Motion::Update(XMMATRIX matView, XMMATRIX matProjection)
 	}
 
 #pragma region 回転処理
-	if (key.IsKeyDown(DIK_RETURN))
-	{
-		WalkMode();
-	}
+	/*if (key.IsKeyDown(DIK_RETURN))
+	{*/
+	WalkMode();
+	/*}*/
 #pragma endregion
 	for (size_t i = 0; i < kNumPartId; i++)
 	{
@@ -144,27 +146,28 @@ void Motion::Draw(ID3D12GraphicsCommandList* commandList, D3D12_VERTEX_BUFFER_VI
 
 void Motion::StartTimer()
 {
-	if (key.IsKeyDown(DIK_RETURN))
+	/*if (key.IsKeyDown(DIK_RETURN))
+	{*/
+	timer += speed;
+	if (timer > maxTimer)
 	{
-		timer += speed;
-		if (timer > maxTimer)
-		{
-			timer = clamp(timer, 0.0f, maxTimer);
-		}
-
-		//ハーフタイマー
-		halfTimer += speed;
-		if (halfTimer > maxHalfTimer)
-		{
-			halfTimer = clamp(halfTimer, 0.0f, maxHalfTimer);
-		}
+		timer = clamp(timer, 0.0f, maxTimer);
 	}
+
+	//ハーフタイマー
+	halfTimer += speed;
+	if (halfTimer > maxHalfTimer)
+	{
+		halfTimer = clamp(halfTimer, 0.0f, maxHalfTimer);
+	}
+	/*}*/
 }
 
 void Motion::RotationKey()
 {
+	pad.Update();
 	//座標操作
-	if (key.IsKeyDown(DIK_W) || key.IsKeyDown(DIK_S))
+	/*if (key.IsKeyDown(DIK_W) || key.IsKeyDown(DIK_S))
 	{
 		if (key.IsKeyDown(DIK_W))
 		{
@@ -177,7 +180,32 @@ void Motion::RotationKey()
 		object3d[0].rotation.y = -angle;
 		object3d[0].position.z = 100.0f * sinf(angle);
 		object3d[0].position.x = 100.0f * cosf(angle);
+	}*/
+
+	//スティックの傾きを取得
+	stickVec = pad.GetLStick();
+	//正規化
+	stickVec = stickVec.normalize();
+	//大きさを代入
+	spd = stickVec.length();
+
+	//スティックの倒した方向(cosθ)を求める
+	angle = stickVec.dot(frontVec) / -spd;
+	//cosθをθにする
+	angle = acosf(angle);
+
+	//acosが180°までしか対応してないため
+	//スティックを右側に倒してるときは反転
+	if (stickVec.x > 0)
+	{
+		angle = -angle;
 	}
+	//スティックを倒した方向をオブジェクトの方向に代入
+	object3d[0].rotation.y = angle;
+
+
+	object3d[0].position.x += stickVec.x * spd;
+	object3d[0].position.z += stickVec.y * spd;
 
 	//スピード変更
 	if (speedAmount.spd <= speedAmount.max && speedAmount.spd >= speedAmount.min)
