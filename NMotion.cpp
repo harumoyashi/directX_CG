@@ -104,12 +104,12 @@ void Motion::Initialize(ID3D12Device* device)
 
 void Motion::Update(XMMATRIX matView, XMMATRIX matProjection)
 {
-	speed = PI * speedAmount.spd;
+	speed = PI * speedAmount.spd * len * spdNorm;
 	rotSpeed = timer;	//基本の回転はタイマーと同じ値
 	easeInRotSpeed = maxHalfTimer * EaseIn(halfTimer / maxHalfTimer, easeSpeed.spd) + PI / 2 * swingVec;	//脚の付け根はイージングかけて、半分ずらしておく
 
 	//超えたら戻す処理
-	easeInRotSpeed = clamp(easeInRotSpeed, -PI - PI / 2, PI + PI / 2);
+	easeInRotSpeed = Clamp(easeInRotSpeed, -PI - PI / 2, PI + PI / 2);
 
 	if (timer == maxTimer)
 	{
@@ -122,12 +122,8 @@ void Motion::Update(XMMATRIX matView, XMMATRIX matProjection)
 		halfTimer = 0;			//タイマーリセット
 	}
 
-#pragma region 回転処理
-	/*if (key.IsKeyDown(DIK_RETURN))
-	{*/
-	WalkMode();
-	/*}*/
-#pragma endregion
+	RotUpdate();
+
 	for (size_t i = 0; i < kNumPartId; i++)
 	{
 		object3d[i].UpdateObject3d(matView, matProjection);
@@ -146,47 +142,29 @@ void Motion::Draw(ID3D12GraphicsCommandList* commandList, D3D12_VERTEX_BUFFER_VI
 
 void Motion::StartTimer()
 {
-	/*if (key.IsKeyDown(DIK_RETURN))
-	{*/
 	timer += speed;
 	if (timer > maxTimer)
 	{
-		timer = clamp(timer, 0.0f, maxTimer);
+		timer = Clamp(timer, 0.0f, maxTimer);
 	}
 
 	//ハーフタイマー
 	halfTimer += speed;
 	if (halfTimer > maxHalfTimer)
 	{
-		halfTimer = clamp(halfTimer, 0.0f, maxHalfTimer);
+		halfTimer = Clamp(halfTimer, 0.0f, maxHalfTimer);
 	}
-	/*}*/
 }
 
-void Motion::RotationKey()
+void Motion::Operation()
 {
 	pad.Update();
-	//座標操作
-	/*if (key.IsKeyDown(DIK_W) || key.IsKeyDown(DIK_S))
-	{
-		if (key.IsKeyDown(DIK_W))
-		{
-			angle -= XMConvertToRadians(10.0f * speed);
-		}
-		else if (key.IsKeyDown(DIK_S))
-		{
-			angle += XMConvertToRadians(10.0f * speed);
-		}
-		object3d[0].rotation.y = -angle;
-		object3d[0].position.z = 100.0f * sinf(angle);
-		object3d[0].position.x = 100.0f * cosf(angle);
-	}*/
 
 	//スティックの傾きを取得
 	stickVec = pad.GetLStick();
 	//大きさを代入
-	spd = stickVec.length();
-	spd = spd / 32768;	//値が大きすぎるので0.0f~1.0fにする
+	len = stickVec.length();
+	len = len / 32768;	//値が大きすぎるので0.0f~1.0fにする
 	//正規化
 	stickVec = stickVec.normalize();
 
@@ -203,13 +181,13 @@ void Motion::RotationKey()
 	}
 
 	//スティックが倒された時
-	if (spd != 0)
+	if (len != 0)
 	{
 		//スティックを倒した方向をオブジェクトの方向に代入
 		object3d[0].rotation.y = angle;
 		//移動量を加算
-		object3d[0].position.x += stickVec.x * spd * spdNorm;
-		object3d[0].position.z += stickVec.y * spd * spdNorm;
+		object3d[0].position.x += stickVec.x * len * spdNorm;
+		object3d[0].position.z += stickVec.y * len * spdNorm;
 	}
 
 	//スピード変更
@@ -245,17 +223,17 @@ void Motion::RotationKey()
 		}
 	}
 	//行きすぎたら戻す
-	speedAmount.spd = clamp(speedAmount.spd, speedAmount.min, speedAmount.max);
-	upArmSpd.spd = clamp(upArmSpd.spd, upArmSpd.min, upArmSpd.max);
-	foreArmSpd.spd = clamp(foreArmSpd.spd, foreArmSpd.min, foreArmSpd.max);
-	upLegSpd.spd = clamp(upLegSpd.spd, upLegSpd.min, upLegSpd.max);
-	kneeSpd.spd = clamp(kneeSpd.spd, kneeSpd.min, kneeSpd.max);
-	footSpd.spd = clamp(footSpd.spd, footSpd.min, footSpd.max);
-	centroidSpd.spd = clamp(centroidSpd.spd, centroidSpd.min, centroidSpd.max);
-	bodyTiltSpd.spd = clamp(bodyTiltSpd.spd, bodyTiltSpd.min, bodyTiltSpd.max);
-	chestTwistSpd.spd = clamp(chestTwistSpd.spd, chestTwistSpd.min, chestTwistSpd.max);
-	elbowPlusSpd.spd = clamp(elbowPlusSpd.spd, elbowPlusSpd.min, elbowPlusSpd.max);
-	kneePlusSpd.spd = clamp(kneePlusSpd.spd, kneePlusSpd.min, kneePlusSpd.max);
+	speedAmount.spd = SpeedClamp(speedAmount);
+	upArmSpd.spd = SpeedClamp(upArmSpd);
+	foreArmSpd.spd = SpeedClamp(foreArmSpd);
+	upLegSpd.spd = SpeedClamp(upLegSpd);
+	kneeSpd.spd = SpeedClamp(kneeSpd);
+	footSpd.spd = SpeedClamp(footSpd);
+	centroidSpd.spd = SpeedClamp(centroidSpd);
+	bodyTiltSpd.spd = SpeedClamp(bodyTiltSpd);
+	chestTwistSpd.spd = SpeedClamp(chestTwistSpd);
+	elbowPlusSpd.spd = SpeedClamp(elbowPlusSpd);
+	kneePlusSpd.spd = SpeedClamp(kneePlusSpd);
 
 	if (speedAmount.spd < 0.05f)
 	{
@@ -271,33 +249,7 @@ void Motion::RotationKey()
 	}
 }
 
-void Motion::RunMode()
-{
-	//二の腕の振り
-	object3d[kUpArmL].rotation.x = 1.2f * sinf(-easeInRotSpeed);
-	object3d[kUpArmR].rotation.x = 1.2f * sinf(easeInRotSpeed);
-	//前腕の振り
-	object3d[kForeArmL].rotation.x = 0.3f * sinf(rotSpeed) + 0.9f;
-	object3d[kForeArmR].rotation.x = 0.3f * sinf(-rotSpeed) + 0.9f;
-	//脚付け根の回転
-	object3d[kUpLegRootL].rotation.x = sinf(easeInRotSpeed) + 0.2f;
-	object3d[kUpLegRootR].rotation.x = sinf(-easeInRotSpeed) + 0.2f;
-	//膝の回転(膝の描画なし)
-	object3d[kKneeL].rotation.x = 0.8f * sinf(-easeInRotSpeed) - 1.2f;
-	object3d[kKneeR].rotation.x = 0.8f * sinf(easeInRotSpeed) - 1.2f;
-	//足の回転
-	object3d[kFootL].rotation.x = 0.2f * sinf(easeInRotSpeed) + 0.2f;
-	object3d[kFootR].rotation.x = 0.2f * sinf(-easeInRotSpeed) + 0.2f;
-	//重心移動
-	object3d[kSpine].position.y = 4.0f * sinf(rotSpeed * 2.0f) + 2.0f;
-	object3d[kSpine].rotation.x = 0.05f * sinf(easeInRotSpeed * 2.0f) - bodyTiltSpd.spd * 2.0f;
-	//胸の捻り
-	object3d[kChest].rotation.y = 0.2f * sinf(easeInRotSpeed);
-	//おしりの捻り
-	object3d[kHip].rotation.y = 0.1f * -sinf(easeInRotSpeed);
-}
-
-void Motion::WalkMode()
+void Motion::RotUpdate()
 {
 	//二の腕の振り
 	object3d[kUpArmL].rotation.x = upArmSpd.spd * sinf(-easeInRotSpeed);
@@ -323,7 +275,7 @@ void Motion::WalkMode()
 	object3d[kHip].rotation.y = 0.1f * -sinf(easeInRotSpeed);
 }
 
-float Motion::clamp(float value, float min, float max)
+float Motion::Clamp(float value, float min, float max)
 {
 	if (value < min)
 	{
@@ -334,4 +286,10 @@ float Motion::clamp(float value, float min, float max)
 		return max;
 	}
 	return value;
+}
+
+float Motion::SpeedClamp(Speed Spd)
+{
+	Spd.spd = Clamp(Spd.spd, Spd.min, Spd.max);
+	return Spd.spd;
 }

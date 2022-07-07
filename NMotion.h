@@ -11,7 +11,7 @@ class Motion
 		float spd;
 		const float min;
 		const float max;
-		const float spdAmount = (max - min) / (10.0f - spd * 10.0f);
+		float spdAmount = (max - min) * 0.1f;
 	};
 
 private:
@@ -49,7 +49,7 @@ private:
 	InputPad pad;
 
 	Vector2 stickVec = {};
-	float spd;
+	float len;
 	Vector2 frontVec = { 0,1 };
 
 public:
@@ -67,13 +67,14 @@ public:
 	void Draw(ID3D12GraphicsCommandList* commandList, D3D12_VERTEX_BUFFER_VIEW vbView, D3D12_INDEX_BUFFER_VIEW ibView, int indicesSize);
 	//エンター押してる間タイマー進む
 	void StartTimer();
-	//キー入力回転処理
-	void RotationKey();
-	//走りモード
-	void RunMode();
-	//歩きモード
-	void WalkMode();
+	//座標操作
+	void Operation();
+	//回転処理
+	void RotUpdate();
 
-	float clamp(float value, float min, float max);
+	//閾値超えないように
+	float Clamp(float value, float min, float max);
+	//スピード専用Clamp
+	float SpeedClamp(Speed Spd);
 };
 

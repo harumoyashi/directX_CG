@@ -725,7 +725,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
 		}
 
-		motion.RotationKey();
+		motion.Operation();
 		motion.StartTimer();
 		motion.Update(matView, matProjection);
 
