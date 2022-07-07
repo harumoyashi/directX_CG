@@ -1,6 +1,7 @@
 #pragma once
 #include "NDirectX.h"
 
+//各パーツの識別番号
 enum PartId
 {
 	kRoot,		//大元
@@ -28,15 +29,12 @@ enum PartId
 
 	kNumPartId	//構造体の数
 };
-
 //3Dオブジェクト型
 class Object3d
 {
 public:
-	//定数バッファ（行列用）
-	ID3D12Resource* constBuffTransform;
-	//定数バッファマップ（行列用）
-	MyDirectX::ConstBufferDataTransform* constMapTransform;
+	ID3D12Resource* constBuffTransform;	//定数バッファ（行列用）
+	MyDirectX::ConstBufferDataTransform* constMapTransform;	//定数バッファマップ（行列用）
 	//アフィン変換情報
 	XMFLOAT3 scale = { 1,1,1 };
 	XMFLOAT3 rotation = { 0,0,0 };
@@ -45,7 +43,6 @@ public:
 	XMMATRIX matWorld;
 	//親オブジェクトへのポインタ
 	Object3d* parent = nullptr;
-
 public:
 	//初期化
 	void InitializeObject3d(ID3D12Device* device);

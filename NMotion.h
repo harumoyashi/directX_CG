@@ -5,6 +5,8 @@
 
 class Motion
 {
+private:
+	//現在のスピード、最大値、最小値、加速度
 	struct Speed
 	{
 		float spd;
@@ -13,7 +15,6 @@ class Motion
 		const float spdAmount = (max - min) / 10.0f;
 	};
 
-private:
 	Speed speedAmount = {0.02f,0.02f,0.1f};
 	float speed = PI * speedAmount.spd;	//移動速度係数&タイマー速度
 	float timer = 0;				//モーションタイマー
@@ -26,7 +27,7 @@ private:
 	Speed easeSpeed = { 2.0f,2.0f,4.0f };	//イージングの加減
 	float swingVec = 1.0f;	//腕や足を振る方向
 
-	float angle = 0.0f;
+	float angle = 0.0f;	//ぐるぐる走らせる用の角度
 
 	//各部位の回転スピード設定
 	Speed upArmSpd =      { 0.5f,0.5f,1.2f };
