@@ -184,13 +184,14 @@ void Motion::RotationKey()
 
 	//スティックの傾きを取得
 	stickVec = pad.GetLStick();
-	//正規化
-	stickVec = stickVec.normalize();
 	//大きさを代入
 	spd = stickVec.length();
+	spd = spd / 10000.0f;	//値が大きすぎるので割る
+	//正規化
+	stickVec = stickVec.normalize();
 
 	//スティックの倒した方向(cosθ)を求める
-	angle = stickVec.dot(frontVec) / -spd;
+	angle = -stickVec.dot(frontVec);
 	//cosθをθにする
 	angle = acosf(angle);
 
@@ -202,7 +203,6 @@ void Motion::RotationKey()
 	}
 	//スティックを倒した方向をオブジェクトの方向に代入
 	object3d[0].rotation.y = angle;
-
 
 	object3d[0].position.x += stickVec.x * spd;
 	object3d[0].position.z += stickVec.y * spd;
