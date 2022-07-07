@@ -11,11 +11,11 @@ class Motion
 		float spd;
 		const float min;
 		const float max;
-		const float spdAmount = (max - min) / (10.0f - spd*10.0f);
+		const float spdAmount = (max - min) / (10.0f - spd * 10.0f);
 	};
 
 private:
-	Speed speedAmount = {0.02f,0.02f,0.1f};
+	Speed speedAmount = { 0.02f,0.02f,0.1f };
 	float speed = PI * speedAmount.spd;	//移動速度係数&タイマー速度
 	float timer = 0;				//モーションタイマー
 	float halfTimer = 0;			//モーションタイマー(ハーフ)
@@ -29,17 +29,19 @@ private:
 
 	float angle = 0.0f;
 
+	const float spdNorm = 4.0f;
+
 	//各部位の回転スピード設定
-	Speed upArmSpd =      { 0.5f,0.5f,1.2f };
-	Speed foreArmSpd =    { 0.2f,0.2f,0.3f };
-	Speed upLegSpd =      { 0.4f,0.4f,1.0f };
-	Speed kneeSpd =       { 0.5f,0.5f,0.8f };
-	Speed footSpd =       { 0.1f,0.1f,0.2f };
-	Speed centroidSpd =   { 0.7f,0.7f,4.0f };
-	Speed bodyTiltSpd =   { 0.02f,0.02f,0.05f };
+	Speed upArmSpd = { 0.5f,0.5f,1.2f };
+	Speed foreArmSpd = { 0.2f,0.2f,0.3f };
+	Speed upLegSpd = { 0.4f,0.4f,1.0f };
+	Speed kneeSpd = { 0.5f,0.5f,0.8f };
+	Speed footSpd = { 0.1f,0.1f,0.2f };
+	Speed centroidSpd = { 0.7f,0.7f,4.0f };
+	Speed bodyTiltSpd = { 0.02f,0.02f,0.05f };
 	Speed chestTwistSpd = { 0.1f,0.1f,0.2f };
-	Speed elbowPlusSpd =  { 0.1f,0.1f,1.2f };
-	Speed kneePlusSpd =   { 0.6f,0.6f,1.2f };
+	Speed elbowPlusSpd = { 0.1f,0.1f,1.2f };
+	Speed kneePlusSpd = { 0.6f,0.6f,1.2f };
 
 	float rotVec = -1.0f;	//true:run,false:walk
 
@@ -72,6 +74,6 @@ public:
 	//歩きモード
 	void WalkMode();
 
-	float clamp(float value,float min,float max);
+	float clamp(float value, float min, float max);
 };
 

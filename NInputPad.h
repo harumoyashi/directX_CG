@@ -38,6 +38,9 @@ public:
     //右トリガーの押し込み具合取得
     int GetRTrigger(BYTE rightTrigger);
 
+    //デッドゾーンの設定
+    void SetDeadZone();
+
     //左スティックの傾き具合取得
     Vector2 GetLStick();
     //右スティックの傾き具合取得

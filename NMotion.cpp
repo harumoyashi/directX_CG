@@ -186,7 +186,7 @@ void Motion::RotationKey()
 	stickVec = pad.GetLStick();
 	//大きさを代入
 	spd = stickVec.length();
-	spd = spd / 10000.0f;	//値が大きすぎるので割る
+	spd = spd / 32768;	//値が大きすぎるので0.0f~1.0fにする
 	//正規化
 	stickVec = stickVec.normalize();
 
@@ -201,11 +201,16 @@ void Motion::RotationKey()
 	{
 		angle = -angle;
 	}
-	//スティックを倒した方向をオブジェクトの方向に代入
-	object3d[0].rotation.y = angle;
 
-	object3d[0].position.x += stickVec.x * spd;
-	object3d[0].position.z += stickVec.y * spd;
+	//スティックが倒された時
+	if (spd != 0)
+	{
+		//スティックを倒した方向をオブジェクトの方向に代入
+		object3d[0].rotation.y = angle;
+		//移動量を加算
+		object3d[0].position.x += stickVec.x * spd * spdNorm;
+		object3d[0].position.z += stickVec.y * spd * spdNorm;
+	}
 
 	//スピード変更
 	if (speedAmount.spd <= speedAmount.max && speedAmount.spd >= speedAmount.min)

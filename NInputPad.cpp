@@ -23,6 +23,7 @@ void InputPad::Initialize()
 void InputPad::Update()
 {
     XInputGetState(0, &state);
+    SetDeadZone();
     //// ëOå„çXêV
     //for (int i = 0; i < 16; ++i)
     //{
@@ -57,6 +58,18 @@ bool InputPad::IsButtonReleased(UINT button)
 bool InputPad::IsButtonReleaseTrigger(UINT button)
 {
     return false;
+}
+
+void InputPad::SetDeadZone()
+{
+    if ((state.Gamepad.sThumbLX <  XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE &&
+        state.Gamepad.sThumbLX > -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE) &&
+        (state.Gamepad.sThumbLY <  XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE &&
+            state.Gamepad.sThumbLY > -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE))
+    {
+        state.Gamepad.sThumbLX = 0;
+        state.Gamepad.sThumbLY = 0;
+    }
 }
 
 Vector2 InputPad::GetLStick()
