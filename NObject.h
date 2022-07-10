@@ -20,10 +20,10 @@ public:
 
 public:
 	//èâä˙âª
-	void InitializeObject3d(Object3d* object, ID3D12Device* device);
+	void InitializeObject3d(ID3D12Device* device);
 	//çXêV
-	void UpdateObject3d(Object3d* object, XMMATRIX& matView, XMMATRIX& matProjection);
+	void UpdateObject3d(XMMATRIX& matView, XMMATRIX& matProjection);
 	//ï`âÊ
-	void DrawObject3d(Object3d* object, ID3D12GraphicsCommandList* commandList,
+	void DrawObject3d(ID3D12GraphicsCommandList* commandList,
 		D3D12_VERTEX_BUFFER_VIEW& vbView, D3D12_INDEX_BUFFER_VIEW& ibView, UINT numIndices);
 };

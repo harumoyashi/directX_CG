@@ -1,6 +1,6 @@
 #include "NObject.h"
 
-void Object3d::InitializeObject3d(Object3d* object, ID3D12Device* device)
+void Object3d::InitializeObject3d(ID3D12Device* device)
 {
 	HRESULT result;
 
@@ -33,33 +33,33 @@ void Object3d::InitializeObject3d(Object3d* object, ID3D12Device* device)
 	assert(SUCCEEDED(result));
 }
 
-void Object3d::UpdateObject3d(Object3d* object, XMMATRIX& matView, XMMATRIX& matProjection)
+void Object3d::UpdateObject3d(XMMATRIX& matView, XMMATRIX& matProjection)
 {
 	XMMATRIX matScale, matRot, matTrans;
 
 	//スケール、回転、平行移動行列の計算
-	matScale = XMMatrixScaling(object->scale.x, object->scale.y, object->scale.z);
+	matScale = XMMatrixScaling(scale.x, scale.y, scale.z);
 	matRot = XMMatrixIdentity();
-	matRot *= XMMatrixRotationZ(object->rotation.z);
-	matRot *= XMMatrixRotationX(object->rotation.x);
-	matRot *= XMMatrixRotationY(object->rotation.y);
-	matTrans = XMMatrixTranslation(object->position.x, object->position.y, object->position.z);
+	matRot *= XMMatrixRotationZ(rotation.z);
+	matRot *= XMMatrixRotationX(rotation.x);
+	matRot *= XMMatrixRotationY(rotation.y);
+	matTrans = XMMatrixTranslation(position.x, position.y, position.z);
 
 	//ワールド行列を合成
-	object->matWorld = XMMatrixIdentity();
-	object->matWorld = matTrans * matRot * matTrans;
+	matWorld = XMMatrixIdentity();
+	matWorld = matTrans * matRot * matTrans;
 
-	if (object->parent != nullptr)
+	if (parent != nullptr)
 	{
 		//親オブジェクトのワールド行列をかける
-		object->matWorld *= object->parent->matWorld;
+		matWorld *= parent->matWorld;
 	}
 
 	//定数バッファデータ転送
-	object->constMapTransform->mat = object->matWorld * matView * matProjection;
+	constMapTransform->mat = matWorld * matView * matProjection;
 }
 
-void Object3d::DrawObject3d(Object3d* object, ID3D12GraphicsCommandList* commandList,
+void Object3d::DrawObject3d(ID3D12GraphicsCommandList* commandList,
 	D3D12_VERTEX_BUFFER_VIEW& vbView, D3D12_INDEX_BUFFER_VIEW& ibView, UINT numIndices)
 {
 	//頂点バッファの設定
@@ -67,7 +67,7 @@ void Object3d::DrawObject3d(Object3d* object, ID3D12GraphicsCommandList* command
 	//インデックスバッファの設定
 	commandList->IASetIndexBuffer(&ibView);
 	//定数バッファビュー(CBV)の設定コマンド
-	commandList->SetGraphicsRootConstantBufferView(2, object->constBuffTransform->GetGPUVirtualAddress());
+	commandList->SetGraphicsRootConstantBufferView(2, constBuffTransform->GetGPUVirtualAddress());
 
 	//描画コマンド
 	commandList->DrawIndexedInstanced(numIndices, 1, 0, 0, 0);

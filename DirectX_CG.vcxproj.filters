@@ -57,6 +57,9 @@
     <ClInclude Include="NInputPad.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="NMotion.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -91,6 +94,9 @@
     </ClCompile>
     <ClCompile Include="NDirectXInput.cpp">
       <Filter>ソース ファイル\input</Filter>
+    </ClCompile>
+    <ClCompile Include="NMotion.cpp">
+      <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

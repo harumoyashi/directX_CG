@@ -209,7 +209,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//std::uniform_real_distribution<float> posDist(-30.0f, 30.0f);
 
 		//初期化
-		object3d.InitializeObject3d(&object3d, directX.device);
+		object3d.InitializeObject3d(directX.device);
 
 		////親子構造のサンプル↓
 		//if (i > 0)
@@ -843,7 +843,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		{
 			object3ds[i].UpdateObject3d(&object3ds[i], matView, matProjection);
 		}*/
-		object3d.UpdateObject3d(&object3d, matView, matProjection);
+		object3d.UpdateObject3d(matView, matProjection);
 
 		////ワールド行列
 		//XMMATRIX matScale;	//スケーリング行列
@@ -983,7 +983,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		{
 			object3ds[i].DrawObject3d(&object3ds[i], directX.commandList, vbView, ibView, _countof(indices));
 		}*/
-		object3d.DrawObject3d(&object3d, directX.commandList, vbView, ibView, _countof(indices));
+		object3d.DrawObject3d(directX.commandList, vbView, ibView, _countof(indices));
 		// 4.描画コマンドここまで
 
 		// 5.リソースバリアを戻す
