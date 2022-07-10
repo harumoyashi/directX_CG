@@ -142,6 +142,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ConstBuffer.h" />
+    <ClInclude Include="NInputPad.h" />
     <ClInclude Include="NMatrix4.h" />
     <ClInclude Include="NDirectX.h" />
     <ClInclude Include="NDirectXInput.h" />
@@ -153,6 +154,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ConstBuffer.cpp" />
+    <ClCompile Include="NInputPad.cpp" />
     <ClCompile Include="NMatrix4.cpp" />
     <ClCompile Include="NDirectX.cpp" />
     <ClCompile Include="NDirectXInput.cpp" />

@@ -12,6 +12,7 @@
 #pragma comment(lib, "d3dcompiler.lib")
 
 #include "NDirectXInput.h"
+#include "NInputPad.h"
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
@@ -56,6 +57,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//input初期化
 	DirectXInput key;
 	key.InputInit(win.w, win.hwnd);
+
+	InputPad pad;
+	pad.Initialize();
 	//DirectX初期化ここまで
 #pragma endregion
 #pragma region 描画初期化処理
@@ -781,6 +785,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma region DirectX毎フレーム処理
 		//DirectX毎フレーム　ここから
 		key.InputUpdate();
+		pad.Update();
 
 #pragma region 行列の計算
 		if (key.IsKeyDown(DIK_D) || key.IsKeyDown(DIK_A))
