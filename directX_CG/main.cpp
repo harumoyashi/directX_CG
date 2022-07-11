@@ -286,10 +286,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	assert(SUCCEEDED(result));
 
 	//値を書き込むと自動的に転送される
-	float R = 0.0f;
-	float G = 0.0f;
-	float B = 0.0f;
+	float R = 0.5f;
+	float G = 0.5f;
+	float B = 0.5f;
 	bool isWhite = false;
+	bool isAlpha = true;
 	constMapMaterial->color = XMFLOAT4(R, G, B, 1);
 
 	//ルートパラメータの設定
@@ -442,7 +443,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	D3D12_RENDER_TARGET_BLEND_DESC& blenddesc = pipelineDesc.BlendState.RenderTarget[0];
 	blenddesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;	//RBGA全てのチャンネルを描画
 
-	blenddesc.BlendEnable = true;					//ブレンドを有効にする
+	blenddesc.BlendEnable = isAlpha;					//ブレンドを有効にする
 	blenddesc.BlendOpAlpha = D3D12_BLEND_OP_ADD;	//加算
 	blenddesc.SrcBlendAlpha = D3D12_BLEND_ONE;		//ソースの値を100%使う
 	blenddesc.DestBlendAlpha = D3D12_BLEND_ZERO;	//デストの値を0%使う
@@ -489,8 +490,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	assert(SUCCEEDED(result));
 #pragma endregion
 
-
-
 	//ゲームループ
 	while (true)
 	{
@@ -524,18 +523,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			OutputDebugStringA("Hit 0\n");	//出力ウィンドウに「Hit 0」と表示
 		}
 
-		//値を書き込むと自動的に転送される
+		//勝手に色が変わってくように
 		if (isWhite)
 		{
 			R -= 0.01f;
 			G -= 0.01f;
-			B -= 0.01f;
+			B += 0.01f;
 		}
 		else
 		{
 			R += 0.01f;
 			G += 0.01f;
-			B += 0.01f;
+			B -= 0.01f;
 		}
 
 		if (R >= 1.0f)
@@ -546,7 +545,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		{
 			isWhite = false;
 		}
+		//値を書き込むと自動的に転送される
 		constMapMaterial->color = XMFLOAT4(R, G, B, 1);	//RGBAで半透明の赤
+
+		if (key[DIK_SPACE])
+		{
+			if (isAlpha)
+			{
+				isAlpha = false;
+			}
+			else
+			{
+				isAlpha = true;
+			}
+		}
+		blenddesc.BlendEnable = isAlpha;
 
 #pragma region グラフィックスコマンド
 		// バックバッファの番号を取得(2つなので0番か1番)
