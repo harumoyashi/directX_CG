@@ -286,7 +286,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	assert(SUCCEEDED(result));
 
 	//値を書き込むと自動的に転送される
-	constMapMaterial->color = XMFLOAT4(1, 0, 0, 0.5f);	//RGBAで半透明の赤
+	float R = 0.0f;
+	float G = 0.0f;
+	float B = 0.0f;
+	bool isWhite = false;
+	constMapMaterial->color = XMFLOAT4(R, G, B, 1);
 
 	//ルートパラメータの設定
 	D3D12_ROOT_PARAMETER rootParam = {};
@@ -521,7 +525,28 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		}
 
 		//値を書き込むと自動的に転送される
-		constMapMaterial->color = XMFLOAT4(1, 0, 0, 0.5f);	//RGBAで半透明の赤
+		if (isWhite)
+		{
+			R -= 0.01f;
+			G -= 0.01f;
+			B -= 0.01f;
+		}
+		else
+		{
+			R += 0.01f;
+			G += 0.01f;
+			B += 0.01f;
+		}
+
+		if (R >= 1.0f)
+		{
+			isWhite = true;
+		}
+		else if(R <= 0.0f)
+		{
+			isWhite = false;
+		}
+		constMapMaterial->color = XMFLOAT4(R, G, B, 1);	//RGBAで半透明の赤
 
 #pragma region グラフィックスコマンド
 		// バックバッファの番号を取得(2つなので0番か1番)
