@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include "Pipeline.h"
+#include "indexBuff.h"
 
 #include <dxgi1_6.h>	//Visual Studio Graphics Debuggerが誤動作起こしたら、1_4にすると解決するかも
 #include <cassert>
@@ -295,8 +296,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	rootParam.Descriptor.RegisterSpace = 0;						//デフォルト値
 	rootParam.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;	//全てのシェーダーから見える
 
+	IndexBuff index;
+	index.Initialize(device);
+
 	Pipeline pipeline;
-	pipeline.Initialize(device);
+	pipeline.Initialize(device,noBlend);
 
 	// ルートシグネチャ
 	ID3D12RootSignature* rootSignature;
@@ -332,7 +336,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			TranslateMessage(&msg);	//キー入力メッセージの処理
 			DispatchMessage(&msg);	//プロシージャにメッセージを送る
 		}
-
 
 		//アプリケーションが終わるときにmwssageがWM_QUITになる
 		if (msg.message == WM_QUIT)
@@ -374,6 +377,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		{
 			isWhite = false;
 		}
+
+		if (key[DIK_SPACE])
+		{
+			pipeline.Initialize(device, sub);
+		}
+
 		//値を書き込むと自動的に転送される
 		constMapMaterial->color = XMFLOAT4(R, G, B, 1);	//RGBAで半透明の赤
 
@@ -432,13 +441,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); // 三角形リスト
 
 		// 頂点バッファビューの設定コマンド
-		commandList->IASetVertexBuffers(0, 1, &pipeline.vbView);
+		commandList->IASetVertexBuffers(0, 1, &index.vbView);
 
 		//定数バッファビュー(CBV)の設定コマンド
 		commandList->SetGraphicsRootConstantBufferView(0, constBuffMaterial->GetGPUVirtualAddress());
 
 		// 描画コマンド
-		commandList->DrawInstanced(pipeline.vertices.size(), 1, 0, 0); // 全ての頂点を使って描画
+		commandList->DrawInstanced(index.vertices.size(), 1, 0, 0); // 全ての頂点を使って描画
 		// 4.描画コマンドここまで
 
 		// 5.リソースバリアを戻す

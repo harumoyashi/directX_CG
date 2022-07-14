@@ -1,19 +1,17 @@
 #include "Pipeline.h"
-void Pipeline::Initialize(ID3D12Device* device)
+void Pipeline::Initialize(ID3D12Device* device, int blendMode)
 {
-	SetVertices();
-	SetVerBuff();
-	CreateVerBuff(device);
-	TransferVerBuff();
-	CreateVerBuffView();
+	//シェーダー
 	VSCompile();
 	PSCompile();
+
+	//頂点レイアウト
 	CreateVerLayout();
 
 	// グラフィックスパイプライン設定
 	SetShader();
 	SetRasterizer();
-	SetBlendState();
+	SetBlendState(blendMode);
 	SetVerLayout();
 	SetTopology();
 }
@@ -21,67 +19,6 @@ void Pipeline::Initialize(ID3D12Device* device)
 void Pipeline::Update()
 {
 	//commandList->DrawInstanced(vertices.size(), 1, 0, 0); // 全ての頂点を使って描画
-}
-
-void Pipeline::SetVertices()
-{
-	// 頂点データ
-	vertices.push_back({ -0.5f, -0.5f, 0.0f });
-	vertices.push_back({ -0.5f, +0.5f, 0.0f });
-	vertices.push_back({ +0.5f, -0.5f, 0.0f });
-
-	// 頂点データ全体のサイズ = 頂点データ一つ分のサイズ * 頂点データの要素数
-	sizeVB = static_cast<UINT>(sizeof(XMFLOAT3) * vertices.size());
-}
-
-void Pipeline::SetVerBuff()
-{
-	heapProp.Type = D3D12_HEAP_TYPE_UPLOAD; // GPUへの転送用
-
-	resDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-	resDesc.Width = sizeVB; // 頂点データ全体のサイズ
-	resDesc.Height = 1;
-	resDesc.DepthOrArraySize = 1;
-	resDesc.MipLevels = 1;
-	resDesc.SampleDesc.Count = 1;
-	resDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-}
-
-void Pipeline::CreateVerBuff(ID3D12Device* device)
-{
-	HRESULT result;
-	result = device->CreateCommittedResource(
-		&heapProp, // ヒープ設定
-		D3D12_HEAP_FLAG_NONE,
-		&resDesc, // リソース設定
-		D3D12_RESOURCE_STATE_GENERIC_READ,
-		nullptr,
-		IID_PPV_ARGS(&vertBuff));
-	assert(SUCCEEDED(result));
-}
-
-void Pipeline::TransferVerBuff()
-{
-	// GPU上のバッファに対応した仮想メモリ(メインメモリ上)を取得
-	HRESULT result;
-	result = vertBuff->Map(0, nullptr, (void**)&vertMap);
-	assert(SUCCEEDED(result));
-	// 全頂点に対して
-	for (int i = 0; i < vertices.size(); i++) {
-		vertMap[i] = vertices[i]; // 座標をコピー
-	}
-	// 繋がりを解除
-	vertBuff->Unmap(0, nullptr);
-}
-
-void Pipeline::CreateVerBuffView()
-{
-	// GPU仮想アドレス
-	vbView.BufferLocation = vertBuff->GetGPUVirtualAddress();
-	// 頂点バッファのサイズ
-	vbView.SizeInBytes = sizeVB;
-	// 頂点1つ分のデータサイズ
-	vbView.StrideInBytes = sizeof(XMFLOAT3);
 }
 
 void Pipeline::VSCompile()
@@ -172,7 +109,7 @@ void Pipeline::SetRasterizer()
 	pipelineDesc.RasterizerState.DepthClipEnable = true;			// 深度クリッピングを有効に
 }
 
-void Pipeline::SetBlendState()
+void Pipeline::SetBlendState(int blendMode)
 {
 	pipelineDesc.BlendState.RenderTarget[0].RenderTargetWriteMask
 		= D3D12_COLOR_WRITE_ENABLE_ALL; // RBGA全てのチャンネルを描画
@@ -181,20 +118,47 @@ void Pipeline::SetBlendState()
 	D3D12_RENDER_TARGET_BLEND_DESC& blenddesc = pipelineDesc.BlendState.RenderTarget[0];
 	blenddesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;	//RBGA全てのチャンネルを描画
 
-	blenddesc.BlendEnable = true;					//ブレンドを有効にする
+	if (blendMode == noBlend)
+	{
+		blenddesc.BlendEnable = false;				//ブレンドを無効にする
+	}
+	else
+	{
+		blenddesc.BlendEnable = true;				//ブレンドを有効にする
+	}
 	blenddesc.BlendOpAlpha = D3D12_BLEND_OP_ADD;	//加算
 	blenddesc.SrcBlendAlpha = D3D12_BLEND_ONE;		//ソースの値を100%使う
 	blenddesc.DestBlendAlpha = D3D12_BLEND_ZERO;	//デストの値を0%使う
 
-	////加算合成
-	//blenddesc.BlendOp = D3D12_BLEND_OP_ADD;				//加算
-	//blenddesc.SrcBlend = D3D12_BLEND_SRC_ALPHA;			//ソースのアルファ値
-	//blenddesc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;	//1.0f-ソースのアルファ値
-
-	//減算合成
-	blenddesc.BlendOp = D3D12_BLEND_OP_SUBTRACT;	//減算
-	blenddesc.SrcBlend = D3D12_BLEND_ONE;			//ソースのアルファ値
-	blenddesc.DestBlend = D3D12_BLEND_ONE;			//1.0f-ソースのアルファ値
+	//ブレンドモードの変更
+	if (blendMode == add)
+	{
+		//加算合成
+		blenddesc.BlendOp = D3D12_BLEND_OP_ADD;		//加算
+		blenddesc.SrcBlend = D3D12_BLEND_ONE;		//ソースの値を100%使う
+		blenddesc.DestBlend = D3D12_BLEND_ONE;		//デストの値を100%使う
+	}
+	else if (blendMode == sub)
+	{
+		//減算合成
+		blenddesc.BlendOp = D3D12_BLEND_OP_SUBTRACT;	//減算
+		blenddesc.SrcBlend = D3D12_BLEND_ONE;			//ソースのアルファ値
+		blenddesc.DestBlend = D3D12_BLEND_ONE;			//1.0f-ソースのアルファ値
+	}
+	else if (blendMode == invers)
+	{
+		//色反転
+		blenddesc.BlendOp = D3D12_BLEND_OP_ADD;				//加算
+		blenddesc.SrcBlend = D3D12_BLEND_INV_DEST_COLOR;	//1.0f-ソースのアルファ値
+		blenddesc.DestBlend = D3D12_BLEND_ZERO;				//使わない
+	}
+	else if (blendMode == alpha)
+	{
+		//半透明合成
+		blenddesc.BlendOp = D3D12_BLEND_OP_ADD;				//加算
+		blenddesc.SrcBlend = D3D12_BLEND_SRC_ALPHA;			//ソースのアルファ値
+		blenddesc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;	//1.0f-ソースのアルファ値
+	}
 }
 
 void Pipeline::SetVerLayout()
