@@ -57,6 +57,12 @@
     <ClInclude Include="NInputPad.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="NIndexBuff.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="NPipeline.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -91,6 +97,12 @@
     </ClCompile>
     <ClCompile Include="NDirectXInput.cpp">
       <Filter>ソース ファイル\input</Filter>
+    </ClCompile>
+    <ClCompile Include="NIndexBuff.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="NPipeline.cpp">
+      <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

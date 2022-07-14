@@ -142,10 +142,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ConstBuffer.h" />
+    <ClInclude Include="NIndexBuff.h" />
     <ClInclude Include="NInputPad.h" />
     <ClInclude Include="NMatrix4.h" />
     <ClInclude Include="NDirectX.h" />
     <ClInclude Include="NDirectXInput.h" />
+    <ClInclude Include="NPipeline.h" />
     <ClInclude Include="NVector2.h" />
     <ClInclude Include="NWindows.h" />
     <ClInclude Include="NObject.h" />
@@ -154,11 +156,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ConstBuffer.cpp" />
+    <ClCompile Include="NIndexBuff.cpp" />
     <ClCompile Include="NInputPad.cpp" />
     <ClCompile Include="NMatrix4.cpp" />
     <ClCompile Include="NDirectX.cpp" />
     <ClCompile Include="NDirectXInput.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="NPipeline.cpp" />
     <ClCompile Include="NVector2.cpp" />
     <ClCompile Include="NWindows.cpp" />
     <ClCompile Include="NObject.cpp" />

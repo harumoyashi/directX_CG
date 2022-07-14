@@ -5,6 +5,8 @@
 #include "NMatrix4.h"
 #include "NObject.h"
 #include "NTexture.h"
+#include "NIndexBuff.h"
+#include "NPipeline.h"
 #include <string>
 #include <random>
 
