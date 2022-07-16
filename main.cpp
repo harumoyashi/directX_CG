@@ -196,35 +196,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//3Dオブジェクトの配列
 	Object3d object3d;
 
-	////乱数シード生成器
-	//std::random_device seed_gen;
-	////メルセンヌ・ツイスター
-	//std::mt19937_64 engine(seed_gen());
-
-	/*for (int i = 0; i < _countof(object3ds); i++)
-	{*/
-		////乱数範囲(回転角用)
-		//std::uniform_real_distribution<float> rotDist(0.0f, XMConvertToDegrees(180.0f));
-		////乱数範囲(座標用)
-		//std::uniform_real_distribution<float> posDist(-30.0f, 30.0f);
-
-		//初期化
-		object3d.InitializeObject3d(directX.device);
-
-		////親子構造のサンプル↓
-		//if (i > 0)
-		//{
-		//	//ひとつ前のオブジェクトを親オブジェクトとする
-		//	/*object3ds[i].parent = &object3ds[i - 1];*/
-		//	//親オブジェクトの9割の大きさ
-		//	object3ds[i].scale = { 0.9f,0.9f,0.9f };
-		//	//回転角設定
-		//	object3ds[i].rotation = { 0,0,0 };
-
-		//	////親オブジェクトに対してZ方向-8.0ずらす
-		//	//object3ds[i].position = { 0,0,0 };
-		//}
-	/*}*/
+	//初期化
+	object3d.InitializeObject3d(directX.device);
 
 	object3d.position = { 0,0,0 };
 
@@ -313,7 +286,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma endregion
 
 	//値を書き込むと自動的に転送される
-	constMapMaterial->color = XMFLOAT4(1, 0, 0, 0.5f);	//RGBAで半透明の赤
+	float R = 0.5f;
+	float G = 0.5f;
+	float B = 0.5f;
+	bool isMaxBlend = false;
+	constMapMaterial->color = XMFLOAT4(R, G, B, 1.0f);
 
 	//デスクリプタレンジの設定
 	D3D12_DESCRIPTOR_RANGE descriptorRange{};
@@ -388,37 +365,37 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		{{ -5.0f, -5.0f, -5.0f }, {}, {0.0f,1.0f}},	// 左下
 		{{ -5.0f,  5.0f, -5.0f }, {}, {0.0f,0.0f}},	// 左上
 		{{  5.0f, -5.0f, -5.0f }, {}, {1.0f,1.0f}},	// 右下
-		{{  5.0f,  5.0f, -5.0f }, {}, {1.0f,0.0f}},	// 右上
+		//{{  5.0f,  5.0f, -5.0f }, {}, {1.0f,0.0f}},	// 右上
 
-		//後
-		{{ -5.0f, -5.0f, 5.0f }, {}, {0.0f,1.0f}},	// 左下
-		{{ -5.0f,  5.0f, 5.0f }, {}, {0.0f,0.0f}},	// 左上
-		{{  5.0f, -5.0f, 5.0f }, {}, {1.0f,1.0f}},	// 右下
-		{{  5.0f,  5.0f, 5.0f }, {}, {1.0f,0.0f}},	// 右上
+		////後
+		//{{ -5.0f, -5.0f, 5.0f }, {}, {0.0f,1.0f}},	// 左下
+		//{{ -5.0f,  5.0f, 5.0f }, {}, {0.0f,0.0f}},	// 左上
+		//{{  5.0f, -5.0f, 5.0f }, {}, {1.0f,1.0f}},	// 右下
+		//{{  5.0f,  5.0f, 5.0f }, {}, {1.0f,0.0f}},	// 右上
 
-		 // 左
-		{{-5.0f,-5.0f,-5.0f }, {}, {0.0f, 1.0f}},    // 左下
-		{{-5.0f,-5.0f, 5.0f }, {}, {0.0f, 0.0f}},    // 左上
-		{{-5.0f, 5.0f,-5.0f }, {}, {1.0f, 1.0f}},    // 右下
-		{{-5.0f, 5.0f, 5.0f }, {}, {1.0f, 0.0f}},    // 右上
+		// // 左
+		//{{-5.0f,-5.0f,-5.0f }, {}, {0.0f, 1.0f}},    // 左下
+		//{{-5.0f,-5.0f, 5.0f }, {}, {0.0f, 0.0f}},    // 左上
+		//{{-5.0f, 5.0f,-5.0f }, {}, {1.0f, 1.0f}},    // 右下
+		//{{-5.0f, 5.0f, 5.0f }, {}, {1.0f, 0.0f}},    // 右上
 
-		// 右
-		{{ 5.0f,-5.0f,-5.0f }, {}, {0.0f, 1.0f}},    // 左下
-		{{ 5.0f,-5.0f, 5.0f }, {}, {0.0f, 0.0f}},    // 左上
-		{{ 5.0f, 5.0f,-5.0f }, {}, {1.0f, 1.0f}},    // 右下
-		{{ 5.0f, 5.0f, 5.0f }, {}, {1.0f, 0.0f}},    // 右上
+		//// 右
+		//{{ 5.0f,-5.0f,-5.0f }, {}, {0.0f, 1.0f}},    // 左下
+		//{{ 5.0f,-5.0f, 5.0f }, {}, {0.0f, 0.0f}},    // 左上
+		//{{ 5.0f, 5.0f,-5.0f }, {}, {1.0f, 1.0f}},    // 右下
+		//{{ 5.0f, 5.0f, 5.0f }, {}, {1.0f, 0.0f}},    // 右上
 
-		// 上
-		{{-5.0f,-5.0f,-5.0f }, {}, {0.0f, 1.0f}},    // 左下
-		{{ 5.0f,-5.0f,-5.0f }, {}, {0.0f, 0.0f}},    // 左上
-		{{-5.0f,-5.0f, 5.0f }, {}, {1.0f, 1.0f}},    // 右下
-		{{ 5.0f,-5.0f, 5.0f }, {}, {1.0f, 0.0f}},    // 右上
+		//// 上
+		//{{-5.0f,-5.0f,-5.0f }, {}, {0.0f, 1.0f}},    // 左下
+		//{{ 5.0f,-5.0f,-5.0f }, {}, {0.0f, 0.0f}},    // 左上
+		//{{-5.0f,-5.0f, 5.0f }, {}, {1.0f, 1.0f}},    // 右下
+		//{{ 5.0f,-5.0f, 5.0f }, {}, {1.0f, 0.0f}},    // 右上
 
-		// 下
-		{{-5.0f, 5.0f,-5.0f }, {}, {0.0f, 1.0f}},    // 左下
-		{{ 5.0f, 5.0f,-5.0f }, {}, {0.0f, 0.0f}},    // 左上
-		{{-5.0f, 5.0f, 5.0f }, {}, {1.0f, 1.0f}},    // 右下
-		{{ 5.0f, 5.0f, 5.0f }, {}, {1.0f, 0.0f}},    // 右上
+		//// 下
+		//{{-5.0f, 5.0f,-5.0f }, {}, {0.0f, 1.0f}},    // 左下
+		//{{ 5.0f, 5.0f,-5.0f }, {}, {0.0f, 0.0f}},    // 左上
+		//{{-5.0f, 5.0f, 5.0f }, {}, {1.0f, 1.0f}},    // 右下
+		//{{ 5.0f, 5.0f, 5.0f }, {}, {1.0f, 0.0f}},    // 右上
 	};
 
 	// 頂点データ全体のサイズ = 頂点データ一つ分のサイズ * 頂点データの要素数
@@ -443,22 +420,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	{
 		//前
 		0,1,2,	//三角形1つ目
-		2,1,3,	//三角形2つ目
-		//後
-		5,4,6,	//三角形3つ目
-		5,6,7,	//三角形4つ目
-		//左
-		8,9,10,	//三角形5つ目
-		10,9,11,//三角形6つ目
-		//右
-		13,12,14,	//三角形7つ目
-		13,14,15,	//三角形8つ目
-		//下
-		16,17,18,	//三角形9つ目
-		18,17,19,	//三角形10つ目
-		//上
-		21,20,22,	//三角形11つ目
-		21,22,23,	//三角形12つ目
+		//2,1,3,	//三角形2つ目
+		////後
+		//5,4,6,	//三角形3つ目
+		//5,6,7,	//三角形4つ目
+		////左
+		//8,9,10,	//三角形5つ目
+		//10,9,11,//三角形6つ目
+		////右
+		//13,12,14,	//三角形7つ目
+		//13,14,15,	//三角形8つ目
+		////下
+		//16,17,18,	//三角形9つ目
+		//18,17,19,	//三角形10つ目
+		////上
+		//21,20,22,	//三角形11つ目
+		//21,22,23,	//三角形12つ目
 	};
 
 	////インデックスデータ(線のやつ)
@@ -800,44 +777,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
 		}
 
-		////座標操作
-		//if (key.IsKeyDown(DIK_UP) || key.IsKeyDown(DIK_DOWN) || key.IsKeyDown(DIK_RIGHT) || key.IsKeyDown(DIK_LEFT))
-		//{
-		//	if (key.IsKeyDown(DIK_UP)) { object3ds[0].position.y += 1.0f; }
-		//	else if (key.IsKeyDown(DIK_DOWN)) { object3ds[0].position.y -= 1.0f; }
-		//	if (key.IsKeyDown(DIK_RIGHT)) { object3ds[0].position.x += 1.0f; }
-		//	else if (key.IsKeyDown(DIK_LEFT)) { object3ds[0].position.x -= 1.0f; }
-		//}
+		//座標操作
+		if (key.IsKeyDown(DIK_UP) || key.IsKeyDown(DIK_DOWN) || key.IsKeyDown(DIK_RIGHT) || key.IsKeyDown(DIK_LEFT))
+		{
+			if (key.IsKeyDown(DIK_UP)) { object3d.position.y += 1.0f; }
+			else if (key.IsKeyDown(DIK_DOWN)) { object3d.position.y -= 1.0f; }
+			if (key.IsKeyDown(DIK_RIGHT)) { object3d.position.x += 1.0f; }
+			else if (key.IsKeyDown(DIK_LEFT)) { object3d.position.x -= 1.0f; }
+		}
 
-		////上半身回転
-		//if (key.IsKeyDown(DIK_U) || key.IsKeyDown(DIK_I))
-		//{
-		//	if (key.IsKeyDown(DIK_U)) { object3ds[kChest].rotation.y += 0.05f; }
-		//	else if (key.IsKeyDown(DIK_I)) { object3ds[kChest].rotation.y -= 0.05f; }
-		//}
-
-		////下半身回転
-		//if (key.IsKeyDown(DIK_J) || key.IsKeyDown(DIK_K))
-		//{
-		//	if (key.IsKeyDown(DIK_J)) { object3ds[kHip].rotation.y += 0.05f; }
-		//	else if (key.IsKeyDown(DIK_K)) { object3ds[kHip].rotation.y -= 0.05f; }
-		//}
-
-		/*eye.z -= 1.0f;*/
 		////ビュー変換行列再作成
 		//matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
-
-		//rotation.x += 0.2f;
-		//rotation.y += 0.2f;
-
-		////いずれかのキーを押したとき
-		//if (key.IsKeyDown(DIK_W) || key.IsKeyDown(DIK_S) || key.IsKeyDown(DIK_D) || key.IsKeyDown(DIK_A))
-		//{
-		//	if (key.IsKeyDown(DIK_W)) { position.y += 2.0f; }
-		//	else if (key.IsKeyDown(DIK_S)) { position.y -= 2.0f; }
-		//	if (key.IsKeyDown(DIK_D)) { position.x += 2.0f; }
-		//	else if (key.IsKeyDown(DIK_A)) { position.x -= 2.0f; }
-		//}
 
 		/*for (size_t i = 0; i < _countof(object3ds); i++)
 		{
@@ -864,6 +814,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		////定数バッファに送信
 		//directX.constMapTransform0->mat = matWorld * matView * matProjection;
+
 #pragma endregion
 		////ワールド変換行列
 		//XMMATRIX matWorld1 = XMMatrixIdentity();
@@ -879,8 +830,26 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		////ワールド、ビュー、射影行列を合成してシェーダーに転送
 		//directX.constMapTransform1->mat = matWorld1 * matView * matProjection;
 
+		//勝手に色が変わってくように
+		if (isMaxBlend)
+		{
+			R -= 0.005f;
+		}
+		else
+		{
+			R += 0.005f;
+		}
+
+		if (R >= 1.0f)
+		{
+			isMaxBlend = true;
+		}
+		else if (R <= 0.0f)
+		{
+			isMaxBlend = false;
+		}
 		//値を書き込むと自動的に転送される
-		constMapMaterial->color = XMFLOAT4(1, 1, 1, 1);	//RGBAで半透明の赤
+		constMapMaterial->color = XMFLOAT4(R, G, B, 1);
 
 #pragma region グラフィックスコマンド
 		// バックバッファの番号を取得(2つなので0番か1番)
