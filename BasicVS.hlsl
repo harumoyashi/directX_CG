@@ -12,12 +12,13 @@
 //	return pos + float4(-0.2f,-0.2f,1,1);
 //}
 
-VSOutput main(float4 pos:POSITION,float3 normal : NORMAL, float2 uv : TEXCOORD)
+VSOutput main(float4 pos:POSITION,float3 normal : NORMAL, float2 uv : TEXCOORD,float4 color : COLOR)
 {
 	VSOutput output;	//ピクセルシェーダーに渡す値
 	/*output.svpos = pos;*/
 	output.svpos = mul(mat, pos);	//座標に行列を乗算
 	output.normal = normal;
 	output.uv = uv;
+	output.color = color;
 	return output;
 }

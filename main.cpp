@@ -356,15 +356,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		XMFLOAT3 pos;		//xyz座標
 		XMFLOAT3 normal;	//法線ベクトル
 		XMFLOAT2 uv;		//uv座標
+		XMFLOAT4 color;		//色
 	};
 
 	// 頂点データ
 	Vertex vertices[] = {
-		//	x		y		z	 法線	u	v
+		//	x		y		z	 法線	u	v      R  G  B  A
 		//前
-		{{ -5.0f, -5.0f, -5.0f }, {}, {0.0f,1.0f}},	// 左下
-		{{ -5.0f,  5.0f, -5.0f }, {}, {0.0f,0.0f}},	// 左上
-		{{  5.0f, -5.0f, -5.0f }, {}, {1.0f,1.0f}},	// 右下
+		{{ -5.0f, -5.0f, -5.0f }, {}, {0.0f,1.0f},{0,0,0,1}},	// 左下
+		{{ -5.0f,  5.0f, -5.0f }, {}, {0.0f,0.0f},{255,255,255,1}},	// 左上
+		{{  5.0f, -5.0f, -5.0f }, {}, {1.0f,1.0f},{0,0,255,1}},	// 右下
 		//{{  5.0f,  5.0f, -5.0f }, {}, {1.0f,0.0f}},	// 右上
 
 		////後
@@ -479,6 +480,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		XMStoreFloat3(&vertices[index0].normal, normal);
 		XMStoreFloat3(&vertices[index1].normal, normal);
 		XMStoreFloat3(&vertices[index2].normal, normal);
+
+		XMStoreFloat4(&vertices[index0].color, {255,0,0,1});
+		XMStoreFloat4(&vertices[index1].color, {0,255,0,1});
+		XMStoreFloat4(&vertices[index2].color, {0,0,255,1});
 	}
 
 	// 頂点バッファの生成
@@ -645,6 +650,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//uv座標//
 			{
 				"TEXCOORD",0,DXGI_FORMAT_R32G32_FLOAT,0,
+				D3D12_APPEND_ALIGNED_ELEMENT,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0
+			},
+		//色//
+			{
+				"COLOR",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
 				D3D12_APPEND_ALIGNED_ELEMENT,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0
 			}
 	};
