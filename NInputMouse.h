@@ -5,15 +5,18 @@
 class InputMouse
 {
 public:
-	void Initialize(HWND hwnd);
-	void Update();
+	void Initialize(WNDCLASSEX w, HWND hwnd);
+	void Update(HWND hwnd);
 
 	void GetState(HWND hwnd);
 	void GetCursorPosition(HWND hwnd);
 
+	bool IsDown(BYTE button);
 	bool IsTrigger(BYTE button);
 
-private:
+	Vector3 GetCursorVec();
+
+public:
 	DIMOUSESTATE state;
 	DIMOUSESTATE prev;
 
@@ -25,5 +28,8 @@ private:
 		Vector3 prevPos;
 		Vector3 Vec;
 	};
+
+	Cursor cursor;
+
 };
 

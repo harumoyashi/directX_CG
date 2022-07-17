@@ -13,6 +13,7 @@
 
 #include "NDirectXInput.h"
 #include "NInputPad.h"
+#include "NInputMouse.h"
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
@@ -60,6 +61,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	InputPad pad;
 	pad.Initialize();
+
+	InputMouse mouse;
+	mouse.Initialize(win.w, win.hwnd);
 	//DirectX初期化ここまで
 #pragma endregion
 #pragma region 描画初期化処理
@@ -278,7 +282,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//ビュー変換行列作成
 	matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
 
-	float angle = 0.0f;	//カメラの回転角
+	Vector3 move = { 0,0,0 };	//マウス動かした距離
+	Vector3 mouseVec = { 0,0,0 };	//マウス動かした距離
+	float angle = 0.0f;
 
 	//XMFLOAT3 scale = { 1.0f,1.0f,1.0f };	//スケーリング倍率
 	//XMFLOAT3 rotation = { 0.0f,0.0f,0.0f };	//回転角
@@ -481,9 +487,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		XMStoreFloat3(&vertices[index1].normal, normal);
 		XMStoreFloat3(&vertices[index2].normal, normal);
 
-		XMStoreFloat4(&vertices[index0].color, {255,0,0,1});
-		XMStoreFloat4(&vertices[index1].color, {0,255,0,1});
-		XMStoreFloat4(&vertices[index2].color, {0,0,255,1});
+		XMStoreFloat4(&vertices[index0].color, { 255,0,0,1 });
+		XMStoreFloat4(&vertices[index1].color, { 0,255,0,1 });
+		XMStoreFloat4(&vertices[index2].color, { 0,0,255,1 });
 	}
 
 	// 頂点バッファの生成
@@ -773,7 +779,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//DirectX毎フレーム　ここから
 		key.InputUpdate();
 		pad.Update();
-
+		mouse.Update(win.hwnd);
 #pragma region 行列の計算
 		if (key.IsKeyDown(DIK_D) || key.IsKeyDown(DIK_A))
 		{
@@ -787,6 +793,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
 		}
 
+		if (mouse.IsDown(0))
+		{
+			mouseVec = mouse.GetCursorVec();
+			move += mouseVec * 0.2f;
+			eye.x = -50.0f * sinf(move.x) * cosf(move.y);
+			eye.y = 50.0f * sinf(move.y);
+			eye.z = -50.0f * sinf(move.x) * cosf(move.y);
+			if (mouseVec.length() != 0)
+			{
+				//ビュー変換行列再作成
+				matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
+			}
+		}
+
 		//座標操作
 		if (key.IsKeyDown(DIK_UP) || key.IsKeyDown(DIK_DOWN) || key.IsKeyDown(DIK_RIGHT) || key.IsKeyDown(DIK_LEFT))
 		{
@@ -795,9 +815,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			if (key.IsKeyDown(DIK_RIGHT)) { object3d.position.x += 1.0f; }
 			else if (key.IsKeyDown(DIK_LEFT)) { object3d.position.x -= 1.0f; }
 		}
-
-		////ビュー変換行列再作成
-		//matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
 
 		/*for (size_t i = 0; i < _countof(object3ds); i++)
 		{
