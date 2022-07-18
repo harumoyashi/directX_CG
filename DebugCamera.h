@@ -24,7 +24,6 @@ private:
 
 	Vector3 move = { 0,0,0 };		//球面座標
 	Vector3 mouseVec = { 0,0,0 };	//マウス動かした方向
-	float mouseSpeed = 0.05f;
 
 	Vector3 eyeVec;
 	Vector3 targetVec;
@@ -33,8 +32,10 @@ private:
 	Vector3 rightVec;	//右ベクトル
 	Vector3 upVec;		//上ベクトル
 	Vector3 yVec = { 0,1,0 };	//Yの仮ベクトル(右ベクトル求めるのに使う)
+	Vector3 trans = {0,0,0};		//カメラの移動量格納変数
 
-	float moveSpeed = 0.2f;	//カメラの移動速度
+	float rotSpeed = 0.05f;		//カメラの球面移動速度
+	float transSpeed = 0.5f;	//カメラの平行移動速度
 
 	//入力デバイス
 	InputMouse mouse;
