@@ -36,8 +36,7 @@ void InputMouse::Update(HWND hwnd)
 
 void InputMouse::GetState(HWND hwnd)
 {
-	//前フレームの状態を代入
-	prev = state;
+	
 	//前フレームの位置代入
 	cursor.prevPos = cursor.nowPos;
 	//マウス情報の取得開始
@@ -55,7 +54,8 @@ void InputMouse::GetCursorPosition(HWND hwnd)
 	//ウィンドウから見たカーソル座標取得
 	ScreenToClient(hwnd, &cursor.p);
 
-	
+	//前フレームの状態を代入
+	prev = state;
 	//現フレームの座標代入
 	cursor.nowPos.x = (float)cursor.p.x;
 	cursor.nowPos.y = (float)cursor.p.y;
