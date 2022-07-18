@@ -14,6 +14,7 @@
 #include "NDirectXInput.h"
 #include "NInputPad.h"
 #include "NInputMouse.h"
+#include "DebugCamera.h"
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
@@ -794,32 +795,32 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
 		}
 
-		if (mouse.IsDown(0))
-		{
-			mouseVec = mouse.GetCursorVec();	//バグんないように代入
-			if (up.y >= 0)
-			{
-				move += mouseVec * speed;
+		//球面座標移動
+		if (mouse.IsDown(0)) {
+			//カメラが上を向いてるとき通常通りに座標を足す
+			if (up.y >= 0) {
+				move += mouse.GetCursorVec() * 0.05f;
 			}
-			else if(up.y <= 0)
-			{
-				move.x -= mouseVec.x * speed;
-				move.y += mouseVec.y * speed;
-				move.z -= mouseVec.z * speed;
-			}
-
-			//カメラ座標代入
-			eye.x = -50.0f * sinf(move.x) * cosf(move.y);
-			eye.y = 50.0f * sinf(move.y);
-			eye.z = -50.0f * sinf(move.x) * cosf(move.y);
-			up = { 0,cosf(move.y),0 };	//上ベクトル変更
-
-			if (mouseVec.length() != 0)
-			{
-				//ビュー変換行列再作成
-				matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
+			//カメラが逆さまになった時X.Z座標を反転させる
+			else if (up.y <= 0) {
+				move.x -= mouse.GetCursorVec().x * 0.05f;
+				move.y += mouse.GetCursorVec().y * 0.05f;
+				move.z -= mouse.GetCursorVec().z * 0.05f;
 			}
 		}
+
+		//カメラUP変換
+		up = {
+			0,
+			cosf(move.y),
+			0
+		};
+		//カメラ座標に代入
+		eye.x = -50.0f*sinf(move.x) * cosf(move.y);
+		eye.y = 50.0f * sinf(move.y);
+		eye.z = -50.0f * cosf(move.x) * cosf(move.y);
+		//ビュー変換行列更新
+		matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
 
 		//座標操作
 		if (key.IsKeyDown(DIK_UP) || key.IsKeyDown(DIK_DOWN) || key.IsKeyDown(DIK_RIGHT) || key.IsKeyDown(DIK_LEFT))
@@ -835,6 +836,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			object3ds[i].UpdateObject3d(&object3ds[i], matView, matProjection);
 		}*/
 		object3d.UpdateObject3d(matView, matProjection);
+		/*object3d.UpdateObject3d(debugCamera.GetMatView(), matProjection);*/
 
 		////ワールド行列
 		//XMMATRIX matScale;	//スケーリング行列

@@ -33,7 +33,7 @@ void Object3d::InitializeObject3d(ID3D12Device* device)
 	assert(SUCCEEDED(result));
 }
 
-void Object3d::UpdateObject3d(XMMATRIX& matView, XMMATRIX& matProjection)
+void Object3d::UpdateObject3d(XMMATRIX matView, XMMATRIX& matProjection)
 {
 	XMMATRIX matScale, matRot, matTrans;
 
