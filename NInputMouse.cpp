@@ -84,6 +84,11 @@ bool InputMouse::IsTrigger(BYTE button)
 	return false;
 }
 
+float InputMouse::GetWheel()
+{
+	return state.lZ;
+}
+
 Vector3 InputMouse::GetCursorVec()
 {
 	return cursor.Vec;

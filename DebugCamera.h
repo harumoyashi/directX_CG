@@ -22,6 +22,8 @@ private:
 	XMFLOAT3 target;	//注視点座標
 	XMFLOAT3 up;		//上方向ベクトル
 
+	float cameraLen = 100.0f;		//カメラの距離
+
 	Vector3 move = { 0,0,0 };		//球面座標
 	Vector3 mouseVec = { 0,0,0 };	//マウス動かした方向
 

@@ -5,7 +5,7 @@
 void DebugCamera::Initialize(WNDCLASSEX w, HWND hwnd)
 {
 	mouse.Initialize(w, hwnd);
-	eye = { 0, 0, -100 };	//視点座標
+	eye = { 0, 0, cameraLen };	//視点座標
 	target = { 0, 0, 0 };	//注視点座標
 	up = { 0, 1, 0 };		//上方向ベクトル
 
@@ -78,6 +78,12 @@ void DebugCamera::CameraMove()
 			targetVec += upVec * transSpeed;
 		}
 	}
+	else
+	{
+		//ホイール押してないとき
+		//ホイール回転に応じて拡大縮小
+		cameraLen += -mouse.GetWheel() * (cameraLen * 0.001f);
+	}
 	//注視点座標とカメラ座標をXMFLOAT3型に戻す
 	eye = { eyeVec.x,eyeVec.y,eyeVec.z };
 	target = { targetVec.x,targetVec.y,targetVec.z };
@@ -99,9 +105,9 @@ void DebugCamera::CameraMove()
 	//カメラUP変換
 	up = { 0,cosf(move.y),0 };
 	//カメラ座標に代入
-	eye.x = -100.0f * sinf(move.x) * cosf(move.y) + trans.x;
-	eye.y = 100.0f * sinf(move.y) + trans.y;
-	eye.z = -100.0f * cosf(move.x) * cosf(move.y) + trans.z;
+	eye.x = -cameraLen * sinf(move.x) * cosf(move.y) + trans.x;
+	eye.y = cameraLen * sinf(move.y) + trans.y;
+	eye.z = -cameraLen * cosf(move.x) * cosf(move.y) + trans.z;
 }
 
 XMMATRIX DebugCamera::GetMatView()

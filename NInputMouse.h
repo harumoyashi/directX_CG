@@ -20,6 +20,7 @@ public:
 
 	bool IsDown(BYTE button);
 	bool IsTrigger(BYTE button);
+	float GetWheel();
 
 	Vector3 GetCursorVec();
 
