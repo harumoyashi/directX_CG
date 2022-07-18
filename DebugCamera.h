@@ -1,37 +1,43 @@
 #pragma once
 #include "NVector3.h"
 #include "NInputMouse.h"
+#include "NDirectXInput.h"
 #include <DirectXMath.h>
 using namespace DirectX;
 class DebugCamera
 {
 public:
-	void DebugCameraIni(WNDCLASSEX w,HWND hwnd);
-	void Updata(HWND hwnd);
+	void Initialize(WNDCLASSEX w, HWND hwnd);
+	void Update(HWND hwnd);
 
-
+	//ビュー変換行列取得
 	XMMATRIX GetMatView();
 
 private:
+	//カメラ移動
 	void CameraMove();
-	//ビュー変換行列
-	XMMATRIX matView;
+
+	XMMATRIX matView;	//ビュー変換行列
 	XMFLOAT3 eye;		//視点座標
 	XMFLOAT3 target;	//注視点座標
 	XMFLOAT3 up;		//上方向ベクトル
 
-	Vector3 dist = { 0,0,0 };
-	Vector3 moveDist = {0,0,0};	//球面座標
-	Vector3 cameraTrans = { 0,0,0 };//平行移動座標
+	Vector3 move = { 0,0,0 };		//球面座標
+	Vector3 mouseVec = { 0,0,0 };	//マウス動かした方向
+	float mouseSpeed = 0.05f;
 
-	//正面・横・上ベクトル
-	Vector3 frontVec;
-	Vector3 sideVec;
-	Vector3 upVec;
+	Vector3 eyeVec;
+	Vector3 targetVec;
 
-	InputMouse input;
+	Vector3 frontVec;	//正面ベクトル
+	Vector3 rightVec;	//右ベクトル
+	Vector3 upVec;		//上ベクトル
+	Vector3 yVec = { 0,1,0 };	//Yの仮ベクトル(右ベクトル求めるのに使う)
 
-	float frontdist;
+	float moveSpeed = 0.2f;	//カメラの移動速度
 
+	//入力デバイス
+	InputMouse mouse;
+	DirectXInput key;
 };
 

@@ -2,112 +2,88 @@
 #include <DirectXMath.h>
 #include <WinUser.h>
 
-void DebugCamera::DebugCameraIni(WNDCLASSEX w,HWND hwnd)
+void DebugCamera::Initialize(WNDCLASSEX w, HWND hwnd)
 {
-	input.Initialize(w,hwnd);
-	eye = { 0, 0, -200 };	//視点座標
+	mouse.Initialize(w, hwnd);
+	eye = { 0, 0, -100 };	//視点座標
 	target = { 0, 0, 0 };	//注視点座標
 	up = { 0, 1, 0 };		//上方向ベクトル
 
 	matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
 
 	frontVec = { 0, 0, 0 };
-	sideVec = { 0,0,0 };
-
-	frontdist = 50;
 }
 
-void DebugCamera::Updata(HWND hwnd)
+void DebugCamera::Update(HWND hwnd)
 {
 	//マウスの情報の更新
-	input.GetState(hwnd);
+	mouse.GetState(hwnd);
 	CameraMove();
 	matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
 }
 
 void DebugCamera::CameraMove()
 {
-	//Vector3 proviUpVec = { 0,1,0 };
-	//float speed = 0.5f;
-	////カメラが注視点座標より奥にいるとき
-	//if (up.y <= 0) {
-	//	speed *= -1;
-	//}
-
-	////プレイヤーの正面ベクトル
-	//frontVec = {
-	//	target.x - eye.x,
-	//	target.y - eye.y,
-	//	target.z - eye.z
-	//};
-	//frontVec.normalize();
-
-	//sideVec = proviUpVec.cross(frontVec);
-	//sideVec.normalize();
-
-	//upVec = sideVec.cross(frontVec);
-	//upVec.normalize();
-
-	////平行移動
-	//if (input.IsMouseDown(MOUSE_WHEEL)) {
-	//	//上下に動かしたとき
-	//	if (input.GetCoursorMoveY() > 0) {
-	//		cameraTrans -= upVec * speed;
-	//		target.x -= upVec.x * speed;
-	//		target.y -= upVec.y * speed;
-	//		target.z -= upVec.z * speed;
-	//	}
-	//	else if (input.GetCoursorMoveY() < 0) {
-	//		cameraTrans += upVec * speed;
-	//		target.x += upVec.x * speed;
-	//		target.y += upVec.y * speed;
-	//		target.z += upVec.z * speed;
-	//	}
-	//	//マウスカーソルを左右に動かしたとき
-	//	if (input.GetCoursorMoveX() > 0) {
-	//		cameraTrans.x -= sideVec.x * speed;
-	//		cameraTrans.z -= sideVec.z * speed;
-
-	//		target.x -= sideVec.x * speed;
-	//		target.z -= sideVec.z * speed;
-	//	}
-	//	else if (input.GetCoursorMoveX() < 0) {
-	//		cameraTrans.x += sideVec.x * speed;
-	//		cameraTrans.z += sideVec.z * speed;
-
-	//		target.x += sideVec.x * speed;
-	//		target.z += sideVec.z * speed;
-	//	}
-
-	//}
-	////拡大縮小
-	//else if (!input.IsMouseDown(MOUSE_WHEEL)) {
-	//	frontdist += -input.IsMouseWheel() * (frontdist * 0.001f);
-	//}
-	//球面座標移動
-	if (input.IsDown(0)) {
+	//マウスでカメラの球面座標移動//
+	if (mouse.IsDown(MOUSE_LEFT)) {
 		//カメラが上を向いてるとき通常通りに座標を足す
 		if (up.y >= 0) {
-			moveDist += input.GetCursorVec() * 0.05f;
+			move += mouse.GetCursorVec() * mouseSpeed;
 		}
 		//カメラが逆さまになった時X.Z座標を反転させる
 		else if (up.y <= 0) {
-			moveDist.x -= input.GetCursorVec().x * 0.05f;
-			moveDist.y += input.GetCursorVec().y * 0.05f;
-			moveDist.z -= input.GetCursorVec().z * 0.05f;
+			move.x -= mouse.GetCursorVec().x * mouseSpeed;
+			move.y += mouse.GetCursorVec().y * mouseSpeed;
+			move.z -= mouse.GetCursorVec().z * mouseSpeed;
 		}
+	//カメラUP変換
+	up = { 0,cosf(move.y),0 };
+	//カメラ座標に代入
+	eye.x = -100.0f * sinf(move.x) * cosf(move.y);
+	eye.y = 100.0f * sinf(move.y);
+	eye.z = -100.0f * cosf(move.x) * cosf(move.y);
 	}
 
-	//カメラUP変換
-	up = {
-		0,
-		cosf(moveDist.y),
-		0
-	};
 
-	eye.x = -frontdist * sinf(moveDist.x) * cosf(moveDist.y);
-	eye.y = frontdist * sinf(moveDist.y);
-	eye.z = -frontdist * cosf(moveDist.x) * cosf(moveDist.y);
+	//キーでカメラの平行移動//
+	//注視点座標とカメラ座標をVector3型に格納
+	eyeVec = { eye.x,eye.y,eye.z };
+	targetVec = { target.x,target.y,target.z };
+
+	//注視点座標とカメラ座標から正面ベクトル取得
+	frontVec = targetVec - eyeVec;
+	//正面ベクトル正規化
+	frontVec.normalize();
+
+	//右ベクトル取得
+	rightVec = yVec.cross(frontVec);
+	rightVec.normalize();
+
+	if (key.IsKeyDown(DIK_A))
+	{
+		eyeVec += rightVec * moveSpeed;
+		targetVec += rightVec * moveSpeed;
+	}
+	else if (key.IsKeyDown(DIK_D))
+	{
+		eyeVec -= rightVec * moveSpeed;
+		targetVec -= rightVec * moveSpeed;
+	}
+
+	if (key.IsKeyDown(DIK_W))
+	{
+		eyeVec += frontVec * moveSpeed;
+		targetVec += frontVec * moveSpeed;
+	}
+	else if (key.IsKeyDown(DIK_S))
+	{
+		eyeVec -= frontVec * moveSpeed;
+		targetVec -= frontVec * moveSpeed;
+	}
+
+	//注視点座標とカメラ座標をXMFLOAT3型に戻す
+	eye = { eyeVec.x,eyeVec.y,eyeVec.z };
+	target = { targetVec.x,targetVec.y,targetVec.z };
 }
 
 XMMATRIX DebugCamera::GetMatView()

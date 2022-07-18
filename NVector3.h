@@ -1,4 +1,5 @@
 #pragma once
+#include <DirectXMath.h>
 
 const float PI = 3.141592654f;
 

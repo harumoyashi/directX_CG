@@ -2,6 +2,13 @@
 #include <dinput.h>
 #include "NVector3.h"
 
+enum Mouse
+{
+	MOUSE_LEFT,
+	MOUSE_RIGHT,
+	MOUSE_WHEEL,
+};
+
 class InputMouse
 {
 public:
@@ -16,7 +23,7 @@ public:
 
 	Vector3 GetCursorVec();
 
-public:
+private:
 	DIMOUSESTATE state;
 	DIMOUSESTATE prev;
 
@@ -30,6 +37,5 @@ public:
 	};
 
 	Cursor cursor;
-
 };
 

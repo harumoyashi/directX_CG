@@ -283,10 +283,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//ビュー変換行列作成
 	matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
 
-	Vector3 move = { 0,0,0 };	//マウス動かした距離
-	Vector3 mouseVec = { 0,0,0 };	//マウス動かした距離
-	float speed = 0.1f;
 	float angle = 0.0f;
+
+	DebugCamera debugCamera;
+	debugCamera.Initialize(win.w,win.hwnd);
 
 	//XMFLOAT3 scale = { 1.0f,1.0f,1.0f };	//スケーリング倍率
 	//XMFLOAT3 rotation = { 0.0f,0.0f,0.0f };	//回転角
@@ -782,45 +782,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		key.InputUpdate();
 		pad.Update();
 		mouse.Update(win.hwnd);
+		debugCamera.Update(win.hwnd);
 #pragma region 行列の計算
-		if (key.IsKeyDown(DIK_D) || key.IsKeyDown(DIK_A))
-		{
-			if (key.IsKeyDown(DIK_D)) angle += XMConvertToRadians(10.0f);
-			else if (key.IsKeyDown(DIK_A)) angle -= XMConvertToRadians(10.0f);
+		//if (key.IsKeyDown(DIK_D) || key.IsKeyDown(DIK_A))
+		//{
+		//	if (key.IsKeyDown(DIK_D)) angle += XMConvertToRadians(10.0f);
+		//	else if (key.IsKeyDown(DIK_A)) angle -= XMConvertToRadians(10.0f);
 
-			//angleラジアンだけY軸周りに回転。半径は-100
-			eye.x = -100 * sinf(angle);
-			eye.z = -100 * cosf(angle);
-			//ビュー変換行列再作成
-			matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
-		}
-
-		//球面座標移動
-		if (mouse.IsDown(0)) {
-			//カメラが上を向いてるとき通常通りに座標を足す
-			if (up.y >= 0) {
-				move += mouse.GetCursorVec() * 0.05f;
-			}
-			//カメラが逆さまになった時X.Z座標を反転させる
-			else if (up.y <= 0) {
-				move.x -= mouse.GetCursorVec().x * 0.05f;
-				move.y += mouse.GetCursorVec().y * 0.05f;
-				move.z -= mouse.GetCursorVec().z * 0.05f;
-			}
-		}
-
-		//カメラUP変換
-		up = {
-			0,
-			cosf(move.y),
-			0
-		};
-		//カメラ座標に代入
-		eye.x = -50.0f*sinf(move.x) * cosf(move.y);
-		eye.y = 50.0f * sinf(move.y);
-		eye.z = -50.0f * cosf(move.x) * cosf(move.y);
-		//ビュー変換行列更新
-		matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
+		//	//angleラジアンだけY軸周りに回転。半径は-100
+		//	eye.x = -100 * sinf(angle);
+		//	eye.z = -100 * cosf(angle);
+		//	//ビュー変換行列再作成
+		//	matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
+		//}
 
 		//座標操作
 		if (key.IsKeyDown(DIK_UP) || key.IsKeyDown(DIK_DOWN) || key.IsKeyDown(DIK_RIGHT) || key.IsKeyDown(DIK_LEFT))
@@ -835,8 +809,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		{
 			object3ds[i].UpdateObject3d(&object3ds[i], matView, matProjection);
 		}*/
-		object3d.UpdateObject3d(matView, matProjection);
-		/*object3d.UpdateObject3d(debugCamera.GetMatView(), matProjection);*/
+
+		/*object3d.UpdateObject3d(matView, matProjection);*/
+
+		//デバッグカメラのビュー変換行列を適用
+		object3d.UpdateObject3d(debugCamera.GetMatView(), matProjection);
 
 		////ワールド行列
 		//XMMATRIX matScale;	//スケーリング行列
