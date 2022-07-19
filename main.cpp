@@ -784,18 +784,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		mouse.Update(win.hwnd);
 		debugCamera.Update(win.hwnd);
 #pragma region 行列の計算
-		//if (key.IsKeyDown(DIK_D) || key.IsKeyDown(DIK_A))
-		//{
-		//	if (key.IsKeyDown(DIK_D)) angle += XMConvertToRadians(10.0f);
-		//	else if (key.IsKeyDown(DIK_A)) angle -= XMConvertToRadians(10.0f);
-
-		//	//angleラジアンだけY軸周りに回転。半径は-100
-		//	eye.x = -100 * sinf(angle);
-		//	eye.z = -100 * cosf(angle);
-		//	//ビュー変換行列再作成
-		//	matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
-		//}
-
 		//座標操作
 		if (key.IsKeyDown(DIK_UP) || key.IsKeyDown(DIK_DOWN) || key.IsKeyDown(DIK_RIGHT) || key.IsKeyDown(DIK_LEFT))
 		{
@@ -814,27 +802,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		//デバッグカメラのビュー変換行列を適用
 		object3d.UpdateObject3d(debugCamera.GetMatView(), matProjection);
-
-		////ワールド行列
-		//XMMATRIX matScale;	//スケーリング行列
-		//matScale = XMMatrixScaling(scale.x, scale.y, scale.z);
-
-		//XMMATRIX matRot = XMMatrixIdentity();	//回転行列
-		//matRot *= XMMatrixRotationZ(rotation.z);	//Z軸周りに0度回転してから
-		//matRot *= XMMatrixRotationX(XMConvertToRadians(rotation.x));	//X軸周りに15度回転してから
-		//matRot *= XMMatrixRotationY(XMConvertToRadians(rotation.y));	//Y軸周りに30度回転
-
-		//XMMATRIX matTrans;	//平行移動行列
-		//matTrans = XMMatrixTranslation(position.x, position.y, position.z);
-
-		//XMMATRIX matWorld = XMMatrixIdentity();	//単位行列代入
-		//matWorld *= matScale;	//ワールド座標にスケーリングを反映
-		//matWorld *= matRot;	//ワールド座標に回転を反映
-		//matWorld *= matTrans;	//ワールド座標に平行移動を反映
-
-		////定数バッファに送信
-		//directX.constMapTransform0->mat = matWorld * matView * matProjection;
-
 #pragma endregion
 		////ワールド変換行列
 		//XMMATRIX matWorld1 = XMMatrixIdentity();
