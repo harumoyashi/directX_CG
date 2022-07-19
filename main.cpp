@@ -15,6 +15,7 @@
 #include "NInputPad.h"
 #include "NInputMouse.h"
 #include "DebugCamera.h"
+#include "NMotion.h"
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
@@ -57,14 +58,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	directX.Init(win.hwnd);
 
 	//input初期化
-	DirectXInput key;
+	DirectXInput key;	//キーボード
 	key.InputInit(win.w, win.hwnd);
 
-	InputPad pad;
+	InputPad pad;		//コントローラー
 	pad.Initialize();
 
-	InputMouse mouse;
+	InputMouse mouse;	//マウス
 	mouse.Initialize(win.w, win.hwnd);
+
+	//オブジェクト移動処理まとめたやつ
+	Motion motion;
+
 	//DirectX初期化ここまで
 #pragma endregion
 #pragma region 描画初期化処理
@@ -203,8 +208,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//初期化
 	object3d.InitializeObject3d(directX.device);
-
 	object3d.position = { 0,0,0 };
+	float objSpeed = 1.0f;
 
 	/*object3ds[PartId::kSpine].position = { 0,8.0f,0 };
 	object3ds[PartId::kSpine].parent = &object3ds[PartId::kRoot];
@@ -286,7 +291,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	float angle = 0.0f;
 
 	DebugCamera debugCamera;
-	debugCamera.Initialize(win.w,win.hwnd);
+	debugCamera.Initialize(win.w, win.hwnd);
 
 	//XMFLOAT3 scale = { 1.0f,1.0f,1.0f };	//スケーリング倍率
 	//XMFLOAT3 rotation = { 0.0f,0.0f,0.0f };	//回転角
@@ -785,13 +790,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		debugCamera.Update(win.hwnd);
 #pragma region 行列の計算
 		//座標操作
-		if (key.IsKeyDown(DIK_UP) || key.IsKeyDown(DIK_DOWN) || key.IsKeyDown(DIK_RIGHT) || key.IsKeyDown(DIK_LEFT))
-		{
-			if (key.IsKeyDown(DIK_UP)) { object3d.position.y += 1.0f; }
-			else if (key.IsKeyDown(DIK_DOWN)) { object3d.position.y -= 1.0f; }
-			if (key.IsKeyDown(DIK_RIGHT)) { object3d.position.x += 1.0f; }
-			else if (key.IsKeyDown(DIK_LEFT)) { object3d.position.x -= 1.0f; }
-		}
+		object3d = motion.MovePadAndKey(object3d,1.0f);
 
 		/*for (size_t i = 0; i < _countof(object3ds); i++)
 		{

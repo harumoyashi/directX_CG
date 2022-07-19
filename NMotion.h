@@ -2,6 +2,7 @@
 #include "NDirectXInput.h"
 #include "NInputPad.h"
 #include "NObject.h"
+#include "NVector3.h"
 
 class Motion
 {
@@ -14,8 +15,11 @@ private:
 public:
 	//3Dオブジェクトの配列
 	Object3d object3d;
-
 	Object3d floor;
+
+	Vector2 stickVec = { 0,0 };
+	float len = 0.0f;
+	float angle = 0.0f;
 
 public:
 	//初期化
@@ -25,6 +29,7 @@ public:
 	//描画
 	void Draw(ID3D12GraphicsCommandList* commandList, D3D12_VERTEX_BUFFER_VIEW vbView, D3D12_INDEX_BUFFER_VIEW ibView, int indicesSize);
 	
-	//閾値超えないように
-	float Clamp(float value, float min, float max);
+	Object3d MovePadAndKey(Object3d object3d,float objSpeed = 1.0f);
 };
+//閾値超えないように
+float Clamp(float value, float min, float max);
