@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include <windows.h>
-class Windows
+class NWindows
 {
 public:
 	const int width = 1280;

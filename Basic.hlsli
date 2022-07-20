@@ -15,7 +15,7 @@ struct VSOutput
 	//uv’l
 	float2 uv:TEXCOORD;
 	//F
-	float4 color:COLOR;
+	float3 color:COLOR;
 };
 
 //3D•ÏŠ·s—ñ

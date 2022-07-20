@@ -2,7 +2,7 @@
 
 //ウィンドプロシージャ
 //面倒だけど書かなきゃいけない関数
-LRESULT Windows::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+LRESULT NWindows::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
 	switch (msg)
 	{
@@ -15,7 +15,7 @@ LRESULT Windows::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 }
 
 //Windowクラスの設定
-void Windows::Set()
+void NWindows::Set()
 {
 	w.cbSize = sizeof(WNDCLASSEX);
 	w.lpfnWndProc = (WNDPROC)WindowProc;		//ウィンドウプロシージャを設定
@@ -27,13 +27,13 @@ void Windows::Set()
 }
 
 //コンソールへの文字出力
-void Windows::DebugText(LPCSTR text)
+void NWindows::DebugText(LPCSTR text)
 {
 	OutputDebugStringA(text);
 }
 
 //ウィンドウオブジェクトの生成
-void Windows::CreateWindowObj()
+void NWindows::CreateWindowObj()
 {
 	wrc = { 0,0,width,height };	//ウィンドウサイズを決める
 
@@ -57,7 +57,7 @@ void Windows::CreateWindowObj()
 }
 
 //ウィンドウ表示
-void Windows::Display()
+void NWindows::Display()
 {
 	ShowWindow(hwnd, SW_SHOW);
 }

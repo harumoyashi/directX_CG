@@ -1,4 +1,4 @@
-#include "DebugCamera.h"
+#include "NDebugCamera.h"
 #include <DirectXMath.h>
 #include <WinUser.h>
 

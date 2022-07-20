@@ -87,7 +87,7 @@ public:
 
 private:
 	//ウィンドウクラス
-	Windows win;
+	NWindows win;
 
 	//アダプター選択
 	void ChoiceAdapters();

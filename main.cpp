@@ -14,7 +14,7 @@
 #include "NDirectXInput.h"
 #include "NInputPad.h"
 #include "NInputMouse.h"
-#include "DebugCamera.h"
+#include "NDebugCamera.h"
 #include "NMotion.h"
 
 #pragma comment(lib,"d3d12.lib")
@@ -46,7 +46,7 @@ struct ConstBufferDataMaterial
 //Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma region WindowsAPI初期化
-	Windows win;	//ウィンドウクラス
+	NWindows win;	//ウィンドウクラス
 	win.Set();
 	win.CreateWindowObj();
 	win.Display();
@@ -369,47 +369,47 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		XMFLOAT3 pos;		//xyz座標
 		XMFLOAT3 normal;	//法線ベクトル
 		XMFLOAT2 uv;		//uv座標
-		XMFLOAT4 color;		//色
+		XMFLOAT3 color;		//色
 	};
 
 	// 頂点データ
 	Vertex vertices[] = {
-		//	x		y		z	 法線	u	v      R  G  B  A
+		//	x		y		z	 法線	u	v      R  G  B
 		//前
-		{{ -5.0f, -5.0f, -5.0f }, {}, {0.0f,1.0f},{0,0,0,1}},	// 左下
-		{{ -5.0f,  5.0f, -5.0f }, {}, {0.0f,0.0f},{255,255,255,1}},	// 左上
-		{{  5.0f, -5.0f, -5.0f }, {}, {1.0f,1.0f},{0,0,255,1}},	// 右下
-		{{  5.0f,  5.0f, -5.0f }, {}, {1.0f,0.0f}},	// 右上
+		{{-5.0f,-5.0f,-5.0f }, {}, {0.0f,1.0f},{0  ,0  ,0  }},	// 左下
+		{{-5.0f, 5.0f,-5.0f }, {}, {0.0f,0.0f},{255,255,255}},	// 左上
+		{{ 5.0f,-5.0f,-5.0f }, {}, {1.0f,1.0f},{0  ,0  ,0  }},	// 右下
+		{{ 5.0f, 5.0f,-5.0f }, {}, {1.0f,0.0f},{255,255,255}},	// 右上
 
 		//後
-		{{ -5.0f, -5.0f, 5.0f }, {}, {0.0f,1.0f}},	// 左下
-		{{ -5.0f,  5.0f, 5.0f }, {}, {0.0f,0.0f}},	// 左上
-		{{  5.0f, -5.0f, 5.0f }, {}, {1.0f,1.0f}},	// 右下
-		{{  5.0f,  5.0f, 5.0f }, {}, {1.0f,0.0f}},	// 右上
+		{{-5.0f,-5.0f, 5.0f }, {}, {0.0f,1.0f},{0  ,0  ,0  }},	// 左下
+		{{-5.0f, 5.0f, 5.0f }, {}, {0.0f,0.0f},{255,255,255}},	// 左上
+		{{ 5.0f,-5.0f, 5.0f }, {}, {1.0f,1.0f},{0  ,0  ,0  }},	// 右下
+		{{ 5.0f, 5.0f, 5.0f }, {}, {1.0f,0.0f},{255,255,255}},	// 右上
 
 		 // 左
-		{{-5.0f,-5.0f,-5.0f }, {}, {0.0f, 1.0f}},    // 左下
-		{{-5.0f,-5.0f, 5.0f }, {}, {0.0f, 0.0f}},    // 左上
-		{{-5.0f, 5.0f,-5.0f }, {}, {1.0f, 1.0f}},    // 右下
-		{{-5.0f, 5.0f, 5.0f }, {}, {1.0f, 0.0f}},    // 右上
+		{{-5.0f,-5.0f,-5.0f }, {}, {0.0f, 1.0f},{0  ,0  ,0  }},    // 左下
+		{{-5.0f,-5.0f, 5.0f }, {}, {0.0f, 0.0f},{255,255,255}},    // 左上
+		{{-5.0f, 5.0f,-5.0f }, {}, {1.0f, 1.0f},{0  ,0  ,0  }},    // 右下
+		{{-5.0f, 5.0f, 5.0f }, {}, {1.0f, 0.0f},{255,255,255}},    // 右上
 
 		// 右
-		{{ 5.0f,-5.0f,-5.0f }, {}, {0.0f, 1.0f}},    // 左下
-		{{ 5.0f,-5.0f, 5.0f }, {}, {0.0f, 0.0f}},    // 左上
-		{{ 5.0f, 5.0f,-5.0f }, {}, {1.0f, 1.0f}},    // 右下
-		{{ 5.0f, 5.0f, 5.0f }, {}, {1.0f, 0.0f}},    // 右上
+		{{ 5.0f,-5.0f,-5.0f }, {}, {0.0f, 1.0f},{0  ,0  ,0  }},    // 左下
+		{{ 5.0f,-5.0f, 5.0f }, {}, {0.0f, 0.0f},{255,255,255}},    // 左上
+		{{ 5.0f, 5.0f,-5.0f }, {}, {1.0f, 1.0f},{0  ,0  ,0  }},    // 右下
+		{{ 5.0f, 5.0f, 5.0f }, {}, {1.0f, 0.0f},{255,255,255}},    // 右上
 
 		// 上
-		{{-5.0f,-5.0f,-5.0f }, {}, {0.0f, 1.0f}},    // 左下
-		{{ 5.0f,-5.0f,-5.0f }, {}, {0.0f, 0.0f}},    // 左上
-		{{-5.0f,-5.0f, 5.0f }, {}, {1.0f, 1.0f}},    // 右下
-		{{ 5.0f,-5.0f, 5.0f }, {}, {1.0f, 0.0f}},    // 右上
+		{{-5.0f,-5.0f,-5.0f }, {}, {0.0f, 1.0f},{0  ,0  ,0  }},    // 左下
+		{{ 5.0f,-5.0f,-5.0f }, {}, {0.0f, 0.0f},{255,255,255}},    // 左上
+		{{-5.0f,-5.0f, 5.0f }, {}, {1.0f, 1.0f},{0  ,0  ,0  }},    // 右下
+		{{ 5.0f,-5.0f, 5.0f }, {}, {1.0f, 0.0f},{255,255,255}},    // 右上
 
 		// 下
-		{{-5.0f, 5.0f,-5.0f }, {}, {0.0f, 1.0f}},    // 左下
-		{{ 5.0f, 5.0f,-5.0f }, {}, {0.0f, 0.0f}},    // 左上
-		{{-5.0f, 5.0f, 5.0f }, {}, {1.0f, 1.0f}},    // 右下
-		{{ 5.0f, 5.0f, 5.0f }, {}, {1.0f, 0.0f}},    // 右上
+		{{-5.0f, 5.0f,-5.0f }, {}, {0.0f, 1.0f},{0  ,0  ,0  }},    // 左下
+		{{ 5.0f, 5.0f,-5.0f }, {}, {0.0f, 0.0f},{255,255,255}},    // 左上
+		{{-5.0f, 5.0f, 5.0f }, {}, {1.0f, 1.0f},{0  ,0  ,0  }},    // 右下
+		{{ 5.0f, 5.0f, 5.0f }, {}, {1.0f, 0.0f},{255,255,255}},    // 右上
 	};
 
 	// 頂点データ全体のサイズ = 頂点データ一つ分のサイズ * 頂点データの要素数
@@ -494,9 +494,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		XMStoreFloat3(&vertices[index1].normal, normal);
 		XMStoreFloat3(&vertices[index2].normal, normal);
 
-		XMStoreFloat4(&vertices[index0].color, { 255,0,0,1 });
-		XMStoreFloat4(&vertices[index1].color, { 0,255,0,1 });
-		XMStoreFloat4(&vertices[index2].color, { 0,0,255,1 });
+		/*XMStoreFloat4(&vertices[index0].color, { 255,0,0 });
+		XMStoreFloat4(&vertices[index1].color, { 0,255,0 });
+		XMStoreFloat4(&vertices[index2].color, { 0,0,255 });*/
 	}
 
 	// 頂点バッファの生成
@@ -790,7 +790,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		debugCamera.Update(win.hwnd);
 #pragma region 行列の計算
 		//座標操作
-		object3d = motion.MovePadAndKey(object3d,1.0f);
+		object3d = motion.MovePadAndKey(object3d, 1.0f);
 
 		/*for (size_t i = 0; i < _countof(object3ds); i++)
 		{
@@ -834,8 +834,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		{
 			isMaxBlend = false;
 		}
-		//値を書き込むと自動的に転送される
-		constMapMaterial->color = XMFLOAT4(R, G, B, 1);
+		////値を書き込むと自動的に転送される
+		//constMapMaterial->color = XMFLOAT4(R, G, B, 1);
 
 #pragma region グラフィックスコマンド
 		// バックバッファの番号を取得(2つなので0番か1番)

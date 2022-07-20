@@ -12,7 +12,7 @@
 //	return pos + float4(-0.2f,-0.2f,1,1);
 //}
 
-VSOutput main(float4 pos:POSITION,float3 normal : NORMAL, float2 uv : TEXCOORD,float4 color : COLOR)
+VSOutput main(float4 pos:POSITION,float3 normal : NORMAL, float2 uv : TEXCOORD,float3 color : COLOR)
 {
 	VSOutput output;	//ピクセルシェーダーに渡す値
 	/*output.svpos = pos;*/
