@@ -8,6 +8,11 @@ void DebugCamera::Initialize(WNDCLASSEX w, HWND hwnd)
 	eye = { 0, 0, cameraLen };	//視点座標
 	target = { 0, 0, 0 };	//注視点座標
 	up = { 0, 1, 0 };		//上方向ベクトル
+	move = { 0,0,0 };
+	mouseVec = { 0,0,0 };
+	eyeVec = { 0,0,0 };
+	targetVec = { 0,0,0 };
+	trans = { 0,0,0 };
 
 	matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
 
@@ -72,7 +77,7 @@ void DebugCamera::CameraMove()
 			trans -= upVec * transSpeed;
 			targetVec -= upVec * transSpeed;
 		}
-		else if(mouse.GetCursorVec().y < 0)
+		else if (mouse.GetCursorVec().y < 0)
 		{
 			trans += upVec * transSpeed;
 			targetVec += upVec * transSpeed;

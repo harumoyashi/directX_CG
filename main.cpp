@@ -300,7 +300,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//値を書き込むと自動的に転送される
 	float R = 0.5f;
-	float G = 0.5f;
+	float G = 1.0f;
 	float B = 0.5f;
 	bool isMaxBlend = false;
 	constMapMaterial->color = XMFLOAT4(R, G, B, 1.0f);
@@ -703,7 +703,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	blenddesc.DestBlendAlpha = D3D12_BLEND_ZERO;	//デストの値を0%使う
 
 	//減算合成
-	blenddesc.BlendOp = D3D12_BLEND_OP_SUBTRACT;	//減算
+	blenddesc.BlendOp = D3D12_BLEND_OP_ADD;			//加算
 	blenddesc.SrcBlend = D3D12_BLEND_ONE;			//ソースのアルファ値
 	blenddesc.DestBlend = D3D12_BLEND_ONE;			//1.0f-ソースのアルファ値
 
@@ -792,6 +792,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//座標操作
 		object3d = motion.MovePadAndKey(object3d, 1.0f);
 
+		if (key.IsKeyTrigger(DIK_R))
+		{
+			debugCamera.Initialize(win.w,win.hwnd);
+		}
+
 		/*for (size_t i = 0; i < _countof(object3ds); i++)
 		{
 			object3ds[i].UpdateObject3d(&object3ds[i], matView, matProjection);
@@ -820,10 +825,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		if (isMaxBlend)
 		{
 			R -= 0.005f;
+			B -= 0.005f;
 		}
 		else
 		{
 			R += 0.005f;
+			B += 0.005f;
 		}
 
 		if (R >= 1.0f)
