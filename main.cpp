@@ -5,6 +5,7 @@
 #include "NMatrix4.h"
 #include "NObject.h"
 #include "NTexture.h"
+#include "NConstBuffer.h"
 #include <string>
 #include <random>
 
@@ -20,12 +21,6 @@
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
 
-#pragma region 構造体宣言
-//定数バッファ用構造体
-struct ConstBufferDataMaterial
-{
-	XMFLOAT4 color;	//色(RGBA)
-};
 #pragma endregion
 
 //enum PartId
@@ -126,35 +121,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	result = directX.device->CreateFence(fenceVal, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
 	assert(SUCCEEDED(result));
 
-	//ヒープ設定
-	D3D12_HEAP_PROPERTIES cbHeapProp{};
-	cbHeapProp.Type = D3D12_HEAP_TYPE_UPLOAD;	//GPUへの転送用
-	//リソース設定
-	D3D12_RESOURCE_DESC cbResouceDesc{};
-	cbResouceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-	cbResouceDesc.Width = (sizeof(ConstBufferDataMaterial) + 0xff) & ~0xff;	//256バイトアラインメント
-	cbResouceDesc.Height = 1;
-	cbResouceDesc.DepthOrArraySize = 1;
-	cbResouceDesc.MipLevels = 1;
-	cbResouceDesc.SampleDesc.Count = 1;
-	cbResouceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+	ConstBuff cBuff;
 
-	ID3D12Resource* constBuffMaterial = nullptr;
-	//定数バッファの生成
-	result = directX.device->CreateCommittedResource(
-		&cbHeapProp,	//ヒープ設定
-		D3D12_HEAP_FLAG_NONE,
-		&cbResouceDesc,	//リソース設定
-		D3D12_RESOURCE_STATE_GENERIC_READ,
-		nullptr,
-		IID_PPV_ARGS(&constBuffMaterial)
-	);
-	assert(SUCCEEDED(result));
+	cBuff.SetHeapProp();
+	cBuff.SetResoucedesc();
+	cBuff.Create(directX.device);
+	cBuff.Mapping();
+	
 
-	//定数バッファのマッピング
-	ConstBufferDataMaterial* constMapMaterial = nullptr;
-	result = constBuffMaterial->Map(0, nullptr, (void**)&constMapMaterial);	//マッピング
-	assert(SUCCEEDED(result));
+	
+	
+
+	
 
 	{
 		////ヒープ設定
@@ -303,7 +281,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	float G = 1.0f;
 	float B = 0.5f;
 	bool isMaxBlend = false;
-	constMapMaterial->color = XMFLOAT4(R, G, B, 1.0f);
+	cBuff.TransfarColor(R, G, B, 1);
 
 	//デスクリプタレンジの設定
 	D3D12_DESCRIPTOR_RANGE descriptorRange{};
@@ -842,7 +820,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			isMaxBlend = false;
 		}
 		//値を書き込むと自動的に転送される
-		constMapMaterial->color = XMFLOAT4(R, G, B, 1);
+		cBuff.TransfarColor(R, G, B, 1);
 
 #pragma region グラフィックスコマンド
 		// バックバッファの番号を取得(2つなので0番か1番)
@@ -907,7 +885,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		directX.commandList->IASetIndexBuffer(&ibView);
 
 		//定数バッファビュー(CBV)の設定コマンド
-		directX.commandList->SetGraphicsRootConstantBufferView(0, constBuffMaterial->GetGPUVirtualAddress());
+		directX.commandList->SetGraphicsRootConstantBufferView(0, cBuff.constBuffMaterial->GetGPUVirtualAddress());
 		//シェーダリソースビュー(SRV)ヒープの設定コマンド
 		directX.commandList->SetDescriptorHeaps(1, &directX.srvHeap);
 		//シェーダリソースビュー(SRV)ヒープの先頭ハンドルを取得(SRVを指してるはず)

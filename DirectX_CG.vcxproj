@@ -118,6 +118,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -132,6 +133,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -141,7 +143,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="ConstBuffer.h" />
+    <ClInclude Include="NConstBuffer.h" />
+    <ClInclude Include="GraphicsPipeline.h" />
     <ClInclude Include="GridLine.h" />
     <ClInclude Include="NDebugCamera.h" />
     <ClInclude Include="NInputMouse.h" />
@@ -157,7 +160,8 @@
     <ClInclude Include="NVector3.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ConstBuffer.cpp" />
+    <ClCompile Include="NConstBuffer.cpp" />
+    <ClCompile Include="GraphicsPipeline.cpp" />
     <ClCompile Include="GridLine.cpp" />
     <ClCompile Include="NDebugCamera.cpp" />
     <ClCompile Include="NInputMouse.cpp" />
