@@ -121,64 +121,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	result = directX.device->CreateFence(fenceVal, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
 	assert(SUCCEEDED(result));
 
+	//定数バッファ
 	ConstBuff cBuff;
-
 	cBuff.SetHeapProp();
 	cBuff.SetResoucedesc();
 	cBuff.Create(directX.device);
 	cBuff.Mapping();
 	
-
-	
-	
-
-	
-
-	{
-		////ヒープ設定
-		//D3D12_HEAP_PROPERTIES cbHeapProp{};
-		//cbHeapProp.Type = D3D12_HEAP_TYPE_UPLOAD;	//GPUへの転送用
-		////リソース設定
-		//D3D12_RESOURCE_DESC cbResouceDesc{};
-		//cbResouceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-		//cbResouceDesc.Width = (sizeof(directX.constMapTransform) + 0xff) & ~0xff;	//256バイトアラインメント
-		//cbResouceDesc.Height = 1;
-		//cbResouceDesc.DepthOrArraySize = 1;
-		//cbResouceDesc.MipLevels = 1;
-		//cbResouceDesc.SampleDesc.Count = 1;
-		//cbResouceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-
-		////定数バッファ0番の生成
-		//result = directX.device->CreateCommittedResource(
-		//	&cbHeapProp,	//ヒープ設定
-		//	D3D12_HEAP_FLAG_NONE,
-		//	&cbResouceDesc,	//リソース設定
-		//	D3D12_RESOURCE_STATE_GENERIC_READ,
-		//	nullptr,
-		//	IID_PPV_ARGS(&directX.constBuffTransform0)
-		//);
-		//assert(SUCCEEDED(result));
-
-		////定数バッファ0番のマッピング
-		//result = directX.constBuffTransform0->Map(0, nullptr, (void**)&directX.constMapTransform0);	//マッピング
-		//assert(SUCCEEDED(result));
-
-		////定数バッファ1番の生成
-		//result = directX.device->CreateCommittedResource(
-		//	&cbHeapProp,	//ヒープ設定
-		//	D3D12_HEAP_FLAG_NONE,
-		//	&cbResouceDesc,	//リソース設定
-		//	D3D12_RESOURCE_STATE_GENERIC_READ,
-		//	nullptr,
-		//	IID_PPV_ARGS(&directX.constBuffTransform1)
-		//);
-		//assert(SUCCEEDED(result));
-
-		////定数バッファ1番のマッピング
-		//result = directX.constBuffTransform1->Map(0, nullptr, (void**)&directX.constMapTransform1);	//マッピング
-		//assert(SUCCEEDED(result));
-
-	}
 	////3Dオブジェクトの数
 	//const size_t kObjectCount = kNumPartId;
 	//3Dオブジェクトの配列
@@ -352,7 +301,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// 頂点データ
 	Vertex vertices[] = {
-		//	x		y		z	 法線	u	v      R  G  B
+		//	x	  y	    z	  法線	 u	  v      R   G   B
 		//前
 		{{-5.0f,-5.0f,-5.0f }, {}, {0.0f,1.0f},{0  ,0  ,0  }},	// 左下
 		{{-5.0f, 5.0f,-5.0f }, {}, {0.0f,0.0f},{255,255,255}},	// 左上
