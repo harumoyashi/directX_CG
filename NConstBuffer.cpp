@@ -16,7 +16,7 @@ void ConstBuff::SetResoucedesc()
 	cbResouceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 }
 
-void ConstBuff::Create(ID3D12Device* device)
+void ConstBuff::Create(ComPtr<ID3D12Device> device)
 {
 	HRESULT result;
 	result = device->CreateCommittedResource(

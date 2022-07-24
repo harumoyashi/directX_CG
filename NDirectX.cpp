@@ -38,7 +38,7 @@ void MyDirectX::Init(HWND hwnd)
 		rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 		rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 		// レンダーターゲットビューの生成
-		device->CreateRenderTargetView(backBuffers[i], &rtvDesc, rtvHandle);
+		device->CreateRenderTargetView(backBuffers[i].Get(), &rtvDesc, rtvHandle);
 	}
 }
 
@@ -62,7 +62,7 @@ void MyDirectX::ChoiceAdapters()
 		// ソフトウェアデバイスを回避
 		if (!(adapterDesc.Flags & DXGI_ADAPTER_FLAG3_SOFTWARE)) {
 			// デバイスを採用してループを抜ける
-			tmpAdapter = adapters[i];
+			tmpAdapter = adapters[i].Get();
 			break;
 		}
 	}
@@ -81,7 +81,7 @@ void MyDirectX::CreateDevice()
 	//生成可能なバージョンが見つかったら打ち切り
 	for (size_t i = 0; i < _countof(levels); i++) {
 		// 採用したアダプターでデバイスを生成
-		result = D3D12CreateDevice(tmpAdapter, levels[i],
+		result = D3D12CreateDevice(tmpAdapter.Get(), levels[i],
 			IID_PPV_ARGS(&device));
 		if (result == S_OK) {	//HRESULT型の関数はtrue,falseの代わりにS_OK,特定の型が返される
 			// デバイスを生成できた時点でループを抜ける
@@ -102,7 +102,7 @@ void MyDirectX::CreateCommandGroup()
 	// コマンドリストを生成
 	result = device->CreateCommandList(0,
 		D3D12_COMMAND_LIST_TYPE_DIRECT,
-		commandAllocator, nullptr,
+		commandAllocator.Get(), nullptr,
 		IID_PPV_ARGS(&commandList));
 	assert(SUCCEEDED(result));
 
@@ -122,11 +122,17 @@ void MyDirectX::CreateSwapChain(HWND hwnd)
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD; // フリップ後は破棄
 	swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
+	//IDXGISwapChain1のComPtrを用意
+	ComPtr<IDXGISwapChain1> swapChain1;
+
 	// スワップチェーンの生成
 	result = dxgiFactory->CreateSwapChainForHwnd(
-		commandQueue, hwnd, &swapChainDesc, nullptr, nullptr,
-		(IDXGISwapChain1**)&swapChain);
+		commandQueue.Get(), hwnd, &swapChainDesc, nullptr, nullptr,
+		(IDXGISwapChain1**)&swapChain1);
 	assert(SUCCEEDED(result));
+
+	//生成したIDXGISwapChain1のオブジェクトをIDXGISwapChain4に変換する
+	swapChain1.As(&swapChain);
 }
 
 void MyDirectX::CreateSRVHeapDesc()

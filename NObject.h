@@ -6,7 +6,7 @@ class Object3d
 {
 public:
 	//定数バッファ（行列用）
-	ID3D12Resource* constBuffTransform;
+	ComPtr<ID3D12Resource> constBuffTransform;
 	//定数バッファマップ（行列用）
 	MyDirectX::ConstBufferDataTransform* constMapTransform;
 	//アフィン変換情報

@@ -25,7 +25,7 @@ public:
 	//リソース設定
 	void SetResoucedesc();
 	//定数バッファの生成
-	void Create(ID3D12Device* device);
+	void Create(ComPtr<ID3D12Device> device);
 	//定数バッファのマッピング
 	void Mapping();
 
