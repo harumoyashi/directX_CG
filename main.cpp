@@ -101,7 +101,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc{};
 	dsvHeapDesc.NumDescriptors = 1;	//深度ビューは1つ
 	dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;	//デプスステンシルビュー
-	ID3D12DescriptorHeap* dsvHeap = nullptr;
+	ComPtr<ID3D12DescriptorHeap> dsvHeap;
 	result = directX.device->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&dsvHeap));
 
 	//深度ビュー作成
@@ -122,20 +122,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	assert(SUCCEEDED(result));
 
 	//定数バッファ
-	ConstBuff cBuff;
-	cBuff.SetHeapProp();
-	cBuff.SetResoucedesc();
-	cBuff.Create(directX.device);
-	cBuff.Mapping();
-	
+	ConstBuff* cBuff;
+	cBuff = new ConstBuff;
+	cBuff->SetHeapProp();
+	cBuff->SetResoucedesc();
+	cBuff->Create(directX.device.Get());
+	cBuff->Mapping();
+
 	////3Dオブジェクトの数
 	//const size_t kObjectCount = kNumPartId;
 	//3Dオブジェクトの配列
-	Object3d object3d;
-
+	Object3d* object3d;
+	object3d = new Object3d;
 	//初期化
-	object3d.InitializeObject3d(directX.device.Get());
-	object3d.position = { 0,0,0 };
+	object3d->InitializeObject3d(directX.device.Get());
+	object3d->position = { 0,0,0 };
 	float objSpeed = 1.0f;
 
 	/*object3ds[PartId::kSpine].position = { 0,8.0f,0 };
@@ -230,7 +231,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	float G = 1.0f;
 	float B = 0.5f;
 	bool isMaxBlend = false;
-	cBuff.TransfarColor(R, G, B, 1);
+	cBuff->TransfarColor(R, G, B, 1);
 
 	//デスクリプタレンジの設定
 	D3D12_DESCRIPTOR_RANGE descriptorRange{};
@@ -276,7 +277,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//}
 
 	//1枚目の画像
-	Texture texture[maxTexture];
+	std::vector<Texture>texture(maxTexture);
 	texture[0].Load(L"Resources/nijisanji_icon.jpg");
 	//2枚目の画像
 	texture[1].Load(L"Resources/salome_icon.jpg");
@@ -438,7 +439,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	assert(SUCCEEDED(result));
 
 	// GPU上のバッファに対応した仮想メモリ(メインメモリ上)を取得
-	Vertex* vertMap = nullptr;
+	Vertex* vertMap;
 	result = vertBuff->Map(0, nullptr, (void**)&vertMap);
 	assert(SUCCEEDED(result));
 	// 全頂点に対して
@@ -493,6 +494,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	D3D12_INDEX_BUFFER_VIEW ibView{};
 	// GPU仮想アドレス
 	ibView.BufferLocation = indexBuff->GetGPUVirtualAddress();
+
 	//インデックス1個分のサイズ
 	ibView.Format = DXGI_FORMAT_R16_UINT;
 	// インデックスバッファのサイズ
@@ -716,11 +718,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		debugCamera.Update(win.hwnd);
 #pragma region 行列の計算
 		//座標操作
-		object3d = motion.MovePadAndKey(object3d, 1.0f);
+		motion.MovePadAndKey(object3d, 1.0f);
 
 		if (key.IsKeyTrigger(DIK_R))
 		{
-			debugCamera.Initialize(win.w,win.hwnd);
+			debugCamera.Initialize(win.w, win.hwnd);
 		}
 
 		/*for (size_t i = 0; i < _countof(object3ds); i++)
@@ -731,7 +733,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		/*object3d.UpdateObject3d(matView, matProjection);*/
 
 		//デバッグカメラのビュー変換行列を適用
-		object3d.UpdateObject3d(debugCamera.GetMatView(), matProjection);
+		object3d->UpdateObject3d(debugCamera.GetMatView(), matProjection);
 #pragma endregion
 		////ワールド変換行列
 		//XMMATRIX matWorld1 = XMMatrixIdentity();
@@ -768,7 +770,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			isMaxBlend = false;
 		}
 		//値を書き込むと自動的に転送される
-		cBuff.TransfarColor(R, G, B, 1);
+		cBuff->TransfarColor(R, G, B, 1);
 
 #pragma region グラフィックスコマンド
 		// バックバッファの番号を取得(2つなので0番か1番)
@@ -801,8 +803,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		// 4.描画コマンドここから
 		// ビューポート設定コマンド
 		D3D12_VIEWPORT viewport{};
-		viewport.Width = win.width;
-		viewport.Height = win.height;
+		viewport.Width = static_cast<float>(win.width);
+		viewport.Height = static_cast<float>(win.height);
 		viewport.TopLeftX = 0;
 		viewport.TopLeftY = 0;
 		viewport.MinDepth = 0.0f;	//最小震度
@@ -833,9 +835,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		directX.commandList->IASetIndexBuffer(&ibView);
 
 		//定数バッファビュー(CBV)の設定コマンド
-		directX.commandList->SetGraphicsRootConstantBufferView(0, cBuff.constBuffMaterial->GetGPUVirtualAddress());
+		directX.commandList->SetGraphicsRootConstantBufferView(0, cBuff->constBuffMaterial->GetGPUVirtualAddress());
 		//シェーダリソースビュー(SRV)ヒープの設定コマンド
-		directX.commandList->SetDescriptorHeaps(1, &directX.srvHeap);
+		ID3D12DescriptorHeap* srvHeaps[] = { directX.srvHeap.Get() };
+		directX.commandList->SetDescriptorHeaps(1, srvHeaps);
 		//シェーダリソースビュー(SRV)ヒープの先頭ハンドルを取得(SRVを指してるはず)
 		D3D12_GPU_DESCRIPTOR_HANDLE srvGpuHandle = directX.srvHeap->GetGPUDescriptorHandleForHeapStart();
 		//スペースで表示するテクスチャ番号切り替え
@@ -871,7 +874,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		{
 			object3ds[i].DrawObject3d(&object3ds[i], directX.commandList, vbView, ibView, _countof(indices));
 		}*/
-		object3d.DrawObject3d(directX.commandList.Get(), vbView, ibView, _countof(indices));
+		object3d->DrawObject3d(directX.commandList.Get(), vbView, ibView, _countof(indices));
 		// 4.描画コマンドここまで
 
 		// 5.リソースバリアを戻す
@@ -909,6 +912,29 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		//DirectX毎フレーム　ここまで
 	}
+
+	//エラー時の名前設定
+	depthBuff->SetName(L"depthBuff");
+	vertBuff->SetName(L"vertBuff");
+	indexBuff->SetName(L"indexBuff");
+
+	//ComPtrの解放
+	delete object3d;
+	delete cBuff;
+	/*rootSignature.Reset();
+	pipelineState.Reset();
+	fence.Reset();
+	dsvHeap.Reset();
+	depthBuff.Reset();
+	vertBuff.Reset();
+	indexBuff.Reset();
+	vsBlob.Reset();
+	psBlob.Reset();
+	errorBlob.Reset();
+	rootSigBlob.Reset();
+	texture.clear();*/
+	/*directX.Finalize();*/
+
 #pragma region WindowsAPI後始末
 	//もうクラスは使わないので登録解除する
 	UnregisterClass(win.w.lpszClassName, win.w.hInstance);

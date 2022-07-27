@@ -18,9 +18,6 @@ class MyDirectX
 public:
 	HRESULT result;
 
-	//デバッグレイヤーをオンにするために使用されるインターフェイス
-	ComPtr<ID3D12Debug> debugController;
-
 	//定数バッファ用データ構造体（3D変換行列）
 	struct  ConstBufferDataTransform
 	{
@@ -71,7 +68,7 @@ public:
 
 	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc{};
 
-	ID3D12DescriptorHeap* srvHeap = nullptr;
+	ComPtr<ID3D12DescriptorHeap> srvHeap;
 
 	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc{};
 
@@ -84,8 +81,11 @@ public:
 	//レンダーターゲットビューの設定
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
 
+public:
 	//DirectX初期化
 	void Init(HWND hwnd);
+	//DirectX終了処理
+	void Finalize();
 
 private:
 	//ウィンドウクラス

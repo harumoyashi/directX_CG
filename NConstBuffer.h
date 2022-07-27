@@ -11,7 +11,7 @@ struct ConstBufferDataMaterial
 class ConstBuff
 {
 public:
-	ID3D12Resource* constBuffMaterial = nullptr;
+	ComPtr<ID3D12Resource> constBuffMaterial;
 	D3D12_HEAP_PROPERTIES cbHeapProp{};		//ヒープ設定
 	D3D12_RESOURCE_DESC cbResouceDesc{};	//リソース設定
 	ConstBufferDataMaterial* constMapMaterial = nullptr;	//定数バッファのマップ
@@ -25,7 +25,7 @@ public:
 	//リソース設定
 	void SetResoucedesc();
 	//定数バッファの生成
-	void Create(ComPtr<ID3D12Device> device);
+	void Create(ID3D12Device* device);
 	//定数バッファのマッピング
 	void Mapping();
 

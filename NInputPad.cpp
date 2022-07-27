@@ -74,8 +74,8 @@ void InputPad::SetDeadZone()
 
 Vector2 InputPad::GetLStick()
 {
-    int x = state.Gamepad.sThumbLX;
-    int y = state.Gamepad.sThumbLY;
+    SHORT x = state.Gamepad.sThumbLX;
+    SHORT y = state.Gamepad.sThumbLY;
 
-    return Vector2(x, y);
+    return Vector2(static_cast<float>(x), static_cast<float>(y));
 }

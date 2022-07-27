@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "NDirectX.h"
 
 class Texture
@@ -10,28 +10,28 @@ public:
 	TexMetadata metadata{};
 	ScratchImage scratchImg{};
 
-	ScratchImage mipChain{};					//ƒ~ƒbƒvƒ}ƒbƒv
-	D3D12_RESOURCE_DESC textureResouceDesc{};	//ƒŠƒ\[ƒX\‘¢‘Ì
-	ID3D12Resource* texBuff = nullptr;			//’è”ƒoƒbƒtƒ@
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};	//İ’è\‘¢‘Ì
+	ScratchImage mipChain{};					//ãƒŸãƒƒãƒ—ãƒãƒƒãƒ—
+	D3D12_RESOURCE_DESC textureResouceDesc{};	//ãƒªã‚½ãƒ¼ã‚¹æ§‹é€ ä½“
+	ComPtr<ID3D12Resource> texBuff;				//å®šæ•°ãƒãƒƒãƒ•ã‚¡
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};	//è¨­å®šæ§‹é€ ä½“
 
-	UINT incrementSize;	//Ÿ‚ÌƒeƒNƒXƒ`ƒƒî•ñ‚ÌêŠ‚Éi‚Ş‚½‚ß‚Ég‚¤
+	UINT incrementSize;	//æ¬¡ã®ãƒ†ã‚¯ã‚¹ãƒãƒ£æƒ…å ±ã®å ´æ‰€ã«é€²ã‚€ãŸã‚ã«ä½¿ã†
 
 public:
-	//WICƒeƒNƒXƒ`ƒƒ‚Ìƒ[ƒh
+	//WICãƒ†ã‚¯ã‚¹ãƒãƒ£ã®ãƒ­ãƒ¼ãƒ‰
 	void Load(const wchar_t* pictureName);
-	//ƒ~ƒbƒvƒ}ƒbƒv¶¬
+	//ãƒŸãƒƒãƒ—ãƒãƒƒãƒ—ç”Ÿæˆ
 	void CreateMipmap();
-	//ƒŠƒ\[ƒXİ’è
+	//ãƒªã‚½ãƒ¼ã‚¹è¨­å®š
 	void SetResouce();
-	//ƒeƒNƒXƒ`ƒƒƒoƒbƒtƒ@‚Ì¶¬
+	//ãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒãƒƒãƒ•ã‚¡ã®ç”Ÿæˆ
 	void CreateTexBuff(ID3D12Device* device, D3D12_HEAP_PROPERTIES textureHeapProp);
-	//ƒ~ƒbƒvƒ}ƒbƒvƒf[ƒ^‚Ì“]‘—
+	//ãƒŸãƒƒãƒ—ãƒãƒƒãƒ—ãƒ‡ãƒ¼ã‚¿ã®è»¢é€
 	void MipmapDataSend();
-	//ƒVƒF[ƒ_[ƒŠƒ\[ƒXƒrƒ…[ì¬
+	//ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ãƒªã‚½ãƒ¼ã‚¹ãƒ“ãƒ¥ãƒ¼ä½œæˆ
 	void CreateSRV(ID3D12Device* device, D3D12_CPU_DESCRIPTOR_HANDLE srvHandle);
-	//1‚Âƒnƒ“ƒhƒ‹‚ği‚ß‚é
+	//1ã¤ãƒãƒ³ãƒ‰ãƒ«ã‚’é€²ã‚ã‚‹
 	void NextHandle(ID3D12Device* device, D3D12_CPU_DESCRIPTOR_HANDLE srvHandle);
 };
 
-const int maxTexture = 3;	//g—p‚·‚éƒeƒNƒXƒ`ƒƒ‚Ì–‡”
+const int maxTexture = 3;	//ä½¿ç”¨ã™ã‚‹ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®æšæ•°

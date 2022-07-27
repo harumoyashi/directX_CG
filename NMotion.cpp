@@ -15,7 +15,7 @@ void Motion::Draw(ID3D12GraphicsCommandList* commandList, D3D12_VERTEX_BUFFER_VI
 	floor.DrawObject3d(commandList, vbView, ibView, indicesSize);	//°
 }
 
-Object3d Motion::MovePadAndKey(Object3d object3d, float objSpeed)
+void Motion::MovePadAndKey(Object3d *object3d, float objSpeed)
 {
 	pad.Update();
 
@@ -31,18 +31,17 @@ Object3d Motion::MovePadAndKey(Object3d object3d, float objSpeed)
 	if (len != 0)
 	{
 		//ˆÚ“®—Ê‚ð‰ÁŽZ
-		object3d.position.x += stickVec.x * len * objSpeed;
-		object3d.position.z += stickVec.y * len * objSpeed;
+		object3d->position.x += stickVec.x * len * objSpeed;
+		object3d->position.z += stickVec.y * len * objSpeed;
 	}
 
 	if (key.IsKeyDown(DIK_UP) || key.IsKeyDown(DIK_DOWN) || key.IsKeyDown(DIK_RIGHT) || key.IsKeyDown(DIK_LEFT))
 	{
-		if (key.IsKeyDown(DIK_UP)) { object3d.position.y += 1.0f; }
-		else if (key.IsKeyDown(DIK_DOWN)) { object3d.position.y -= 1.0f; }
-		if (key.IsKeyDown(DIK_RIGHT)) { object3d.position.x += 1.0f; }
-		else if (key.IsKeyDown(DIK_LEFT)) { object3d.position.x -= 1.0f; }
+		if (key.IsKeyDown(DIK_UP)) { object3d->position.y += 1.0f; }
+		else if (key.IsKeyDown(DIK_DOWN)) { object3d->position.y -= 1.0f; }
+		if (key.IsKeyDown(DIK_RIGHT)) { object3d->position.x += 1.0f; }
+		else if (key.IsKeyDown(DIK_LEFT)) { object3d->position.x -= 1.0f; }
 	}
-	return object3d;
 }
 
 float Clamp(float value, float min, float max)

@@ -3,9 +3,12 @@
 void MyDirectX::Init(HWND hwnd)
 {
 #ifdef _DEBUG
+	//デバッグレイヤーをオンにするために使用されるインターフェイス
+	ComPtr<ID3D12Debug1> debugController;
 	//デバッグレイヤーをオンに
 	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
 		debugController->EnableDebugLayer();
+		debugController->SetEnableGPUBasedValidation(TRUE);
 	}
 #endif
 	// DXGIファクトリーの生成
@@ -14,6 +17,32 @@ void MyDirectX::Init(HWND hwnd)
 
 	ChoiceAdapters();
 	CreateDevice();
+
+#ifdef _DEBUG
+	ComPtr<ID3D12InfoQueue> infoQueue;
+	if (SUCCEEDED(device->QueryInterface(IID_PPV_ARGS(&infoQueue))))
+	{
+		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);	//やばいエラーで止まる
+		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);	//エラーで止まる
+
+		// 抑制するエラー
+		D3D12_MESSAGE_ID denyIds[] = {
+			/*
+			 * Windows11でのDXGIデバッグレイヤーとDX12デバッグレイヤーの相互作用バグによるエラーメッセージ
+			 * https://stackoverflow.com/questions/69805245/directx-12-application-is-crashing-in-windows-11
+			 */
+			D3D12_MESSAGE_ID_RESOURCE_BARRIER_MISMATCHING_COMMAND_LIST_TYPE };
+		// 抑制する表示レベル
+		D3D12_MESSAGE_SEVERITY severities[] = { D3D12_MESSAGE_SEVERITY_INFO };
+		D3D12_INFO_QUEUE_FILTER filter{};
+		filter.DenyList.NumIDs = _countof(denyIds);
+		filter.DenyList.pIDList = denyIds;
+		filter.DenyList.NumSeverities = _countof(severities);
+		filter.DenyList.pSeverityList = severities;
+		// 指定したエラーの表示を抑制する
+		infoQueue->PushStorageFilter(&filter);
+	}
+#endif
 
 	CreateCommandGroup();
 
@@ -39,6 +68,39 @@ void MyDirectX::Init(HWND hwnd)
 		rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 		// レンダーターゲットビューの生成
 		device->CreateRenderTargetView(backBuffers[i].Get(), &rtvDesc, rtvHandle);
+	}
+}
+
+void MyDirectX::Finalize()
+{
+	//定数バッファ0番
+	constBuffTransform0.Reset();
+	//定数バッファ1番
+	constBuffTransform1.Reset();
+	//アダプターの列挙状態の変化を検出できるようにするためのインターフェース
+	dxgiFactory.Reset();
+	//ダブルバッファリングのために画面切り替え用のバッファー管理するやつ
+	swapChain.Reset();
+	//コマンドリストに格納する命令の為のメモリを管理するオブジェクト
+	commandAllocator.Reset();
+	//命令を一時的に格納しとくやつ
+	commandList.Reset();
+	//GPUが実行するべき命令のリストを,指定した順序でGPUに転送するためのインターフェース
+	commandQueue.Reset();
+	rtvHeap.Reset();
+	//定数バッファのGPUリソースのポインタ
+	constBuffTransform.Reset();
+	//アダプターの列挙用
+	adapters.clear();	//Vectorの全ての要素を追い出す
+	//ここに特定の名前を持つアダプターオブジェクトが入る
+	tmpAdapter.Reset();
+	backBuffers.clear();
+	srvHeap.Reset();
+
+	ComPtr<ID3D12DebugDevice> debugInterface;
+	if (SUCCEEDED(device.Get()->QueryInterface(IID_PPV_ARGS(&debugInterface))))
+	{
+		debugInterface->ReportLiveDeviceObjects(D3D12_RLDO_DETAIL | D3D12_RLDO_IGNORE_INTERNAL);
 	}
 }
 

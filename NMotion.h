@@ -29,7 +29,7 @@ public:
 	//•`‰æ
 	void Draw(ID3D12GraphicsCommandList* commandList, D3D12_VERTEX_BUFFER_VIEW vbView, D3D12_INDEX_BUFFER_VIEW ibView, int indicesSize);
 	
-	Object3d MovePadAndKey(Object3d object3d,float objSpeed = 1.0f);
+	void MovePadAndKey(Object3d *object3d,float objSpeed = 1.0f);
 };
 //è‡’l’´‚¦‚È‚¢‚æ‚¤‚É
 float Clamp(float value, float min, float max);
